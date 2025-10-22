@@ -1,269 +1,126 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>SkyWings Travel</title>
-    <link
-      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Hero Gallery — 11 Figma-Style Sections</title>
     <link rel="stylesheet" href="styles.css" />
-    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   </head>
   <body>
-    <div id="root"></div>
-    <script type="text/babel" data-presets="react">
-      const partners = [
-        { name: "airbnb", displayName: "airbnb" },
-        { name: "booking", displayName: "Booking.com" },
-        { name: "trivago", displayName: "trivago" },
-        { name: "expedia", displayName: "Expedia" }
-      ];
+    <header class="site-header">
+      <div class="inner">
+        <div class="site-title">Hero Gallery</div>
+        <div class="small-note">11 themed hero sections + tiles</div>
+      </div>
+    </header>
 
-      const destinations = [
-        {
-          title: "Forest Wild Life",
-          location: "NRT, Indonesia",
-          rating: "4.7",
-          image:
-            "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=800&q=80"
-        },
-        {
-          title: "Forest Wild Life",
-          location: "NRT, Indonesia",
-          rating: "4.7",
-          image:
-            "https://images.unsplash.com/photo-1526498460520-4c246339dccb?auto=format&fit=crop&w=800&q=80"
-        },
-        {
-          title: "Forest Wild Life",
-          location: "NRT, Indonesia",
-          rating: "4.7",
-          image:
-            "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80"
-        }
-      ];
-
-      const Highlights = () => (
-        <section className="highlights-section">
-          <div className="highlight-card blue reveal-on-scroll" style={{ "--delay": "0.05s" }}>
-            <div className="badge">38</div>
-            <h3>Book A Ticket</h3>
-            <p>
-              Traveling Is A Wonderful Way To Explore New Places, Learn About Different Cultures, And Gain
-              Unique Experiences.
-            </p>
-            <button className="link-button">Learn More</button>
+    <main class="container" id="tiles">
+      <h1 style="margin: 8px 0 6px; font-size: 24px;">Explore Hero Tiles</h1>
+      <div class="tiles-intro">Click a tile to jump to its full hero.</div>
+      <div class="tiles-grid">
+        <a class="tile tile--saas" href="hero-1.html" aria-label="SaaS hero">
+          <span class="tile-badge">1</span>
+          <div class="tile-preview"><iframe src="hero-1.html" title="Preview: SaaS hero" loading="lazy" scrolling="no"></iframe></div>
+          <div class="tile-overlay"></div>
+          <div class="tile-content">
+            <h3>Tech Startup / SaaS</h3>
+            <p>Minimal, futuristic, data visuals</p>
           </div>
-          <div className="highlight-card white reveal-on-scroll" style={{ "--delay": "0.15s" }}>
-            <div className="icon-circle" />
-            <h3>Find Your Destination</h3>
-            <p>
-              Traveling Is A Wonderful Way To Explore New Places, Learn About Different Cultures, And Gain
-              Unique Experiences.
-            </p>
+        </a>
+        <a class="tile tile--fashion" href="hero-2.html" aria-label="Luxury fashion hero">
+          <span class="tile-badge">2</span>
+          <div class="tile-preview"><iframe src="hero-2.html" title="Preview: Luxury fashion" loading="lazy" scrolling="no"></iframe></div>
+          <div class="tile-overlay"></div>
+          <div class="tile-content">
+            <h3>Luxury Fashion</h3>
+            <p>Cinematic, elegant, editorial</p>
           </div>
-          <div className="highlight-card white reveal-on-scroll" style={{ "--delay": "0.25s" }}>
-            <div className="icon-circle" />
-            <h3>Pay & Start Journey</h3>
-            <p>
-              Traveling Is A Wonderful Way To Explore New Places, Learn About Different Cultures, And Gain
-              Unique Experiences.
-            </p>
+        </a>
+        <a class="tile tile--eco" href="hero-3.html" aria-label="Eco brand hero">
+          <span class="tile-badge">3</span>
+          <div class="tile-preview"><iframe src="hero-3.html" title="Preview: Eco brand" loading="lazy" scrolling="no"></iframe></div>
+          <div class="tile-overlay"></div>
+          <div class="tile-content">
+            <h3>Eco-Friendly</h3>
+            <p>Natural, organic, calming</p>
           </div>
-        </section>
-      );
-
-      const App = () => {
-        const [loaded, setLoaded] = React.useState(false);
-
-        React.useEffect(() => {
-          const timer = setTimeout(() => setLoaded(true), 60);
-          return () => clearTimeout(timer);
-        }, []);
-
-        React.useEffect(() => {
-          const elements = document.querySelectorAll(".reveal-on-scroll");
-          if (!("IntersectionObserver" in window)) {
-            elements.forEach((el) => el.classList.add("is-visible"));
-            return;
-          }
-
-          const observer = new IntersectionObserver(
-            (entries) => {
-              entries.forEach((entry) => {
-                if (entry.isIntersecting) {
-                  entry.target.classList.add("is-visible");
-                  observer.unobserve(entry.target);
-                }
-              });
-            },
-            { threshold: 0.2, rootMargin: "0px 0px -10%" }
-          );
-
-          elements.forEach((el) => observer.observe(el));
-
-          return () => observer.disconnect();
-        }, []);
-
-        return (
-          <div className={`page-wrapper ${loaded ? "is-loaded" : ""}`}>
-            <header className="hero">
-              <div className="nav">
-                <div className="logo">
-                  <div className="logo-icon">U</div>
-                  <span>UIXSHUVO</span>
-              </div>
-              <nav className="nav-links">
-                <a href="#">About</a>
-                <a href="#">Tour</a>
-                <a href="#">Package</a>
-                <a href="#">Contact</a>
-              </nav>
-              <button className="btn btn-dark">Book Trip</button>
-            </div>
-            <div className="hero-content">
-              <div className="hero-text reveal-on-scroll" style={{ "--delay": "0.05s" }}>
-                <div className="hero-subtitle">
-                  <div className="circle" />
-                  <span>Elevate your travel journey</span>
-                </div>
-                <h1>
-                  Experience
-                  <br />
-                  The Magic Of
-                  <br />
-                  Flight!
-                </h1>
-                <div className="hero-buttons">
-                  <button className="btn btn-primary">Book A Trip Now</button>
-                  <button className="btn btn-circle">
-                    <span className="icon-play" />
-                  </button>
-                </div>
-              </div>
-              <div className="hero-image reveal-on-scroll" style={{ "--delay": "0.2s" }}>
-                <div className="plane-img" />
-                <div className="info-card reveal-on-scroll" style={{ "--delay": "0.35s" }}>
-                  <h4>Know More</h4>
-                  <div className="info-details">
-                    <div className="avatars">
-                      <div className="avatar avatar-1" />
-                      <div className="avatar avatar-2" />
-                      <div className="avatar avatar-3" />
-                    </div>
-                    <div className="info-text">
-                      <h5>Awesome Places</h5>
-                      <p>Discover The World One Adventure At A Time!</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="hero-pagination">
-              <button className="pagination-dot active" />
-              <button className="pagination-dot" />
-              <button className="pagination-dot" />
-            </div>
-            <div className="partners reveal-on-scroll" style={{ "--delay": "0.45s" }}>
-              {partners.map((partner) => (
-                <div
-                  className={`partner partner-${partner.name}`}
-                  key={partner.name}
-                  role="img"
-                  aria-label={`${partner.displayName} logo`}
-                >
-                  <span>{partner.displayName}</span>
-                </div>
-              ))}
-            </div>
-          </header>
-
-          <main>
-            <section className="popular-section reveal-on-scroll" style={{ "--delay": "0.05s" }}>
-              <div className="section-header">
-                <div>
-                  <h2>Popular Destination</h2>
-                  <p>Unleash Your Wanderlust With SkyWings</p>
-                </div>
-                <div className="slider-controls">
-                  <button className="slider-dot active" />
-                  <button className="slider-dot" />
-                  <button className="slider-arrow">&#8594;</button>
-                </div>
-              </div>
-              <div className="destination-grid">
-                {destinations.map((destination, idx) => {
-                  const delay = 0.08 * idx + 0.12;
-                  return (
-                    <div
-                      className="destination-card reveal-on-scroll"
-                      style={{ "--delay": `${delay}s` }}
-                      key={idx}
-                    >
-                      <div
-                        className="destination-image"
-                        style={{ backgroundImage: `url(${destination.image})` }}
-                      />
-                      <div className="destination-info">
-                        <h3>{destination.title}</h3>
-                        <div className="destination-meta">
-                          <span>{destination.location}</span>
-                          <div className="rating">
-                            <span className="star" /> {destination.rating}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </section>
-
-            <section className="journey-section reveal-on-scroll" style={{ "--delay": "0.12s" }}>
-              <div className="journey-header">
-                <h2>Journey To The Skies Made Simple!</h2>
-                <p>
-                  Traveling Is A Wonderful Way To Explore New Places, Learn About Different Cultures, And Gain
-                  Unique Experiences.
-                </p>
-              </div>
-              <Highlights />
-            </section>
-
-            <section className="promo-section reveal-on-scroll" style={{ "--delay": "0.18s" }}>
-              <div className="promo-image" />
-              <div className="promo-content">
-                <h2>
-                  Unleash
-                  <br />
-                  Wanderlust With
-                  <br />
-                  SkyWings
-                </h2>
-                <p>
-                  Traveling Is A Wonderful Way To Explore New Places, Learn About Different Cultures, And Gain
-                  Unique Experiences.
-                </p>
-                <div className="promo-footer">
-                  <div className="discount">
-                    <span>20% OFF</span>
-                    <small>Till 28 September, 2023</small>
-                  </div>
-                  <button className="btn btn-outline">Book A Flight Now &#8594;</button>
-                </div>
-              </div>
-            </section>
-          </main>
-        </div>
-        );
-      };
-
-      const root = ReactDOM.createRoot(document.getElementById("root"));
-      root.render(<App />);
-    </script>
+        </a>
+        <a class="tile tile--agency" href="hero-4.html" aria-label="Creative agency hero">
+          <span class="tile-badge">4</span>
+          <div class="tile-preview"><iframe src="hero-4.html" title="Preview: Creative agency" loading="lazy" scrolling="no"></iframe></div>
+          <div class="tile-overlay"></div>
+          <div class="tile-content">
+            <h3>Creative Agency</h3>
+            <p>Bold, portfolio-driven</p>
+          </div>
+        </a>
+        <a class="tile tile--coach" href="hero-5.html" aria-label="Personal coach hero">
+          <span class="tile-badge">5</span>
+          <div class="tile-preview"><iframe src="hero-5.html" title="Preview: Personal coach" loading="lazy" scrolling="no"></iframe></div>
+          <div class="tile-overlay"></div>
+          <div class="tile-content">
+            <h3>Personal Coach</h3>
+            <p>Warm, approachable</p>
+          </div>
+        </a>
+        <a class="tile tile--fintech" href="hero-6.html" aria-label="Fintech hero">
+          <span class="tile-badge">6</span>
+          <div class="tile-preview"><iframe src="hero-6.html" title="Preview: Fintech" loading="lazy" scrolling="no"></iframe></div>
+          <div class="tile-overlay"></div>
+          <div class="tile-content">
+            <h3>Fintech</h3>
+            <p>Trustworthy, data-focused</p>
+          </div>
+        </a>
+        <a class="tile tile--travel" href="hero-7.html" aria-label="Travel hero">
+          <span class="tile-badge">7</span>
+          <div class="tile-preview"><iframe src="hero-7.html" title="Preview: Travel" loading="lazy" scrolling="no"></iframe></div>
+          <div class="tile-overlay"></div>
+          <div class="tile-content">
+            <h3>Travel</h3>
+            <p>Adventurous, inspiring</p>
+          </div>
+        </a>
+        <a class="tile tile--wellness" href="hero-8.html" aria-label="Wellness hero">
+          <span class="tile-badge">8</span>
+          <div class="tile-preview"><iframe src="hero-8.html" title="Preview: Wellness" loading="lazy" scrolling="no"></iframe></div>
+          <div class="tile-overlay"></div>
+          <div class="tile-content">
+            <h3>Health & Wellness</h3>
+            <p>Peaceful, rejuvenating</p>
+          </div>
+        </a>
+        <a class="tile tile--product" href="hero-9.html" aria-label="Product launch hero">
+          <span class="tile-badge">9</span>
+          <div class="tile-preview"><iframe src="hero-9.html" title="Preview: Product launch" loading="lazy" scrolling="no"></iframe></div>
+          <div class="tile-overlay"></div>
+          <div class="tile-content">
+            <h3>Product Launch</h3>
+            <p>Premium, cinematic</p>
+          </div>
+        </a>
+        <a class="tile tile--charity" href="hero-10.html" aria-label="Charity hero">
+          <span class="tile-badge">10</span>
+          <div class="tile-preview"><iframe src="hero-10.html" title="Preview: Charity" loading="lazy" scrolling="no"></iframe></div>
+          <div class="tile-overlay"></div>
+          <div class="tile-content">
+            <h3>Nonprofit</h3>
+            <p>Genuine, hopeful</p>
+          </div>
+        </a>
+        <a class="tile tile--ai" href="hero-11.html" aria-label="AI company hero">
+          <span class="tile-badge">11</span>
+          <div class="tile-preview"><iframe src="hero-11.html" title="Preview: AI" loading="lazy" scrolling="no"></iframe></div>
+          <div class="tile-overlay"></div>
+          <div class="tile-content">
+            <h3>AI / Future-Tech</h3>
+            <p>Cutting-edge, neon</p>
+          </div>
+        </a>
+      </div>
+      <div class="tiles-footer">Tip: Use your browser’s back/forward to compare quickly.</div>
+    </main>
+    
   </body>
+  
 </html>

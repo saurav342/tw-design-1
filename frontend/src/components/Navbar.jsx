@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import logoImage from '../assets/image.png';
 
 const navLinks = [
   { label: 'Home', to: '/' },
@@ -24,11 +25,7 @@ const Navbar = () => {
     <header className="sticky top-0 z-50 bg-white/90 shadow-sm backdrop-blur-md">
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 lg:px-8">
         <Link to="/" className="flex items-center gap-3">
-          <img
-            src="/logo-placeholder.svg"
-            alt="LaunchAndLift logo"
-            className="h-10 w-10"
-          />
+          <img src={logoImage} alt="LaunchAndLift logo" className="h-10 w-10" />
           <span className="font-display text-2xl font-semibold text-burnt">
             Launch<span className="text-lagoon">&</span>Lift
           </span>

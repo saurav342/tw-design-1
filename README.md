@@ -141,3 +141,4 @@ Backend:
 3. Deploy frontend (Netlify/Vercel) and backend (Render/Heroku/Fly) with `APP_URL` and `JWT_SECRET` configured.
 4. Integrate a real email service (Postmark/SendGrid) for password resets and onboarding sequences.
 
+mmm

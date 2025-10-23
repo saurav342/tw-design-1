@@ -49,7 +49,7 @@ const Home = () => (
         <div className="rounded-3xl border border-white bg-white/70 p-6 shadow-xl shadow-brand-muted/60 backdrop-blur">
           <SectionHeader
             eyebrow="Mission statement"
-            title="Ignite bold ideas. Elevate lasting value."
+            title="Ignite bold ideas.Elevate lasting value."
             description="LaunchAndLift exists to accelerate private market innovation responsibly. We align capital, operators, and data to help founders build enduring companies while delivering resilient outcomes for investors."
             align="left"
           />

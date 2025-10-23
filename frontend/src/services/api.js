@@ -76,6 +76,8 @@ export const apiClient = {
 export const authApi = {
   login: (credentials) => apiClient.post('/auth/login', credentials),
   signup: (payload) => apiClient.post('/auth/signup', payload),
+  sendOtp: (payload) => apiClient.post('/auth/send-otp', payload),
+  verifyOtp: (payload) => apiClient.post('/auth/verify-otp', payload),
   resetPassword: (payload) => apiClient.post('/auth/reset-password', payload),
   fetchProfile: (token) => apiClient.get('/auth/profile', token),
 };

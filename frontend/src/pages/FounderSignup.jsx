@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { authApi } from '../services/api';
 
 const steps = [
   {
@@ -73,6 +74,9 @@ const formatMonth = (value) => {
   return new Intl.DateTimeFormat('en', { year: 'numeric', month: 'long' }).format(date);
 };
 
+const TEST_PHONE_NUMBER = '9312121212';
+const TEST_OTP_CODE = '1234';
+
 const FounderSignup = () => {
   const navigate = useNavigate();
   const { signup, loading, error, setError, user } = useAuth();
@@ -84,7 +88,7 @@ const FounderSignup = () => {
     email: '',
     password: '',
     gender: '',
-    phone: '',
+    phone: TEST_PHONE_NUMBER,
     otp: '',
     phoneVerified: false,
     linkedinUrl: '',
@@ -113,7 +117,18 @@ const FounderSignup = () => {
     },
   });
   const [pitchDeckFile, setPitchDeckFile] = useState(null);
-  const [verificationFeedback, setVerificationFeedback] = useState('');
+  const [otpSent, setOtpSent] = useState(false);
+  const [sendingOtp, setSendingOtp] = useState(false);
+  const [verifyingOtp, setVerifyingOtp] = useState(false);
+  const [verificationFeedback, setVerificationFeedback] = useState({ type: 'info', message: '' });
+
+  const showVerificationFeedback = (type, message) => {
+    setVerificationFeedback({ type, message });
+  };
+
+  const clearVerificationFeedback = () => {
+    setVerificationFeedback({ type: 'info', message: '' });
+  };
 
   useEffect(() => {
     if (user) {
@@ -145,10 +160,22 @@ const FounderSignup = () => {
       return;
     }
 
-    if (name === 'phone' || name === 'otp') {
+    if (name === 'phone') {
+      setOtpSent(false);
+      clearVerificationFeedback();
       setFormState((prev) => ({
         ...prev,
-        [name]: value,
+        phone: value,
+        otp: '',
+        phoneVerified: false,
+      }));
+      return;
+    }
+
+    if (name === 'otp') {
+      setFormState((prev) => ({
+        ...prev,
+        otp: value,
         phoneVerified: false,
       }));
       return;
@@ -197,12 +224,67 @@ const FounderSignup = () => {
     });
   };
 
-  const handleVerifyPhone = () => {
-    if (formState.phone && formState.otp.trim().length >= 4) {
-      setFormState((prev) => ({ ...prev, phoneVerified: true }));
-      setVerificationFeedback('Phone number marked as verified.');
-    } else {
-      setVerificationFeedback('Enter your phone and a 4-digit code before marking as verified.');
+  const handleSendOtp = async () => {
+    if (!formState.phone) {
+      showVerificationFeedback('error', 'Enter the phone number before requesting an OTP.');
+      return;
+    }
+
+    setSendingOtp(true);
+    setOtpSent(false);
+    clearVerificationFeedback();
+    setFormState((prev) => ({ ...prev, phoneVerified: false }));
+
+    try {
+      const response = await authApi.sendOtp({ phone: formState.phone });
+      setOtpSent(true);
+      setFormState((prev) => ({
+        ...prev,
+        phone: response?.phone ?? prev.phone,
+        otp: response?.otp ?? TEST_OTP_CODE,
+        phoneVerified: false,
+      }));
+      showVerificationFeedback('success', response?.message ?? `OTP sent. Use ${TEST_OTP_CODE} to verify.`);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Unable to send OTP.';
+      showVerificationFeedback('error', message);
+      setOtpSent(false);
+    } finally {
+      setSendingOtp(false);
+    }
+  };
+
+  const handleVerifyOtp = async () => {
+    if (formState.phoneVerified) {
+      showVerificationFeedback('success', 'Phone number already verified.');
+      return;
+    }
+
+    if (!otpSent) {
+      showVerificationFeedback('error', 'Send the OTP before attempting verification.');
+      return;
+    }
+
+    if (!formState.otp.trim()) {
+      showVerificationFeedback('error', 'Enter the OTP before attempting verification.');
+      return;
+    }
+
+    setVerifyingOtp(true);
+
+    try {
+      const response = await authApi.verifyOtp({ phone: formState.phone, otp: formState.otp });
+      setFormState((prev) => ({
+        ...prev,
+        phone: response?.phone ?? prev.phone,
+        phoneVerified: true,
+      }));
+      showVerificationFeedback('success', 'Phone number verified successfully!');
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Unable to verify OTP.';
+      showVerificationFeedback('error', message);
+    } finally {
+      setVerifyingOtp(false);
     }
   };
 
@@ -213,11 +295,11 @@ const FounderSignup = () => {
       return;
     }
     if (file.type !== 'application/pdf') {
-      setVerificationFeedback('Pitch deck must be a PDF file.');
+      showVerificationFeedback('error', 'Pitch deck must be a PDF file.');
       event.target.value = '';
       return;
     }
-    setVerificationFeedback('');
+    clearVerificationFeedback();
     setPitchDeckFile(file);
   };
 
@@ -230,7 +312,6 @@ const FounderSignup = () => {
       if (!formState.password) missing.push('password');
       if (!formState.gender) missing.push('gender');
       if (!formState.phone) missing.push('phone number');
-      if (!formState.otp.trim()) missing.push('OTP');
       if (!formState.linkedinUrl) missing.push('LinkedIn URL');
       if (formState.singleFounder === undefined) missing.push('founder structure');
       if (!formState.phoneVerified) {
@@ -379,9 +460,15 @@ const FounderSignup = () => {
           <div className="bg-white p-10">
             <form className="space-y-6" onSubmit={handleSubmit}>
               {stepError && <div className="rounded-xl bg-burnt/10 px-4 py-3 text-sm text-burnt">{stepError}</div>}
-              {verificationFeedback && (
-                <div className="rounded-xl border border-lagoon/40 bg-lagoon/10 px-4 py-3 text-xs text-lagoon">
-                  {verificationFeedback}
+              {verificationFeedback.message && (
+                <div
+                  className={`rounded-xl px-4 py-3 text-xs ${
+                    verificationFeedback.type === 'error'
+                      ? 'border border-burnt/40 bg-burnt/10 text-burnt'
+                      : 'border border-lagoon/40 bg-lagoon/10 text-lagoon'
+                  }`}
+                >
+                  {verificationFeedback.message}
                 </div>
               )}
               {error && <div className="rounded-xl bg-burnt/10 px-4 py-3 text-sm text-burnt">{error}</div>}
@@ -461,44 +548,58 @@ const FounderSignup = () => {
                       <label htmlFor="phone" className="text-sm font-semibold text-brand-dark">
                         Phone number
                       </label>
-                      <input
-                        id="phone"
-                        name="phone"
-                        type="tel"
-                        required
-                        value={formState.phone}
-                        onChange={handleRootChange}
-                        className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-brand-dark focus:border-lagoon focus:outline-none focus:ring-2 focus:ring-lagoon"
-                        placeholder="+91 99999 99999"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label htmlFor="otp" className="text-sm font-semibold text-brand-dark">
-                        Enter OTP
-                      </label>
                       <div className="flex items-center gap-3">
                         <input
-                          id="otp"
-                          name="otp"
-                          type="text"
-                          maxLength={6}
-                          value={formState.otp}
+                          id="phone"
+                          name="phone"
+                          type="tel"
+                          required
+                          value={formState.phone}
                           onChange={handleRootChange}
-                          className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm tracking-[0.3em] text-brand-dark focus:border-lagoon focus:outline-none focus:ring-2 focus:ring-lagoon"
-                          placeholder="••••"
+                          className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-brand-dark focus:border-lagoon focus:outline-none focus:ring-2 focus:ring-lagoon"
+                          placeholder="+91 93121 21212"
                         />
                         <button
                           type="button"
-                          onClick={handleVerifyPhone}
-                          className="whitespace-nowrap rounded-full border border-lagoon px-4 py-2 text-xs font-semibold uppercase tracking-wide text-lagoon transition hover:border-burnt hover:text-burnt"
+                          onClick={handleSendOtp}
+                          disabled={sendingOtp}
+                          className="whitespace-nowrap rounded-full border border-lagoon px-4 py-2 text-xs font-semibold uppercase tracking-wide text-lagoon transition hover:border-burnt hover:text-burnt disabled:cursor-not-allowed disabled:border-slate-300 disabled:text-slate-400"
                         >
-                          Mark verified
+                          {sendingOtp ? 'Sending...' : otpSent ? 'Resend OTP' : 'Send OTP'}
                         </button>
                       </div>
-                      {formState.phoneVerified && (
-                        <p className="text-xs font-semibold text-emerald-600">Phone number verified successfully!</p>
-                      )}
+                      <p className="text-xs text-slate-500">Only the sandbox test number {TEST_PHONE_NUMBER} is enabled.</p>
                     </div>
+                    {(otpSent || formState.phoneVerified) && (
+                      <div className="space-y-2">
+                        <label htmlFor="otp" className="text-sm font-semibold text-brand-dark">
+                          Enter OTP
+                        </label>
+                        <div className="flex items-center gap-3">
+                          <input
+                            id="otp"
+                            name="otp"
+                            type="text"
+                            maxLength={6}
+                            value={formState.otp}
+                            onChange={handleRootChange}
+                            className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm tracking-[0.3em] text-brand-dark focus:border-lagoon focus:outline-none focus:ring-2 focus:ring-lagoon"
+                            placeholder={TEST_OTP_CODE}
+                          />
+                          <button
+                            type="button"
+                            onClick={handleVerifyOtp}
+                            disabled={verifyingOtp || formState.phoneVerified}
+                            className="whitespace-nowrap rounded-full border border-lagoon px-4 py-2 text-xs font-semibold uppercase tracking-wide text-lagoon transition hover:border-burnt hover:text-burnt disabled:cursor-not-allowed disabled:border-slate-300 disabled:text-slate-400"
+                          >
+                            {formState.phoneVerified ? 'Verified' : verifyingOtp ? 'Verifying...' : 'Verify OTP'}
+                          </button>
+                        </div>
+                        {formState.phoneVerified && (
+                          <p className="text-xs font-semibold text-emerald-600">Phone number verified successfully!</p>
+                        )}
+                      </div>
+                    )}
                   </div>
 
                   <div className="space-y-2">
@@ -927,7 +1028,7 @@ const FounderSignup = () => {
                     disabled={loading}
                     className="rounded-full bg-blaze px-6 py-3 text-sm font-semibold uppercase tracking-wide text-white shadow-lg shadow-blaze/40 transition hover:bg-sunset disabled:cursor-not-allowed disabled:opacity-70"
                   >
-                    {loading ? 'Submitting…' : 'Submit founder application'}
+                    {loading ? 'Submitting...' : 'Submit founder application'}
                   </button>
                 ) : (
                   <button

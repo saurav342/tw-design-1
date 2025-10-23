@@ -17,6 +17,11 @@ const buildAuthResponse = (user) => ({
 const truthyValues = new Set(['true', '1', 'yes', 'y', 'on']);
 const falsyValues = new Set(['false', '0', 'no', 'n', 'off']);
 
+const TEST_PHONE_NUMBER = '9312121212';
+const TEST_OTP_CODE = '1234';
+const OTP_EXPIRY_MS = 5 * 60 * 1000;
+const otpStore = new Map();
+
 const toBoolean = (value) => {
   if (typeof value === 'boolean') return value;
   if (typeof value === 'string') {
@@ -58,6 +63,71 @@ const inferAccountHolderType = (descriptor) => {
   }
 
   return 'individual';
+};
+
+const normalizePhone = (value) => (typeof value === 'string' ? value.replace(/\D/g, '') : '');
+
+const sendOtp = (req, res) => {
+  try {
+    const { phone } = req.body;
+    const normalized = normalizePhone(phone);
+    if (!normalized) {
+      return res.status(400).json({ message: 'Phone number is required.' });
+    }
+
+    if (normalized !== TEST_PHONE_NUMBER) {
+      return res.status(400).json({
+        message: `Only the test number ${TEST_PHONE_NUMBER} is enabled in this environment.`,
+      });
+    }
+
+    const expiresAt = Date.now() + OTP_EXPIRY_MS;
+    otpStore.set(normalized, { code: TEST_OTP_CODE, expiresAt });
+
+    console.log('[LaunchAndLift] OTP issued', {
+      phone: normalized,
+      otp: TEST_OTP_CODE,
+      expiresAt: new Date(expiresAt).toISOString(),
+    });
+
+    return res.status(200).json({
+      message: 'OTP sent successfully. Use 1234 for verification.',
+      phone: normalized,
+      otp: TEST_OTP_CODE,
+      expiresAt: new Date(expiresAt).toISOString(),
+    });
+  } catch (error) {
+    return res.status(500).json({ message: 'Unable to issue OTP.' });
+  }
+};
+
+const verifyOtp = (req, res) => {
+  try {
+    const { phone, otp } = req.body;
+    const normalizedPhone = normalizePhone(phone);
+    if (!normalizedPhone || !otp) {
+      return res.status(400).json({ message: 'Phone number and OTP are required.' });
+    }
+
+    const entry = otpStore.get(normalizedPhone);
+    if (!entry) {
+      return res.status(400).json({ message: 'No OTP request found. Please request a new code.' });
+    }
+
+    if (entry.expiresAt < Date.now()) {
+      otpStore.delete(normalizedPhone);
+      return res.status(400).json({ message: 'OTP expired. Please request a new code.' });
+    }
+
+    if (entry.code !== otp) {
+      return res.status(400).json({ message: 'Invalid OTP. Use 1234 for this environment.' });
+    }
+
+    otpStore.delete(normalizedPhone);
+    return res.status(200).json({ message: 'OTP verified successfully.', phone: normalizedPhone });
+  } catch (error) {
+    return res.status(500).json({ message: 'Unable to verify OTP.' });
+  }
 };
 
 const signup = async (req, res) => {
@@ -340,7 +410,9 @@ module.exports = {
   confirmPasswordReset,
   getProfile,
   login,
+  sendOtp,
   requestPasswordReset,
   signup,
   updateProfile,
+  verifyOtp,
 };

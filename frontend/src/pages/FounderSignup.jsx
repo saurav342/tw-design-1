@@ -312,12 +312,8 @@ const FounderSignup = () => {
       if (!formState.password) missing.push('password');
       if (!formState.gender) missing.push('gender');
       if (!formState.phone) missing.push('phone number');
-      if (!formState.linkedinUrl) missing.push('LinkedIn URL');
       if (formState.singleFounder === undefined) missing.push('founder structure');
-      if (!formState.phoneVerified) {
-        setStepError('Please verify your phone number before continuing.');
-        return false;
-      }
+      
 
       if (formState.singleFounder === false) {
         const { name, email, linkedinUrl, gender } = formState.coFounder;

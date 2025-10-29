@@ -211,7 +211,7 @@ const HeroSection = () => {
               Welcome to
             </span>
             <h1
-              className="text-white"
+              className="text-night/80"
               style={{
                 fontFamily: 'var(--hero-display-font)',
                 fontSize: '5.0rem',

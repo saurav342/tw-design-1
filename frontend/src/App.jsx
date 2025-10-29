@@ -3,6 +3,7 @@ import Footer from './components/Footer';
 import Navbar from './components/Navbar';
 import ProtectedRoute from './components/ProtectedRoute';
 import { AuthProvider } from './context/AuthContext';
+import { Toaster } from './components/ui/toaster.jsx';
 import Home from './pages/Home';
 import Investors from './pages/Investors';
 import Founders from './pages/Founders';
@@ -60,6 +61,7 @@ const App = () => (
         </Routes>
       </main>
       <Footer />
+      <Toaster />
     </div>
   </AuthProvider>
 );

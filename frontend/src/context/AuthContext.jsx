@@ -1,9 +1,8 @@
-import { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { authApi } from '../services/api';
+import { AuthContext } from './AuthContextBase.js';
 
 const STORAGE_KEY = 'launchandlift_auth_state';
-
-const AuthContext = createContext(undefined);
 
 const readPersistedState = () => {
   if (typeof window === 'undefined') {
@@ -54,6 +53,11 @@ export const AuthProvider = ({ children }) => {
   const login = (credentials) => authenticate(authApi.login, credentials);
   const signup = (payload) => authenticate(authApi.signup, payload);
 
+  const establishSession = ({ user: nextUser, token: nextToken = 'mock-session-token' }) => {
+    setAuthState({ token: nextToken, user: nextUser });
+    setStatus({ loading: false, error: null });
+  };
+
   const logout = () => {
     setAuthState({ token: null, user: null });
     setStatus({ loading: false, error: null });
@@ -72,28 +76,18 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const value = useMemo(
-    () => ({
-      user,
-      token,
-      loading: status.loading,
-      error: status.error,
-      login,
-      signup,
-      logout,
-      refreshProfile,
-      setError,
-    }),
-    [user, token, status],
-  );
+  const value = {
+    user,
+    token,
+    loading: status.loading,
+    error: status.error,
+    login,
+    signup,
+    establishSession,
+    logout,
+    refreshProfile,
+    setError,
+  };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
-};
-
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
 };

@@ -381,3 +381,303 @@ export const resources = [
     link: '#',
   },
 ];
+
+export const homeIntro = {
+  headline: 'Welcome to Launch & Lift - Your Complete Fundraising Partner!',
+  subheadline:
+    'End-to-end fundraising support that connects founders with investors, mentors, and the resources to close deals.',
+  primaryCta: { label: 'Start Your Fundraising Journey', to: '/signup/founder' },
+  secondaryCtas: [
+    { label: 'Book a Free Consultation', to: '/signup' },
+    { label: 'Explore Our Investor Network', to: '/investors' },
+  ],
+};
+
+export const founderSignals = [
+  'Struggling to find the right investors for their stage and sector',
+  'Spending months on cold outreach with minimal responses',
+  'Unsure how to craft a compelling pitch deck that converts',
+  'Lost in the complexity of fundraising without guidance',
+  'Ready to accelerate their path to funding',
+];
+
+export const corePromises = [
+  {
+    title: 'Investor Matching at Scale',
+    description:
+      'Access our network of 10,000+ active investors across seed to Series A, precisely matched to your industry, geography, and capital needs.',
+  },
+  {
+    title: 'Pitch Perfection',
+    description:
+      'Expert guidance to craft compelling decks, financial models, and narratives that resonate with the exact investors you are targeting.',
+  },
+  {
+    title: 'Strategic Mentorship',
+    description:
+      'Connect with experienced mentors who have sat on both sides of the table and know how to navigate each stage of the raise.',
+  },
+  {
+    title: 'Proven Process',
+    description:
+      'Structured frameworks, templates, and playbooks that compress years of fundraising learning into a matter of weeks.',
+  },
+  {
+    title: 'Success Guarantee',
+    description:
+      'We back our work—if you do not raise, you do not pay. Our incentives stay aligned with your success.',
+  },
+];
+
+export const processSteps = [
+  {
+    step: 'Step 1',
+    title: 'Build Your Foundation',
+    timeline: 'Timeline: 1–2 weeks',
+    bullets: [
+      'Complete our comprehensive startup assessment to uncover your fundraising gaps.',
+      'Refine your pitch deck and financial projections with dedicated consultants.',
+      'Package investor-ready materials that showcase traction and potential.',
+    ],
+  },
+  {
+    step: 'Step 2',
+    title: 'Connect with the Right Investors',
+    timeline: 'Timeline: Ongoing',
+    bullets: [
+      'Match with investors from our 10,000+ network based on sector, stage, and goals.',
+      'Receive warm introductions and tailored guidance on outreach strategy.',
+      'Unlock detailed investor profiles, theses, and preferences to personalize every touchpoint.',
+    ],
+  },
+  {
+    step: 'Step 3',
+    title: 'Close Your Round',
+    timeline: 'Timeline: 4–12 weeks',
+    bullets: [
+      'Navigate negotiations with experienced partners by your side.',
+      'Leverage our frameworks for term sheets, diligence, and closing checklists.',
+      'Join our funded founder community for post-raise momentum.',
+    ],
+  },
+];
+
+export const benefitHighlights = [
+  {
+    title: 'AI-Powered Investor Matching',
+    description:
+      'Stop wasting time on the wrong rooms. Get curated introductions to investors that align with your thesis, stage, and pace.',
+  },
+  {
+    title: 'Pitch Deck Excellence',
+    description:
+      'Work with storytelling experts and financial strategists who have helped startups raise hundreds of crores.',
+  },
+  {
+    title: 'Mentor Network Access',
+    description:
+      'Tap founders, VCs, and operators who open doors, share playbooks, and help you avoid avoidable detours.',
+  },
+  {
+    title: 'Fundraising Strategy',
+    description:
+      'Get tailored guidance on valuation, round structure, investor sequencing, and timing across the entire raise.',
+  },
+  {
+    title: 'Investor Readiness Training',
+    description:
+      'Live workshops, mock pitches, and feedback from real investors ensure you enter every room prepared.',
+  },
+  {
+    title: 'Success-Based Alignment',
+    description:
+      'We only win when you do—our success-based pricing keeps our team aligned with your outcome.',
+  },
+];
+
+export const problemSolutions = [
+  {
+    problem: '“I don’t know where to find investors.”',
+    solution: 'Access 10,000+ vetted investors with warm introductions that command responses.',
+  },
+  {
+    problem: '“My pitch isn’t getting traction.”',
+    solution: 'Partner with experts who rebuild your narrative, positioning, and financial story for investor conviction.',
+  },
+  {
+    problem: '“I’m wasting months on the wrong conversations.”',
+    solution: 'Spend time only with investors aligned to your stage, sector, and cheque size.',
+  },
+  {
+    problem: '“I don’t understand the fundraising process.”',
+    solution: 'Follow step-by-step frameworks and mentor guidance across diligence, negotiation, and close.',
+  },
+  {
+    problem: '“I need help but can’t afford consultants.”',
+    solution: 'Leverage success-based pricing—no large retainers, just outcomes.',
+  },
+];
+
+export const differentiators = [
+  {
+    title: 'End-to-End Support',
+    description: 'From pitch preparation to post-term-sheet diligence, we stay engaged the entire journey.',
+  },
+  {
+    title: 'Quality Over Quantity',
+    description: 'Every intro is curated and contextualized for maximum conversion.',
+  },
+  {
+    title: 'Proven Methodology',
+    description: 'Frameworks distilled from thousands of raises across SaaS, climate, health, and fintech.',
+  },
+  {
+    title: 'Skin in the Game',
+    description: 'Success guarantee and performance-based fees keep our incentives perfectly aligned.',
+  },
+  {
+    title: 'Community for Life',
+    description: 'Become part of a founder, mentor, and investor network that stays with you beyond the raise.',
+  },
+];
+
+export const serviceCatalog = [
+  {
+    title: 'Pitch Deck Development',
+    description:
+      'From blank slide to investor-ready collateral—story structure, visual design, and financial modeling included.',
+  },
+  {
+    title: 'Investor Matching & Introductions',
+    description:
+      'Intelligent matching with 10,000+ investors, complete with warm intros and approach strategy.',
+  },
+  {
+    title: 'Fundraising Strategy',
+    description:
+      'Valuation narratives, round structure recommendations, and raise sequencing tailored to your goals.',
+  },
+  {
+    title: 'Mentor Connections',
+    description:
+      'Connect with investors, founders, and domain specialists who have navigated the exact path you are on.',
+  },
+  {
+    title: 'Financial Modeling',
+    description:
+      'Build credible projections that articulate your unit economics, growth levers, and capital efficiency.',
+  },
+  {
+    title: 'Due Diligence Preparation',
+    description:
+      'Stand up your data room, legal docs, and diligence workflows before investors even ask.',
+  },
+];
+
+export const outcomeStats = [
+  {
+    label: 'Active investors in network',
+    value: '10,000+',
+    caption: 'Curated intros across seed to Series A',
+  },
+  {
+    label: 'Capital raised by founders',
+    value: '₹780 Cr+',
+    caption: 'Across SaaS, climate, fintech, and health',
+  },
+  {
+    label: 'Success rate',
+    value: '87%',
+    caption: 'Founders securing term sheets within 16 weeks',
+  },
+  {
+    label: 'Average time to close',
+    value: '12 weeks',
+    caption: 'From first intro to money in the bank',
+  },
+];
+
+export const homeTestimonials = [
+  {
+    quote:
+      'LaunchAndLift rebuilt our story, recalibrated our numbers, and had us in front of the right investors within 30 days. We closed a ₹28 Cr round in record time.',
+    name: 'Anika Sharma',
+    role: 'Founder, FluxGrid | Series A',
+  },
+  {
+    quote:
+      'The warm introductions were game-changing. Every investor already knew why we were relevant, and the team coached us through each negotiation.',
+    name: 'Dev Malhotra',
+    role: 'CEO, FarmVerse | Seed',
+  },
+  {
+    quote:
+      'Beyond capital, the mentor bench gave us weekly accountability and tactical advice that accelerated our expansion into two new markets.',
+    name: 'Lina Rodriguez',
+    role: 'Co-founder, CareLoop | Pre-Series A',
+  },
+];
+
+export const faqItems = [
+  {
+    question: 'What stages does LaunchAndLift support?',
+    answer: 'We partner with founders from seed through Series A, with select support for pre-seed and Series B extensions.',
+  },
+  {
+    question: 'How long does the process take?',
+    answer: 'Most founders move from onboarding to closed funding within 8–16 weeks, depending on round size and complexity.',
+  },
+  {
+    question: 'What is your success rate?',
+    answer: '87% of teams that complete our full program secure term sheets, with the majority closing above target.',
+  },
+  {
+    question: 'How do investor introductions work?',
+    answer: 'We shortlist aligned investors, provide warm context, and prepare you for each conversation with tailored briefs.',
+  },
+  {
+    question: 'What if I do not raise funding?',
+    answer: 'Your upfront investment covers program delivery; our performance fee is only triggered when you close.',
+  },
+  {
+    question: 'Do you take equity?',
+    answer: 'No. We operate on fees tied to outcomes, so your cap table stays intact.',
+  },
+  {
+    question: 'Can you help with pitch deck creation?',
+    answer: 'Yes—our pitch studio co-builds your deck, data room, and financial models with feedback loops baked in.',
+  },
+  {
+    question: 'Do I need traction to use the platform?',
+    answer: 'Traction helps, but we also work with pre-revenue teams that have strong validation and a credible path to market.',
+  },
+];
+
+export const blogIdeas = [
+  '10 Things Investors Look for in a Pitch Deck',
+  'How to Value Your Startup for Fundraising',
+  'The Ultimate Fundraising Timeline',
+  'Common Pitch Deck Mistakes That Kill Deals',
+  'How to Prepare for Investor Due Diligence',
+  'Understanding Term Sheets: A Founder’s Guide',
+  'Building Financial Models That Impress Investors',
+  'Warm Introductions vs. Cold Outreach: The Data',
+];
+
+export const brandStory = {
+  mission:
+    'LaunchAndLift was founded by entrepreneurs who experienced the frustrations of fundraising firsthand. We combined technology, expertise, and a relentless focus on outcomes to build the partner we always needed.',
+  teamHighlights: [
+    'Former VCs who understand how decisions get made in committee rooms.',
+    'Founders who have raised multiple rounds and navigated acquisitions.',
+    'Pitch strategists who have helped startups close hundreds of crores.',
+    'Industry mentors with deep networks across SaaS, climate, health, and fintech.',
+  ],
+};
+
+export const finalCta = {
+  headline: 'Ready to unlock momentum?',
+  subheadline: 'Join LaunchAndLift and turn fundraising from a grind into a guided, data-backed process.',
+  primary: { label: 'Start Your Fundraising Journey', to: '/signup/founder' },
+  secondary: { label: 'See Success Stories', to: '/portfolio' },
+};

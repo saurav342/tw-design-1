@@ -1,260 +1,204 @@
 import { useEffect, useMemo, useState } from 'react';
-import { contentApi } from '../services/api';
-import { useAuth } from '../context/AuthContext';
+import { motion as Motion } from 'framer-motion';
+import { Lock, NotebookPen, Rocket } from 'lucide-react';
+import { useAuth } from '../context/useAuth.js';
+import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card.jsx';
+import { CardStat } from '../components/CardStat.jsx';
+import { BenchmarkTable } from '../components/BenchmarkTable.jsx';
+import { MatchScoreBadge } from '../components/MatchScoreBadge.jsx';
+import { showGenericSuccess } from '../lib/emailClientMock.js';
+import { formatCurrency } from '../lib/formatters.js';
+import { useAppStore } from '../store/useAppStore.js';
 
-const formatMonthYear = (value) => {
-  if (!value) return '—';
-  const date = new Date(`${value}-01T00:00:00`);
-  if (Number.isNaN(date.getTime())) return value;
-  return new Intl.DateTimeFormat('en', { year: 'numeric', month: 'long' }).format(date);
-};
+const ACTIVE_FOUNDER_KEY = 'launch.activeFounderId';
 
 const FounderDashboard = () => {
   const { user } = useAuth();
-  const [updates, setUpdates] = useState([]);
-  const [testimonials, setTestimonials] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const founders = useAppStore((state) => state.founders);
+  const investors = useAppStore((state) => state.investors);
+  const saveNotes = useAppStore((state) => state.saveBenchmarkNotes);
+  const [activeId, setActiveId] = useState(null);
 
   useEffect(() => {
-    const load = async () => {
-      try {
-        const [portfolioResponse, testimonialsResponse] = await Promise.all([
-          contentApi.portfolio(),
-          contentApi.testimonials(),
-        ]);
-        setUpdates(portfolioResponse.items ?? []);
-        setTestimonials(testimonialsResponse.items ?? []);
-      } catch (error) {
-        console.error('Failed to load founder dashboard', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    load();
+    if (typeof window === 'undefined') return;
+    const persisted = window.sessionStorage.getItem(ACTIVE_FOUNDER_KEY);
+    setActiveId(persisted);
   }, []);
 
-  if (loading) {
+  const activeFounder = useMemo(() => {
+    if (activeId) {
+      const found = founders.find((founder) => founder.id === activeId);
+      if (found) return found;
+    }
+    return founders[0];
+  }, [founders, activeId]);
+
+  const [notes, setNotes] = useState(activeFounder?.benchmarkNotes ?? {});
+
+  useEffect(() => {
+    if (activeFounder) {
+      setNotes(activeFounder.benchmarkNotes ?? {});
+      if (typeof window !== 'undefined') {
+        window.sessionStorage.setItem(ACTIVE_FOUNDER_KEY, activeFounder.id);
+      }
+    }
+  }, [activeFounder]);
+
+  if (!activeFounder) {
     return (
-      <div className="mx-auto max-w-6xl px-4 py-16">
-        <div className="rounded-3xl bg-brand-muted p-10 text-center text-sm text-slate-600">
-          Loading your LaunchAndLift workspace…
-        </div>
-      </div>
+      <Card className="p-10 text-center text-slate-200">
+        <p>No founder data yet. Submit the intake flow to unlock insights.</p>
+      </Card>
     );
   }
 
+  const isPending = activeFounder.status === 'pending';
+
+  const matchPreview = activeFounder.matches
+    .map((match) => ({
+      match,
+      investor: investors.find((investor) => investor.id === match.investorId),
+    }))
+    .filter((entry) => entry.investor)
+    .slice(0, 3);
+
+  const handleSave = () => {
+    saveNotes(activeFounder.id, notes);
+    showGenericSuccess('Remarks saved (mocked)');
+  };
+
   return (
-    <div className="mx-auto max-w-6xl space-y-12 px-4 py-12">
-      <header className="rounded-3xl bg-gradient-to-r from-lagoon via-neon to-blaze p-10 text-brand-dark shadow-lg shadow-lagoon/40">
-        <p className="text-xs font-semibold uppercase tracking-[0.3em] text-brand-dark/70">
-          Founder Workspace
-        </p>
-        <h1 className="mt-3 text-3xl font-semibold">Hello, {user?.fullName ?? 'LaunchAndLift founder'}</h1>
-        <p className="mt-3 text-sm text-brand-dark/70">
-          Track capital milestones, connect with operator guild experts, and monitor LaunchAndLift mission control tasks.
-        </p>
-      </header>
-
-      <FounderSummary user={user} />
-
-      <section className="space-y-4">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <h2 className="text-xl font-semibold text-brand-dark">Operator guild tasks</h2>
-          <button type="button" className="rounded-full border border-brand-dark px-5 py-2 text-xs font-semibold uppercase tracking-wide text-brand-dark hover:border-burnt hover:text-burnt">
-            Request support
-          </button>
+    <div className="space-y-10">
+      <Motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="flex flex-col gap-6 rounded-3xl border border-white/10 bg-white/5 p-8 shadow-xl backdrop-blur md:flex-row md:items-center md:justify-between"
+      >
+        <div>
+          <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-black/20 px-4 py-1 text-xs uppercase tracking-[0.2em] text-slate-300">
+            <Rocket className="h-4 w-4 text-indigo-300" />
+            Ready to Lift
+          </div>
+          <h1 className="mt-4 text-4xl font-semibold text-white">
+            {activeFounder.startupName}
+          </h1>
+          <p className="mt-2 max-w-xl text-sm text-slate-200">
+            {activeFounder.aiSummary}
+          </p>
+          <p className="mt-4 text-xs uppercase tracking-[0.18em] text-indigo-200">
+            Founder: {user?.fullName ?? activeFounder.fullName}
+          </p>
         </div>
-        <div className="grid gap-4 md:grid-cols-2">
-          {['GTM Sprint', 'People Ops', 'Finance Readiness', 'Product Roadmap'].map((task) => (
-            <div key={task} className="rounded-3xl border border-slate-100 bg-white p-6 shadow-sm shadow-slate-200">
-              <p className="text-xs font-semibold uppercase tracking-wide text-lagoon">{task}</p>
-              <p className="mt-2 text-sm text-slate-600">
-                LaunchAndLift operator guild is reviewing your milestones. Expect feedback within 48 hours.
+        <div className="h-full rounded-2xl border border-indigo-400/30 bg-indigo-500/10 px-6 py-4 text-right text-sm text-indigo-100">
+          <p>Raise Target</p>
+          <p className="mt-1 text-2xl font-semibold text-white">
+            {formatCurrency(activeFounder.raiseAmountUSD)}
+          </p>
+          <p className="mt-2 text-xs uppercase tracking-[0.18em] text-indigo-200">
+            {activeFounder.raiseStage}
+          </p>
+        </div>
+      </Motion.div>
+
+      <Motion.div
+        initial={{ opacity: 0, y: 24 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.05 }}
+        className="grid gap-6 md:grid-cols-4"
+      >
+        {activeFounder.readiness.map((stat, index) => (
+          <CardStat
+            key={stat.id}
+            label={stat.label}
+            value={stat.score}
+            accent={index % 3 === 0 ? 'indigo' : index % 3 === 1 ? 'emerald' : 'fuchsia'}
+          />
+        ))}
+      </Motion.div>
+
+      <Motion.div
+        initial={{ opacity: 0, y: 24 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1 }}
+        className="space-y-6"
+      >
+        <div className="flex items-center justify-between">
+          <h2 className="text-2xl font-semibold text-white">Benchmark Notes</h2>
+          <div className="flex items-center gap-2 text-sm text-slate-300">
+            <NotebookPen className="h-4 w-4" />
+            Investor-facing view with your context
+          </div>
+        </div>
+        <BenchmarkTable
+          rows={activeFounder.benchmarks}
+          founderNotes={notes}
+          onChangeNote={(rowId, note) => setNotes((prev) => ({ ...prev, [rowId]: note }))}
+          onSave={handleSave}
+          isDisabled={isPending}
+        />
+        {isPending ? (
+          <div className="flex items-center gap-3 rounded-2xl border border-amber-300/30 bg-amber-500/10 px-5 py-4 text-sm text-amber-200">
+            <Lock className="h-4 w-4" /> Benchmark notes can be edited but matches remain locked until approval.
+          </div>
+        ) : null}
+      </Motion.div>
+
+      <Motion.div
+        initial={{ opacity: 0, y: 24 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.15 }}
+      >
+        <Card className="relative overflow-hidden">
+          <CardHeader className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+            <div>
+              <CardTitle className="text-2xl text-white">Investor Match Preview</CardTitle>
+              <p className="text-sm text-slate-300">
+                Top aligned funds for your raise. Admin will send intros once approved.
               </p>
-              <button type="button" className="mt-4 text-xs font-semibold text-burnt hover:text-blaze">
-                View details
-              </button>
             </div>
-          ))}
-        </div>
-      </section>
-
-      <section className="space-y-4">
-        <h2 className="text-xl font-semibold text-brand-dark">My LaunchAndLift deals</h2>
-        <div className="space-y-3">
-          {updates.slice(0, 4).map((deal) => (
-            <div key={deal.id} className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm shadow-slate-200">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-wide text-burnt">{deal.sector}</p>
-                  <h3 className="text-lg font-semibold text-brand-dark">{deal.name}</h3>
-                </div>
-                <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                  Next milestone
-                </span>
+            {isPending ? (
+              <div className="flex items-center gap-2 rounded-full border border-white/20 bg-black/40 px-4 py-2 text-xs uppercase tracking-[0.2em] text-slate-300">
+                <Lock className="h-4 w-4" /> Matches locked pending review
               </div>
-              <p className="mt-3 text-sm text-slate-600">{deal.milestone}</p>
+            ) : null}
+          </CardHeader>
+          <CardContent className="grid gap-4 md:grid-cols-3">
+            {matchPreview.map(({ match, investor }) => (
+              <div key={match.investorId} className="rounded-2xl border border-white/10 bg-black/30 p-5">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-semibold text-white">
+                    {investor.fundName}
+                  </h3>
+                  <MatchScoreBadge score={match.matchScore} />
+                </div>
+                <p className="mt-2 text-sm text-slate-300">{investor.thesis}</p>
+                <div className="mt-4 flex flex-wrap gap-1 text-xs text-slate-400">
+                  {investor.stageFocus.map((stage) => (
+                    <span key={stage} className="rounded-full border border-white/10 px-2 py-0.5">
+                      {stage}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ))}
+            {matchPreview.length === 0 ? (
+              <p className="text-sm text-slate-300">
+                Matches will appear here once investors share aligned theses.
+              </p>
+            ) : null}
+          </CardContent>
+          {isPending ? (
+            <div className="absolute inset-0 flex items-center justify-center rounded-3xl bg-black/60 text-sm text-slate-200 backdrop-blur">
+              <div className="flex items-center gap-3">
+                <Lock className="h-5 w-5" />
+                Awaiting Launch & Lift approval to unlock investor outreach.
+              </div>
             </div>
-          ))}
-        </div>
-      </section>
-
-      <section className="space-y-4">
-        <h2 className="text-xl font-semibold text-brand-dark">Community shoutouts</h2>
-        <div className="grid gap-4 md:grid-cols-2">
-          {testimonials.slice(0, 2).map((item) => (
-            <div key={item.name} className="rounded-3xl border border-slate-100 bg-white p-6 shadow-sm shadow-slate-200">
-              <p className="text-sm text-slate-600">“{item.quote}”</p>
-              <p className="mt-4 text-sm font-semibold text-brand-dark">{item.name}</p>
-              <p className="text-xs uppercase tracking-wide text-slate-400">{item.role}</p>
-            </div>
-          ))}
-        </div>
-      </section>
+          ) : null}
+        </Card>
+      </Motion.div>
     </div>
   );
 };
 
 export default FounderDashboard;
-
-const FounderSummary = ({ user }) => {
-  const founderDetails = useMemo(() => user?.founderDetails ?? {}, [user]);
-  const startupDetails = founderDetails.startupDetails ?? {};
-  const coFounder = founderDetails.coFounder;
-
-  return (
-    <section className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-      <div className="space-y-4 rounded-3xl border border-slate-100 bg-white p-6 shadow-sm shadow-slate-200">
-        <h2 className="text-lg font-semibold text-brand-dark">Founder profile</h2>
-        <dl className="grid gap-3 text-sm text-slate-600">
-          <div className="flex flex-wrap justify-between gap-2">
-            <dt className="font-semibold text-brand-dark">Email</dt>
-            <dd>{user?.email ?? '—'}</dd>
-          </div>
-          <div className="flex flex-wrap justify-between gap-2">
-            <dt className="font-semibold text-brand-dark">Phone</dt>
-            <dd>
-              {founderDetails.phone ?? '—'}{' '}
-              {founderDetails.phone && (
-                <span className={`text-xs font-semibold ${founderDetails.phoneVerified ? 'text-emerald-600' : 'text-burnt'}`}>
-                  {founderDetails.phoneVerified ? 'Verified' : 'Pending verification'}
-                </span>
-              )}
-            </dd>
-          </div>
-          <div className="flex flex-wrap justify-between gap-2">
-            <dt className="font-semibold text-brand-dark">LinkedIn</dt>
-            <dd>
-              {founderDetails.linkedinUrl ? (
-                <a href={founderDetails.linkedinUrl} target="_blank" rel="noreferrer" className="text-lagoon hover:text-neon">
-                  View profile
-                </a>
-              ) : (
-                '—'
-              )}
-            </dd>
-          </div>
-          <div className="flex flex-wrap justify-between gap-2">
-            <dt className="font-semibold text-brand-dark">Referrer</dt>
-            <dd>{founderDetails.referrer ?? '—'}</dd>
-          </div>
-          <div className="flex flex-wrap justify-between gap-2">
-            <dt className="font-semibold text-brand-dark">Founder structure</dt>
-            <dd>{founderDetails.singleFounder ? 'Single founder' : 'Founder team'}</dd>
-          </div>
-          {!founderDetails.singleFounder && coFounder && (
-            <div className="rounded-2xl bg-brand-muted/40 p-3">
-              <p className="text-xs font-semibold uppercase tracking-wide text-lagoon">Co-founder</p>
-              <p className="text-sm text-brand-dark">{coFounder.name}</p>
-              <p className="text-xs text-slate-500">{coFounder.email}</p>
-              {coFounder.linkedinUrl && (
-                <a href={coFounder.linkedinUrl} target="_blank" rel="noreferrer" className="text-xs font-semibold text-lagoon hover:text-neon">
-                  LinkedIn
-                </a>
-              )}
-            </div>
-          )}
-        </dl>
-      </div>
-
-      <div className="space-y-4 rounded-3xl border border-slate-100 bg-white p-6 shadow-sm shadow-slate-200">
-        <h2 className="text-lg font-semibold text-brand-dark">Company snapshot</h2>
-        <dl className="grid gap-3 text-sm text-slate-600">
-          <div className="flex flex-wrap justify-between gap-2">
-            <dt className="font-semibold text-brand-dark">Brand name</dt>
-            <dd>{startupDetails.brandName ?? '—'}</dd>
-          </div>
-          <div className="flex flex-wrap justify-between gap-2">
-            <dt className="font-semibold text-brand-dark">Legal name</dt>
-            <dd>{startupDetails.legalName ?? '—'}</dd>
-          </div>
-          <div className="flex flex-wrap justify-between gap-2">
-            <dt className="font-semibold text-brand-dark">Stage</dt>
-            <dd>{startupDetails.stage ?? '—'}</dd>
-          </div>
-          <div className="flex flex-wrap justify-between gap-2">
-            <dt className="font-semibold text-brand-dark">Sector focus</dt>
-            <dd>
-              {startupDetails.sectorTags?.length
-                ? startupDetails.sectorTags.join(', ')
-                : startupDetails.sector ?? '—'}
-            </dd>
-          </div>
-          <div className="flex flex-wrap justify-between gap-2">
-            <dt className="font-semibold text-brand-dark">City</dt>
-            <dd>{startupDetails.cityOfOperation ?? '—'}</dd>
-          </div>
-          <div className="flex flex-wrap justify-between gap-2">
-            <dt className="font-semibold text-brand-dark">Company type</dt>
-            <dd>{startupDetails.companyType ?? '—'}</dd>
-          </div>
-          <div className="flex flex-wrap justify-between gap-2">
-            <dt className="font-semibold text-brand-dark">Monthly revenue</dt>
-            <dd>{startupDetails.monthlyRevenue ?? '—'}</dd>
-          </div>
-          <div className="flex flex-wrap justify-between gap-2">
-            <dt className="font-semibold text-brand-dark">Pre-money valuation</dt>
-            <dd>{startupDetails.preMoneyValuation ?? '—'}</dd>
-          </div>
-          <div className="flex flex-wrap justify-between gap-2">
-            <dt className="font-semibold text-brand-dark">Capital to raise</dt>
-            <dd>{startupDetails.capitalToRaise ?? '—'}</dd>
-          </div>
-          <div className="flex flex-wrap justify-between gap-2">
-            <dt className="font-semibold text-brand-dark">Incorporation</dt>
-            <dd>{formatMonthYear(startupDetails.incorporationDate)}</dd>
-          </div>
-          <div className="flex flex-col gap-1">
-            <dt className="font-semibold text-brand-dark">Pitch deck</dt>
-            <dd>
-              {startupDetails.pitchDeck?.data ? (
-                <a
-                  href={startupDetails.pitchDeck.data}
-                  download={startupDetails.pitchDeck.fileName ?? 'launchandlift-pitch-deck.pdf'}
-                  className="inline-flex items-center gap-2 text-sm font-semibold text-lagoon hover:text-neon"
-                >
-                  Download deck
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4">
-                    <path d="M9 2a1 1 0 0 1 2 0v7.586l1.293-1.293a1 1 0 0 1 1.414 1.414l-3.001 3a1 1 0 0 1-1.414 0l-3.001-3A1 1 0 0 1 7.293 8.293L8.586 9.586V2Z" />
-                    <path d="M3 12a1 1 0 0 1 1 1v2h12v-2a1 1 0 1 1 2 0v3a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1Z" />
-                  </svg>
-                </a>
-              ) : (
-                '—'
-              )}
-            </dd>
-          </div>
-          {startupDetails.description && (
-            <div className="flex flex-col gap-1">
-              <dt className="font-semibold text-brand-dark">What we are building</dt>
-              <dd className="rounded-2xl bg-brand-muted/40 p-3 text-sm text-slate-600">
-                {startupDetails.description}
-              </dd>
-            </div>
-          )}
-        </dl>
-      </div>
-    </section>
-  );
-};

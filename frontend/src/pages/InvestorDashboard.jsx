@@ -1,234 +1,146 @@
-import { useEffect, useMemo, useState } from 'react';
-import { contentApi } from '../services/api';
-import { useAuth } from '../context/AuthContext';
+import { useMemo, useState } from 'react';
+import { motion as Motion } from 'framer-motion';
+import { Filter } from 'lucide-react';
+import { StartupCard } from '../components/StartupCard.jsx';
+import { Card, CardHeader, CardTitle } from '../components/ui/card.jsx';
+import { cn } from '../lib/utils.js';
+import { showGenericInfo } from '../lib/emailClientMock.js';
+import { useAppStore } from '../store/useAppStore.js';
 
-const maskPan = (pan) => {
-  if (!pan) return '—';
-  const normalized = pan.toUpperCase();
-  if (normalized.length <= 4) {
-    return normalized;
-  }
-  return `${normalized.slice(0, 2)}••••${normalized.slice(-2)}`;
+const initialFilters = {
+  stage: 'All',
+  sector: 'All',
+  geo: 'All',
 };
 
 const InvestorDashboard = () => {
-  const { token, user } = useAuth();
-  const [portfolio, setPortfolio] = useState([]);
-  const [stats, setStats] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const founders = useAppStore((state) => state.founders);
+  const investors = useAppStore((state) => state.investors);
+  const [filters, setFilters] = useState(initialFilters);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [portfolioResponse, statsResponse] = await Promise.all([
-          contentApi.portfolio(),
-          contentApi.stats(token),
-        ]);
-        setPortfolio(portfolioResponse.items ?? []);
-        setStats(statsResponse);
-        setLoading(false);
-      } catch (err) {
-        setError('Unable to load dashboard data. Please try again later.');
-        setLoading(false);
-      }
+  const approvedFounders = founders.filter((founder) => founder.status === 'approved');
+
+  const filterOptions = useMemo(() => {
+    const stages = new Set();
+    const sectors = new Set();
+    const geos = new Set();
+    approvedFounders.forEach((founder) => {
+      stages.add(founder.raiseStage);
+      sectors.add(founder.sector);
+      geos.add(founder.geography);
+    });
+    return {
+      stages: Array.from(stages),
+      sectors: Array.from(sectors),
+      geos: Array.from(geos),
     };
+  }, [approvedFounders]);
 
-    fetchData();
-  }, [token]);
+  const filteredFounders = approvedFounders.filter((founder) => {
+    const matchesStage = filters.stage === 'All' || founder.raiseStage === filters.stage;
+    const matchesSector = filters.sector === 'All' || founder.sector === filters.sector;
+    const matchesGeo = filters.geo === 'All' || founder.geography === filters.geo;
+    return matchesStage && matchesSector && matchesGeo;
+  });
 
-  if (loading) {
-    return (
-      <div className="mx-auto max-w-6xl px-4 py-16">
-        <div className="rounded-3xl bg-brand-muted p-10 text-center text-sm text-slate-600">
-          Loading LaunchAndLift Mission Control…
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="mx-auto max-w-6xl px-4 py-16">
-        <div className="rounded-3xl bg-burnt/10 p-10 text-center text-sm font-semibold text-burnt">
-          {error}
-        </div>
-      </div>
-    );
-  }
+  const bestMatchScore = (founder) =>
+    founder.matches.reduce((highest, match) => {
+      const investor = investors.find((item) => item.id === match.investorId);
+      if (!investor) return highest;
+      return match.matchScore > highest ? match.matchScore : highest;
+    }, 0);
 
   return (
-    <div className="mx-auto max-w-6xl space-y-12 px-4 py-12">
-      <header className="flex flex-col gap-6 rounded-3xl bg-brand-muted p-10 text-brand-dark shadow-sm shadow-brand-muted/60 md:flex-row md:items-center md:justify-between">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-lagoon">Mission Control</p>
-          <h1 className="mt-3 text-3xl font-semibold">
-            Welcome back, {user?.fullName ?? user?.name ?? 'LaunchAndLift investor'}
-          </h1>
-          <p className="mt-3 text-sm text-slate-600">
-            Access your LaunchAndLift allocations, review portfolio performance, and stay aligned with upcoming deal flow.
-          </p>
+    <div className="grid gap-8 md:grid-cols-[280px_1fr]">
+      <Motion.aside
+        initial={{ opacity: 0, x: -16 }}
+        animate={{ opacity: 1, x: 0 }}
+        className="space-y-6 rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur"
+      >
+        <div className="flex items-center gap-2 text-sm text-slate-300">
+          <Filter className="h-4 w-4" /> Filters
         </div>
-        {user?.investorDetails?.profilePhoto?.data && (
-          <div className="flex items-center gap-3 rounded-3xl border border-white/70 bg-white/70 px-5 py-4 shadow-sm">
-            <img
-              src={user.investorDetails.profilePhoto.data}
-              alt={user.fullName}
-              className="h-20 w-20 rounded-2xl object-cover shadow-lg shadow-brand-muted/40"
+        <FilterGroup
+          label="Stage"
+          options={['All', ...filterOptions.stages]}
+          value={filters.stage}
+          onChange={(value) => setFilters((prev) => ({ ...prev, stage: value }))}
+        />
+        <FilterGroup
+          label="Sector"
+          options={['All', ...filterOptions.sectors]}
+          value={filters.sector}
+          onChange={(value) => setFilters((prev) => ({ ...prev, sector: value }))}
+        />
+        <FilterGroup
+          label="Geography"
+          options={['All', ...filterOptions.geos]}
+          value={filters.geo}
+          onChange={(value) => setFilters((prev) => ({ ...prev, geo: value }))}
+        />
+      </Motion.aside>
+
+      <Motion.section
+        initial={{ opacity: 0, y: 24 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="space-y-6"
+      >
+        <Card className="border-white/10 bg-white/5">
+          <CardHeader>
+            <CardTitle className="text-2xl text-white">Recommended Startups</CardTitle>
+            <p className="text-sm text-slate-300">
+              Viewing approved founders who align with your thesis parameters.
+            </p>
+          </CardHeader>
+        </Card>
+
+        <div className="grid gap-6">
+          {filteredFounders.map((founder) => (
+            <StartupCard
+              key={founder.id}
+              founder={founder}
+              matchScore={bestMatchScore(founder)}
+              onRequestIntro={() =>
+                showGenericInfo(`Intro requested for ${founder.startupName} (mock)`)
+              }
             />
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-lagoon">Profile photo</p>
-              <p className="text-sm text-slate-600">Provided for verification</p>
-            </div>
-          </div>
-        )}
-      </header>
-
-      <InvestorProfileSummary user={user} />
-
-      {stats && (
-        <section className="grid gap-4 sm:grid-cols-2">
-          {stats.metrics?.map((item) => (
-            <div key={item.label} className="rounded-3xl border border-slate-100 bg-white p-6 shadow-sm shadow-slate-200">
-              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">{item.label}</p>
-              <p className="mt-3 text-3xl font-semibold text-burnt">{item.value}</p>
-              <p className="mt-2 text-sm text-slate-600">{item.caption}</p>
-            </div>
           ))}
-        </section>
-      )}
 
-      <section className="space-y-4">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <h2 className="text-xl font-semibold text-brand-dark">Active allocations</h2>
-          <button
-            type="button"
-            className="rounded-full border border-lagoon px-5 py-2 text-xs font-semibold uppercase tracking-wide text-lagoon hover:border-burnt hover:text-burnt"
-          >
-            Download NAV report
-          </button>
+          {filteredFounders.length === 0 ? (
+            <Card className="p-10 text-center text-sm text-slate-300">
+              No startups match these filters yet. Adjust focus or check again soon.
+            </Card>
+          ) : null}
         </div>
-        <div className="space-y-3">
-          {portfolio.map((company) => (
-            <div key={company.id} className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm shadow-slate-200">
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-wide text-lagoon">
-                    {company.sector}
-                  </p>
-                  <h3 className="text-lg font-semibold text-brand-dark">{company.name}</h3>
-                </div>
-                <span className="rounded-full bg-brand-muted px-3 py-1 text-xs font-semibold uppercase tracking-wide text-burnt">
-                  {company.status ?? 'Active'}
-                </span>
-              </div>
-              <p className="mt-3 text-sm text-slate-600">{company.summary}</p>
-            </div>
-          ))}
-        </div>
-      </section>
+      </Motion.section>
     </div>
   );
 };
 
+const FilterGroup = ({ label, options, value, onChange }) => (
+  <div className="space-y-2 text-sm text-slate-200">
+    <p className="text-xs uppercase tracking-[0.2em] text-slate-400">{label}</p>
+    <div className="flex flex-wrap gap-2">
+      {options.map((option) => {
+        const isActive = option === value;
+        return (
+          <button
+            key={option}
+            type="button"
+            onClick={() => onChange(option)}
+            className={cn(
+              'rounded-full border border-white/10 px-3 py-1 text-xs font-semibold transition',
+              isActive
+                ? 'bg-gradient-to-r from-indigo-500 to-brand text-white shadow-[0_12px_35px_-30px_rgba(124,92,255,0.9)]'
+                : 'bg-white/10 text-slate-200 hover:bg-white/15',
+            )}
+          >
+            {option}
+          </button>
+        );
+      })}
+    </div>
+  </div>
+);
+
 export default InvestorDashboard;
-
-const InvestorProfileSummary = ({ user }) => {
-  const investorDetails = useMemo(() => user?.investorDetails ?? {}, [user]);
-  const experience = investorDetails.experience ?? [];
-  const assetsText =
-    investorDetails.assetsOverThreshold === undefined
-      ? '—'
-      : investorDetails.assetsOverThreshold
-        ? 'Yes'
-        : 'No';
-  const accountHolderType =
-    investorDetails.accountHolderType === 'corporate' ? 'Corporate / Institutional' : 'Individual';
-
-  return (
-    <section className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-      <div className="space-y-4 rounded-3xl border border-slate-100 bg-white p-6 shadow-sm shadow-slate-200">
-        <h2 className="text-lg font-semibold text-brand-dark">Investor profile</h2>
-        <dl className="grid gap-3 text-sm text-slate-600">
-          <div className="flex flex-wrap justify-between gap-2">
-            <dt className="font-semibold text-brand-dark">Organization</dt>
-            <dd>{user?.organization ?? '—'}</dd>
-          </div>
-          <div className="flex flex-wrap justify-between gap-2">
-            <dt className="font-semibold text-brand-dark">Phone</dt>
-            <dd>
-              {investorDetails.phone ?? '—'}{' '}
-              {investorDetails.phone && (
-                <span className={`text-xs font-semibold ${investorDetails.phoneVerified ? 'text-emerald-600' : 'text-burnt'}`}>
-                  {investorDetails.phoneVerified ? 'Verified' : 'Pending verification'}
-                </span>
-              )}
-            </dd>
-          </div>
-          <div className="flex flex-wrap justify-between gap-2">
-            <dt className="font-semibold text-brand-dark">LinkedIn</dt>
-            <dd>
-              {investorDetails.linkedinUrl ? (
-                <a href={investorDetails.linkedinUrl} target="_blank" rel="noreferrer" className="text-lagoon hover:text-neon">
-                  View profile
-                </a>
-              ) : (
-                '—'
-              )}
-            </dd>
-          </div>
-          <div className="flex flex-wrap justify-between gap-2">
-            <dt className="font-semibold text-brand-dark">Country of citizenship</dt>
-            <dd>{investorDetails.countryOfCitizenship ?? '—'}</dd>
-          </div>
-          <div className="flex flex-wrap justify-between gap-2">
-            <dt className="font-semibold text-brand-dark">Location</dt>
-            <dd>{investorDetails.location ?? '—'}</dd>
-          </div>
-          <div className="flex flex-wrap justify-between gap-2">
-            <dt className="font-semibold text-brand-dark">PAN</dt>
-            <dd>{maskPan(investorDetails.panNumber)}</dd>
-          </div>
-        </dl>
-      </div>
-
-      <div className="space-y-4 rounded-3xl border border-slate-100 bg-white p-6 shadow-sm shadow-slate-200">
-        <h2 className="text-lg font-semibold text-brand-dark">Investment preferences</h2>
-        <dl className="grid gap-3 text-sm text-slate-600">
-          <div className="flex flex-wrap justify-between gap-2">
-            <dt className="font-semibold text-brand-dark">Investor type</dt>
-            <dd>{investorDetails.investorType ?? '—'}</dd>
-          </div>
-          <div className="flex flex-wrap justify-between gap-2">
-            <dt className="font-semibold text-brand-dark">Account holder type</dt>
-            <dd>{accountHolderType}</dd>
-          </div>
-          <div className="flex flex-wrap justify-between gap-2">
-            <dt className="font-semibold text-brand-dark">Assets &gt; ₹2 Cr</dt>
-            <dd>{assetsText}</dd>
-          </div>
-          <div className="flex flex-col gap-1">
-            <dt className="font-semibold text-brand-dark">Experience highlights</dt>
-            <dd>
-              {experience.length ? (
-                <ul className="list-disc space-y-1 pl-5">
-                  {experience.map((item) => (
-                    <li key={item}>{item}</li>
-                  ))}
-                </ul>
-              ) : (
-                '—'
-              )}
-            </dd>
-          </div>
-          {user?.notes && (
-            <div className="flex flex-col gap-1">
-              <dt className="font-semibold text-brand-dark">Capital focus</dt>
-              <dd className="rounded-2xl bg-brand-muted/40 p-3 text-sm text-slate-600">{user.notes}</dd>
-            </div>
-          )}
-        </dl>
-      </div>
-    </section>
-  );
-};

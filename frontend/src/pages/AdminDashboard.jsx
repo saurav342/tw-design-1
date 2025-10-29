@@ -1,259 +1,256 @@
-import { useEffect, useState } from 'react';
-import FAQAccordion from '../components/FAQAccordion';
-import Testimonials from '../components/Testimonials';
-import { contentApi } from '../services/api';
-import { useAuth } from '../context/AuthContext';
-
-const emptyTestimonial = { name: '', role: '', quote: '' };
-const emptyFaq = { audience: 'investor', question: '', answer: '' };
+import { useMemo, useState } from 'react';
+import { motion as Motion } from 'framer-motion';
+import { MailPlus, Users } from 'lucide-react';
+import { Button } from '../components/ui/button.jsx';
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '../components/ui/card.jsx';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs.jsx';
+import { BenchmarkTable } from '../components/BenchmarkTable.jsx';
+import { MatchScoreBadge } from '../components/MatchScoreBadge.jsx';
+import { sendIntroEmailMock, showGenericSuccess } from '../lib/emailClientMock.js';
+import { formatCurrency } from '../lib/formatters.js';
+import { useAppStore } from '../store/useAppStore.js';
 
 const AdminDashboard = () => {
-  const { token, user } = useAuth();
-  const [statsForm, setStatsForm] = useState([{ label: '', value: '', caption: '' }]);
-  const [testimonials, setTestimonials] = useState([]);
-  const [testimonialForm, setTestimonialForm] = useState(emptyTestimonial);
-  const [faqs, setFaqs] = useState([]);
-  const [faqForm, setFaqForm] = useState(emptyFaq);
-  const [statusMessage, setStatusMessage] = useState('');
+  const founders = useAppStore((state) => state.founders);
+  const investors = useAppStore((state) => state.investors);
+  const updateFounderStatus = useAppStore((state) => state.updateFounderStatus);
 
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const [statsResponse, testimonialResponse, faqResponse] = await Promise.all([
-          contentApi.stats(token),
-          contentApi.testimonials(),
-          contentApi.faqs(),
-        ]);
+  const pendingFounders = founders.filter((founder) => founder.status === 'pending');
+  const approvedFounders = founders.filter((founder) => founder.status === 'approved');
 
-        setStatsForm(statsResponse?.metrics?.length ? statsResponse.metrics : statsForm);
-        setTestimonials(testimonialResponse.items ?? []);
-        setFaqs(faqResponse.items ?? []);
-      } catch (error) {
-        setStatusMessage('Unable to load admin data. Check your connection or permissions.');
-      }
-    };
+  const [selectedFounderId, setSelectedFounderId] = useState(() => approvedFounders[0]?.id ?? '');
+  const [selectedInvestors, setSelectedInvestors] = useState([]);
 
-    load();
-  }, [token]);
+  const selectedFounder = useMemo(
+    () => approvedFounders.find((founder) => founder.id === selectedFounderId),
+    [approvedFounders, selectedFounderId],
+  );
 
-  const handleStatsChange = (index, field, value) => {
-    setStatsForm((prev) =>
-      prev.map((item, idx) => (idx === index ? { ...item, [field]: value } : item)),
+  const matches = useMemo(() => {
+    if (!selectedFounder) return [];
+    return selectedFounder.matches
+      .map((match) => ({
+        ...match,
+        investor: investors.find((investor) => investor.id === match.investorId),
+      }))
+      .filter((item) => item.investor)
+      .sort((a, b) => b.matchScore - a.matchScore);
+  }, [investors, selectedFounder]);
+
+  const toggleInvestor = (investorId) => {
+    setSelectedInvestors((prev) =>
+      prev.includes(investorId) ? prev.filter((id) => id !== investorId) : [...prev, investorId],
     );
   };
 
-  const addMetricRow = () => {
-    setStatsForm((prev) => [...prev, { label: '', value: '', caption: '' }]);
+  const selectAllHighScores = () => {
+    const highScores = matches
+      .filter((match) => match.matchScore >= 70)
+      .map((match) => match.investor.id);
+    setSelectedInvestors(highScores);
   };
 
-  const handleSaveStats = async () => {
-    try {
-      await contentApi.updateStats({ metrics: statsForm }, token);
-      setStatusMessage('Platform stats updated successfully.');
-    } catch (error) {
-      setStatusMessage('Failed to update stats. Please try again.');
-    }
-  };
-
-  const handleTestimonialSubmit = async (event) => {
-    event.preventDefault();
-    try {
-      const response = await contentApi.upsertTestimonial(testimonialForm, token);
-      setTestimonials((prev) => [...prev, response.item]);
-      setTestimonialForm(emptyTestimonial);
-      setStatusMessage('Testimonial added.');
-    } catch (error) {
-      setStatusMessage('Unable to add testimonial.');
-    }
-  };
-
-  const handleDeleteTestimonial = async (id) => {
-    try {
-      await contentApi.deleteTestimonial(id, token);
-      setTestimonials((prev) => prev.filter((item) => item.id !== id));
-      setStatusMessage('Testimonial removed.');
-    } catch (error) {
-      setStatusMessage('Failed to remove testimonial.');
-    }
-  };
-
-  const handleFaqSubmit = async (event) => {
-    event.preventDefault();
-    try {
-      const response = await contentApi.upsertFaq(faqForm, token);
-      setFaqs((prev) => [...prev, response.item]);
-      setFaqForm(emptyFaq);
-      setStatusMessage('FAQ saved.');
-    } catch (error) {
-      setStatusMessage('Unable to save FAQ.');
-    }
+  const sendBulkIntros = () => {
+    if (!selectedFounder || selectedInvestors.length === 0) return;
+    showGenericSuccess(
+      `Intro emails sent to ${selectedInvestors.length} investors for ${selectedFounder.startupName} (mock)`,
+    );
   };
 
   return (
-    <div className="mx-auto max-w-6xl space-y-12 px-4 py-12">
-      <header className="rounded-3xl bg-brand-dark p-10 text-white shadow-lg shadow-brand-dark/40">
-        <p className="text-xs font-semibold uppercase tracking-[0.3em] text-white/70">Admin Console</p>
-        <h1 className="mt-3 text-3xl font-semibold">
-          Welcome, {user?.fullName ?? 'LaunchAndLift Admin'}
-        </h1>
-        <p className="mt-3 text-sm text-white/70">
-          Manage LaunchAndLift content, portfolio snapshots, FAQs, and community stories for the platform.
-        </p>
-      </header>
+    <Tabs defaultValue="pending" className="space-y-8">
+      <TabsList>
+        <TabsTrigger value="pending">Pending Review ({pendingFounders.length})</TabsTrigger>
+        <TabsTrigger value="matchmaking">Matchmaking Console</TabsTrigger>
+      </TabsList>
 
-      {statusMessage && (
-        <div className="rounded-2xl bg-brand-muted p-4 text-sm text-brand-dark">
-          {statusMessage}
-        </div>
-      )}
+      <TabsContent value="pending" className="space-y-6">
+        {pendingFounders.length === 0 ? (
+          <Card className="p-10 text-center text-sm text-slate-300">
+            All founders have been reviewed. You're caught up.
+          </Card>
+        ) : null}
 
-      <section className="space-y-6 rounded-3xl border border-slate-100 bg-white p-8 shadow-sm shadow-slate-200">
-        <div className="flex items-center justify-between gap-4">
-          <h2 className="text-xl font-semibold text-brand-dark">Homepage metrics</h2>
-          <button
-            type="button"
-            onClick={addMetricRow}
-            className="rounded-full border border-lagoon px-4 py-2 text-xs font-semibold uppercase tracking-wide text-lagoon hover:border-burnt hover:text-burnt"
+        {pendingFounders.map((founder) => (
+          <Motion.div
+            key={founder.id}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
           >
-            Add metric
-          </button>
-        </div>
+            <Card className="space-y-6">
+              <CardHeader>
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <CardTitle className="text-2xl text-white">{founder.startupName}</CardTitle>
+                    <p className="text-sm text-slate-300">{founder.headline}</p>
+                    <div className="mt-3 flex flex-wrap gap-2 text-xs text-slate-400">
+                      <span className="rounded-full border border-white/10 px-2 py-0.5">
+                        {founder.sector}
+                      </span>
+                      <span className="rounded-full border border-white/10 px-2 py-0.5">
+                        {founder.geography}
+                      </span>
+                      <span className="rounded-full border border-white/10 px-2 py-0.5">
+                        Targeting {formatCurrency(founder.raiseAmountUSD)}
+                      </span>
+                    </div>
+                  </div>
+                  <Button
+                    onClick={() => {
+                      updateFounderStatus(founder.id, 'approved');
+                      showGenericSuccess(`${founder.startupName} approved (mock)`);
+                    }}
+                  >
+                    Approve Profile
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <section>
+                  <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-300">
+                    AI Summary
+                  </h3>
+                  <p className="mt-2 text-sm text-slate-200">{founder.aiSummary}</p>
+                </section>
+                <section>
+                  <h3 className="mb-3 text-sm font-semibold uppercase tracking-[0.2em] text-slate-300">
+                    Benchmarks &amp; Notes
+                  </h3>
+                  <BenchmarkTable
+                    rows={founder.benchmarks}
+                    founderNotes={founder.benchmarkNotes}
+                    onChangeNote={() => {}}
+                    onSave={() => {}}
+                    isDisabled
+                  />
+                </section>
+              </CardContent>
+            </Card>
+          </Motion.div>
+        ))}
+      </TabsContent>
 
-        <div className="grid gap-4">
-          {statsForm.map((metric, index) => (
-            <div key={`${metric.label}-${index}`} className="grid gap-4 rounded-2xl border border-slate-100 bg-brand-muted p-4 sm:grid-cols-3">
-              <input
-                type="text"
-                value={metric.label}
-                onChange={(event) => handleStatsChange(index, 'label', event.target.value)}
-                placeholder="Label"
-                className="rounded-xl border border-slate-200 px-4 py-2 text-sm text-brand-dark focus:border-lagoon focus:outline-none focus:ring-2 focus:ring-lagoon"
-              />
-              <input
-                type="text"
-                value={metric.value}
-                onChange={(event) => handleStatsChange(index, 'value', event.target.value)}
-                placeholder="Value"
-                className="rounded-xl border border-slate-200 px-4 py-2 text-sm text-brand-dark focus:border-lagoon focus:outline-none focus:ring-2 focus:ring-lagoon"
-              />
-              <input
-                type="text"
-                value={metric.caption}
-                onChange={(event) => handleStatsChange(index, 'caption', event.target.value)}
-                placeholder="Caption"
-                className="rounded-xl border border-slate-200 px-4 py-2 text-sm text-brand-dark focus:border-lagoon focus:outline-none focus:ring-2 focus:ring-lagoon"
-              />
+      <TabsContent value="matchmaking" className="space-y-6">
+        {approvedFounders.length === 0 ? (
+          <Card className="p-10 text-center text-sm text-slate-300">
+            Approve at least one founder to activate matchmaking.
+          </Card>
+        ) : (
+          <>
+            <div className="flex flex-col gap-4 rounded-3xl border border-white/10 bg-white/5 p-6 text-sm text-slate-200 md:flex-row md:items-center md:justify-between">
+              <div>
+                <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Founder in focus</p>
+                <p className="mt-1 text-lg font-semibold text-white">
+                  {selectedFounder?.startupName ?? 'Select a founder'}
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-3">
+                {approvedFounders.map((founder) => {
+                  const isActive = founder.id === selectedFounderId;
+                  return (
+                    <button
+                      key={founder.id}
+                      type="button"
+                      onClick={() => setSelectedFounderId(founder.id)}
+                      className={
+                        (isActive
+                          ? 'bg-gradient-to-r from-indigo-500 to-brand text-white'
+                          : 'bg-white/10 text-slate-200') +
+                        ' rounded-full border border-white/10 px-4 py-2 text-xs font-semibold'
+                      }
+                    >
+                      {founder.startupName}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
-          ))}
-        </div>
 
-        <button
-          type="button"
-          onClick={handleSaveStats}
-          className="rounded-full bg-blaze px-6 py-3 text-sm font-semibold uppercase tracking-wide text-white shadow-lg shadow-blaze/40 hover:bg-sunset"
-        >
-          Save metrics
-        </button>
-      </section>
+            <Card>
+              <CardHeader className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+                <div>
+                  <CardTitle className="text-2xl text-white">Investor Matches</CardTitle>
+                  <p className="text-sm text-slate-300">
+                    Ranked introductions for {selectedFounder?.startupName ?? 'the selected founder'}.
+                  </p>
+                </div>
+                <div className="flex gap-3">
+                  <Button variant="secondary" onClick={selectAllHighScores}>
+                    Select all ≥ 70%
+                  </Button>
+                  <Button onClick={sendBulkIntros}>Send All Selected</Button>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {matches.map((entry) => {
+                  const investor = entry.investor;
+                  const isSelected = selectedInvestors.includes(investor.id);
+                  return (
+                    <div
+                      key={investor.id}
+                      className="flex flex-col gap-4 rounded-2xl border border-white/10 bg-black/30 p-5 md:flex-row md:items-center md:justify-between"
+                    >
+                      <div className="flex flex-col gap-2">
+                        <div className="flex items-center gap-3">
+                          <MatchScoreBadge score={entry.matchScore} />
+                          <p className="text-lg font-semibold text-white">{investor.fundName}</p>
+                        </div>
+                        <p className="text-sm text-slate-300">{investor.thesis}</p>
+                        <div className="flex flex-wrap gap-2 text-xs text-slate-400">
+                          {investor.stageFocus.map((stage) => (
+                            <span key={stage} className="rounded-full border border-white/10 px-2 py-0.5">
+                              {stage}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="flex flex-col items-end gap-3">
+                        <label className="flex items-center gap-2 text-xs text-slate-300">
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={() => toggleInvestor(investor.id)}
+                            className="h-4 w-4 rounded border-white/20 bg-black/40"
+                          />
+                          Add to batch intro
+                        </label>
+                        <Button
+                          variant="secondary"
+                          onClick={() =>
+                            sendIntroEmailMock({
+                              investorName: investor.fundName,
+                              startupName: selectedFounder?.startupName ?? '',
+                            })
+                          }
+                        >
+                          <MailPlus className="mr-2 h-4 w-4" /> Send Intro
+                        </Button>
+                      </div>
+                    </div>
+                  );
+                })}
 
-      <section className="space-y-6 rounded-3xl border border-slate-100 bg-white p-8 shadow-sm shadow-slate-200">
-        <h2 className="text-xl font-semibold text-brand-dark">Testimonials</h2>
-        <Testimonials items={testimonials} />
-        <form className="grid gap-4 sm:grid-cols-2" onSubmit={handleTestimonialSubmit}>
-          <input
-            type="text"
-            name="name"
-            required
-            value={testimonialForm.name}
-            onChange={(event) =>
-              setTestimonialForm((prev) => ({ ...prev, name: event.target.value }))
-            }
-            placeholder="Name"
-            className="rounded-xl border border-slate-200 px-4 py-3 text-sm text-brand-dark focus:border-lagoon focus:outline-none focus:ring-2 focus:ring-lagoon"
-          />
-          <input
-            type="text"
-            name="role"
-            required
-            value={testimonialForm.role}
-            onChange={(event) =>
-              setTestimonialForm((prev) => ({ ...prev, role: event.target.value }))
-            }
-            placeholder="Role"
-            className="rounded-xl border border-slate-200 px-4 py-3 text-sm text-brand-dark focus:border-lagoon focus:outline-none focus:ring-2 focus:ring-lagoon"
-          />
-          <textarea
-            name="quote"
-            required
-            rows={3}
-            value={testimonialForm.quote}
-            onChange={(event) =>
-              setTestimonialForm((prev) => ({ ...prev, quote: event.target.value }))
-            }
-            placeholder="Quote"
-            className="sm:col-span-2 rounded-xl border border-slate-200 px-4 py-3 text-sm text-brand-dark focus:border-lagoon focus:outline-none focus:ring-2 focus:ring-lagoon"
-          />
-          <div className="flex flex-wrap gap-3 sm:col-span-2">
-            <button
-              type="submit"
-              className="rounded-full bg-burnt px-6 py-3 text-sm font-semibold uppercase tracking-wide text-white shadow-lg shadow-burnt/40 hover:bg-sunset"
-            >
-              Add testimonial
-            </button>
-            {testimonials
-              .filter((item) => item.id)
-              .map((item) => (
-                <button
-                  key={`delete-${item.id}`}
-                  type="button"
-                  onClick={() => handleDeleteTestimonial(item.id)}
-                  className="rounded-full border border-burnt px-4 py-2 text-xs font-semibold uppercase tracking-wide text-burnt hover:bg-burnt hover:text-white"
-                >
-                  Remove {item.name}
-                </button>
-              ))}
-          </div>
-        </form>
-      </section>
-
-      <section className="space-y-6 rounded-3xl border border-slate-100 bg-white p-8 shadow-sm shadow-slate-200">
-        <h2 className="text-xl font-semibold text-brand-dark">FAQs</h2>
-        <FAQAccordion items={faqs} />
-        <form className="grid gap-4" onSubmit={handleFaqSubmit}>
-          <select
-            value={faqForm.audience}
-            onChange={(event) => setFaqForm((prev) => ({ ...prev, audience: event.target.value }))}
-            className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-brand-dark focus:border-lagoon focus:outline-none focus:ring-2 focus:ring-lagoon"
-          >
-            <option value="investor">Investor</option>
-            <option value="founder">Founder</option>
-            <option value="general">General</option>
-          </select>
-          <input
-            type="text"
-            value={faqForm.question}
-            onChange={(event) => setFaqForm((prev) => ({ ...prev, question: event.target.value }))}
-            placeholder="Question"
-            required
-            className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-brand-dark focus:border-lagoon focus:outline-none focus:ring-2 focus:ring-lagoon"
-          />
-          <textarea
-            value={faqForm.answer}
-            onChange={(event) => setFaqForm((prev) => ({ ...prev, answer: event.target.value }))}
-            placeholder="Answer"
-            required
-            rows={3}
-            className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-brand-dark focus:border-lagoon focus:outline-none focus:ring-2 focus:ring-lagoon"
-          />
-          <button
-            type="submit"
-            className="rounded-full bg-blaze px-6 py-3 text-sm font-semibold uppercase tracking-wide text-white shadow-lg shadow-blaze/40 hover:bg-sunset"
-          >
-            Publish FAQ
-          </button>
-        </form>
-      </section>
-    </div>
+                {matches.length === 0 ? (
+                  <div className="rounded-2xl border border-white/10 bg-black/30 p-6 text-sm text-slate-300">
+                    Approve a founder and we will generate match scores instantly.
+                  </div>
+                ) : null}
+              </CardContent>
+              <CardFooter className="flex items-center justify-end gap-3 text-xs text-slate-300">
+                <Users className="h-4 w-4 text-indigo-300" />
+                {selectedInvestors.length} investors selected for bulk intros.
+              </CardFooter>
+            </Card>
+          </>
+        )}
+      </TabsContent>
+    </Tabs>
   );
 };
 

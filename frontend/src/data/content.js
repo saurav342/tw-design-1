@@ -1,4 +1,4 @@
-export const palette = ['#AF3800', '#FE621D', '#FD5200', '#00CFC1', '#00FFE7'];
+export const palette = ['#5B21D1', '#FF4F9A', '#F7C948', '#2EDC92', '#9FF5CF'];
 
 export const heroContent = {
   eyebrow: 'Private Market Launchpad',
@@ -60,25 +60,25 @@ export const ecosystem = {
       title: 'Curated capital',
       description:
         'Dedicated capital lanes for seed, growth, and secondary opportunities ensure founders access the right resources at every stage.',
-      color: 'bg-burnt',
+      color: 'bg-sunbeam',
     },
     {
       title: 'Operator guild',
       description:
         'A bench of 70+ operating advisors covering product, go-to-market, finance, and people outcomes embedded into each portfolio company.',
-      color: 'bg-sunset',
+      color: 'bg-blossom',
     },
     {
       title: 'Insight engine',
       description:
         'Proprietary diligence platform evaluating data, customer sentiment, and founder-market fit to derisk execution.',
-      color: 'bg-blaze',
+      color: 'bg-blossom',
     },
     {
       title: 'Mission control',
       description:
         'Unified dashboards for investors and founders track KPIs, deal flow, and cross-portfolio benchmarks in real time.',
-      color: 'bg-lagoon',
+      color: 'bg-sprout',
     },
   ],
 };
@@ -385,7 +385,7 @@ export const resources = [
 export const homeIntro = {
   headline: 'Welcome to Launch & Lift - Your Complete Fundraising Partner!',
   subheadline:
-    'End-to-end fundraising support that connects founders with investors, mentors, and the resources to close deals.',
+    'Your Complete Fundraising Partner: End-to-end fundraising support that connects founders with investors, mentors, and the resources to close deals.',
   primaryCta: { label: 'Start Your Fundraising Journey', to: '/signup/founder' },
   secondaryCtas: [
     { label: 'Book a Free Consultation', to: '/signup' },

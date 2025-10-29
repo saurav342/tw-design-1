@@ -1,180 +1,362 @@
-import { motion } from 'framer-motion';
+import { useEffect, useRef, useState } from 'react';
 import {
-  benefitHighlights,
-  blogIdeas,
-  brandStory,
-  corePromises,
-  differentiators,
-  faqItems,
-  finalCta,
-  founderSignals,
-  homeIntro,
-  homeTestimonials,
-  outcomeStats,
-  problemSolutions,
-  processSteps,
-  serviceCatalog,
-} from '../data/content';
-
+  motion,
+  useInView,
+  useMotionTemplate,
+  useMotionValue,
+  useSpring,
+  useTransform,
+} from 'framer-motion';
 const MotionDiv = motion.div;
+const MotionButton = motion.button;
+const MotionLi = motion.li;
 
-const HeroSection = () => (
-  <section
-    className="relative min-h-screen overflow-hidden bg-gradient-to-br from-[#FFF6D7] via-[#FFE085] to-[#FF935C] text-midnight"
-    style={{ fontFamily: 'var(--framer-blockquote-font-family, var(--framer-font-family, "Space Grotesk"))' }}
-  >
-    <MotionDiv
-      aria-hidden="true"
-      animate={{ rotate: [0, 6, 0] }}
-      transition={{ duration: 20, repeat: Infinity, ease: 'easeInOut' }}
-      className="absolute -top-44 -left-32 h-[32rem] w-[32rem] rounded-full bg-[conic-gradient(at_top_left,_var(--tw-gradient-stops))] from-aurora/60 via-amberflare/30 to-solstice/50 blur-[140px]"
-    />
-    <MotionDiv
-      aria-hidden="true"
-      animate={{ rotate: [0, -8, 0] }}
-      transition={{ duration: 24, repeat: Infinity, ease: 'easeInOut' }}
-      className="absolute -bottom-52 right-[-6rem] h-[36rem] w-[36rem] rounded-full bg-[conic-gradient(at_bottom_right,_var(--tw-gradient-stops))] from-solstice/50 via-amberflare/20 to-aurora/60 blur-[160px]"
-    />
+const parseStatValue = (value) => {
+  const match = value.match(/([\d.,]+)/);
+  if (!match) {
+    return {
+      number: null,
+      prefix: '',
+      suffix: '',
+      decimals: 0,
+    };
+  }
 
-    <div className="relative z-10 mx-auto flex max-w-screen-xl flex-col items-center gap-16 px-4 pt-28 pb-24 sm:px-6 lg:flex-row lg:px-8 lg:pt-10 lg:pb-32">
-      <div className="flex-1 max-w-xl">
-        <span className="inline-flex items-center gap-2 rounded-full bg-white/40 px-4 py-1 text-xs font-semibold uppercase tracking-[0.4em] text-midnight/70 shadow-glow-amber">
-          LaunchAndLift
-        </span>
-        <h1 className="mt-6 font-display text-4xl font-semibold leading-[1.05] tracking-tight text-midnight sm:text-5xl lg:text-6xl">
-          {homeIntro.headline}
-        </h1>
+  const numericString = match[1];
+  const decimals = numericString.includes('.') ? numericString.split('.')[1].length : 0;
+  const number = Number(numericString.replace(/,/g, ''));
 
-        <p className="mt-6 max-w-xl text-base leading-relaxed text-midnight/70 sm:text-lg">
-          {homeIntro.subheadline}
-        </p>
+  return {
+    number: Number.isNaN(number) ? null : number,
+    prefix: value.slice(0, match.index),
+    suffix: value.slice(match.index + numericString.length),
+    decimals,
+  };
+};
 
-        <div className="mt-8 flex flex-wrap items-center gap-3">
-          <button className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-amberflare via-solstice to-[#FF6F3C] px-6 py-3 text-sm font-semibold uppercase tracking-wide text-midnight shadow-glow-amber transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-[#FF8A3D]/40 sm:text-base">
-            {homeIntro.primaryCta.label}
-          </button>
-          <button className="flex items-center gap-2 rounded-full border border-midnight/10 bg-white/40 px-6 py-3 text-sm font-semibold text-midnight transition-all duration-200 hover:bg-white/60 sm:text-base">
-            <svg className="h-4 w-4 text-solstice" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M8 5v14l11-7z" />
-            </svg>
-            How it works
-          </button>
-        </div>
+const AnimatedStat = ({ value, label }) => {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: '-120px 0px' });
+  const { number, prefix, suffix, decimals } = parseStatValue(value);
+  const tracker = useMotionValue(0);
+  const spring = useSpring(tracker, { stiffness: 110, damping: 20, mass: 0.6 });
 
-        <ul className="mt-8 space-y-3">
-          {[
-            'Book unlimited 1-on-1 calls',
-            'New challenge? Pick a new mentor',
-            'No pitches. Just honest advice.',
-          ].map((text) => (
-            <li key={text} className="flex items-center gap-3">
-              <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-aurora to-solstice">
-                <svg className="h-4 w-4 text-midnight" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                </svg>
-              </div>
-              <span className="text-sm text-midnight/80 sm:text-base">{text}</span>
-            </li>
-          ))}
-        </ul>
+  function formatDisplay(val) {
+    const formatted = new Intl.NumberFormat('en-US', {
+      minimumFractionDigits: decimals,
+      maximumFractionDigits: decimals,
+    }).format(val);
+    return `${prefix}${formatted}${suffix}`;
+  }
 
-        <div className="mt-10 flex max-w-xl flex-wrap gap-x-10 gap-y-6 border-t border-midnight/10 pt-8">
-          {[
-            { number: '50,000+', label: 'Sessions booked' },
-            { number: '750+', label: 'Vetted mentors' },
-            { number: '4.8/5', label: 'Average session rating' },
-          ].map((stat) => (
-            <div key={stat.label} className="flex flex-col">
-              <div className="text-xl font-semibold text-midnight sm:text-2xl">{stat.number}</div>
-              <div className="mt-1 text-xs uppercase tracking-wide text-midnight/50">{stat.label}</div>
-            </div>
-          ))}
-        </div>
-      </div>
+  const [display, setDisplay] = useState(number === null ? value : formatDisplay(0));
 
-      <div className="flex-1 flex items-start justify-center lg:justify-end w-full">
-        <div className="relative max-w-md w-full mx-auto lg:mx-0">
-          <div className="absolute -top-10 left-1/2 -translate-x-1/2 z-10">
-            <div className="h-14 w-14 rounded-full bg-gradient-to-br from-aurora to-solstice ring-2 ring-white/60 shadow-2xl shadow-[#FFAB4C]/50" />
-            <div className="absolute left-1/2 top-full h-10 w-0.5 -translate-x-1/2 bg-gradient-to-b from-white/60 to-transparent" />
+  useEffect(() => {
+    if (number === null) return undefined;
+
+    const unsubscribe = spring.on('change', (latest) => {
+      setDisplay(formatDisplay(latest));
+    });
+
+    return () => {
+      unsubscribe?.();
+    };
+  }, [spring, number, decimals, prefix, suffix]);
+
+  useEffect(() => {
+    if (number === null) return;
+    if (isInView) {
+      tracker.set(number);
+    }
+  }, [isInView, number, tracker]);
+
+  return (
+    <motion.div
+      ref={ref}
+      className="flex flex-col"
+      initial={{ opacity: 0, y: 12 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+    >
+      <div className="text-xl font-semibold text-night sm:text-2xl">{number === null ? value : display}</div>
+      <div className="mt-1 text-xs uppercase tracking-wide text-night/50">{label}</div>
+    </motion.div>
+  );
+};
+
+const HeroSection = () => {
+  const heroRef = useRef(null);
+  const pointerX = useMotionValue(50);
+  const pointerY = useMotionValue(55);
+  const smoothX = useSpring(pointerX, { stiffness: 120, damping: 30, mass: 0.6 });
+  const smoothY = useSpring(pointerY, { stiffness: 120, damping: 30, mass: 0.6 });
+
+  const spotlight = useMotionTemplate`radial-gradient(480px circle at ${smoothX}% ${smoothY}%, rgba(91, 33, 209, 0.28), transparent 68%)`;
+  const gridOffsetX = useTransform(smoothX, (value) => (value - 50) * 0.4);
+  const gridOffsetY = useTransform(smoothY, (value) => (value - 50) * 0.3);
+  const cardTranslateX = useTransform(smoothX, (value) => (value - 50) * 0.6);
+  const cardTranslateY = useTransform(smoothY, (value) => (value - 50) * 0.5);
+  const cardRotateX = useTransform(smoothY, (value) => (value - 50) * -0.4);
+  const cardRotateY = useTransform(smoothX, (value) => (value - 50) * 0.4);
+
+  const handlePointerMove = (event) => {
+    const bounds = heroRef.current?.getBoundingClientRect();
+    if (!bounds) return;
+    const relativeX = ((event.clientX - bounds.left) / bounds.width) * 100;
+    const relativeY = ((event.clientY - bounds.top) / bounds.height) * 100;
+    const clampedX = Math.max(0, Math.min(100, relativeX));
+    const clampedY = Math.max(0, Math.min(100, relativeY));
+    pointerX.set(clampedX);
+    pointerY.set(clampedY);
+  };
+
+  const resetPointer = () => {
+    pointerX.stop();
+    pointerY.stop();
+    pointerX.set(50);
+    pointerY.set(55);
+  };
+
+  useEffect(() => {
+    resetPointer();
+  }, []);
+
+  const heroStats = [
+    { number: '50,000+', label: 'Sessions booked' },
+    { number: '750+', label: 'Vetted mentors' },
+    { number: '4.8/5', label: 'Average session rating' },
+  ];
+
+  const heroAdvantages = [
+    'Book unlimited 1-on-1 calls',
+    'New challenge? Pick a new mentor',
+    'No pitches. Just honest advice.',
+  ];
+
+  const heroCopy = {
+    welcome: 'WELCOME TO',
+    brandPrimary: 'Launch',
+    brandSecondary: 'Lift',
+    brandConnector: 'and',
+    tagline: 'Connecting Founders & Investors!',
+    subheadline:
+      'Your Complete Fundraising Partner: End-to-end fundraising support that connects founders with investors, mentors, and the resources to close deals.',
+  };
+
+  const barConfig = [
+    { height: 80, delay: '0s' },
+    { height: 140, delay: '0.2s' },
+    { height: 200, delay: '0.4s' },
+    { height: 260, delay: '0.6s' },
+  ];
+
+  const arrowConfig = [
+    { left: '20%', delay: '0s', color: '#059669' },
+    { left: '40%', delay: '1s', color: '#2563EB' },
+    { left: '60%', delay: '2s', color: '#4F46E5' },
+    { left: '80%', delay: '1.5s', color: '#059669' },
+  ];
+
+  const particleConfig = [
+    { left: '15%', delay: '0.5s' },
+    { left: '35%', delay: '1.5s' },
+    { left: '55%', delay: '2.5s' },
+    { left: '75%', delay: '3.5s' },
+  ];
+
+  return (
+    <section
+      ref={heroRef}
+      onMouseMove={handlePointerMove}
+      onMouseLeave={resetPointer}
+      className="relative min-h-screen overflow-hidden bg-gradient-to-br from-lilac via-petal/40 to-honey/30 text-night"
+      style={{ fontFamily: 'var(--framer-blockquote-font-family, var(--framer-font-family, "Space Grotesk"))' }}
+    >
+      <MotionDiv
+        aria-hidden="true"
+        animate={{ rotate: [0, 6, 0] }}
+        transition={{ duration: 20, repeat: Infinity, ease: 'easeInOut' }}
+        className="absolute -top-44 -left-32 h-[32rem] w-[32rem] rounded-full bg-[conic-gradient(at_top_left,_var(--tw-gradient-stops))] from-royal/40 via-blossom/25 to-sunbeam/35 blur-[140px]"
+      />
+      <MotionDiv
+        aria-hidden="true"
+        animate={{ rotate: [0, -8, 0] }}
+        transition={{ duration: 24, repeat: Infinity, ease: 'easeInOut' }}
+        className="absolute -bottom-52 right-[-6rem] h-[36rem] w-[36rem] rounded-full bg-[conic-gradient(at_bottom_right,_var(--tw-gradient-stops))] from-sunbeam/35 via-blossom/25 to-sprout/35 blur-[160px]"
+      />
+      <MotionDiv
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 opacity-90 mix-blend-screen"
+        style={{ backgroundImage: spotlight }}
+      />
+      <MotionDiv
+        aria-hidden="true"
+        style={{
+          x: gridOffsetX,
+          y: gridOffsetY,
+          backgroundImage:
+            'radial-gradient(circle at center, rgba(255,255,255,0.35) 0, transparent 58%), linear-gradient(115deg, rgba(255,79,154,0.08) 0%, rgba(46,220,146,0.08) 100%)',
+        }}
+        className="pointer-events-none absolute inset-0 opacity-40 blur-[60px]"
+      />
+
+      <div className="relative z-10 mx-auto flex max-w-screen-xl flex-col items-center gap-16 px-4 pt-28 pb-24 sm:px-6 lg:flex-row lg:px-8 lg:pt-10 lg:pb-32">
+        <div className="flex-1 max-w-xl">
+          <motion.span
+            className="inline-flex items-center gap-2 rounded-full bg-white/65 px-4 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.35em] text-night/60 shadow-glow-sunbeam"
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+          >
+            {heroCopy.welcome}
+          </motion.span>
+          <motion.h1
+            className="mt-6 font-display text-[2.75rem] font-semibold leading-[1.08] tracking-tight text-night sm:text-5xl lg:text-[3.75rem]"
+            initial={{ opacity: 0, y: 28 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
+          >
+            <span className="text-royal">{heroCopy.brandPrimary}</span>
+            <span className="mx-2 text-night/60">{heroCopy.brandConnector}</span>
+            <span className="text-royal">{heroCopy.brandSecondary}</span>
+          </motion.h1>
+
+          <motion.p
+            className="mt-4 text-lg font-medium text-night/80 sm:text-xl"
+            initial={{ opacity: 0, y: 28 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
+          >
+            {heroCopy.tagline}
+          </motion.p>
+
+          <motion.p
+            className="mt-4 max-w-xl text-sm leading-relaxed text-night/70 sm:text-base"
+            initial={{ opacity: 0, y: 28 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.25 }}
+          >
+            {heroCopy.subheadline}
+          </motion.p>
+
+          <div className="mt-8 flex flex-wrap items-center gap-3">
+            <MotionButton
+              type="button"
+              whileHover={{ scale: 1.05, y: -6 }}
+              whileTap={{ scale: 0.97 }}
+              className="inline-flex min-w-[170px] items-center justify-center rounded-2xl bg-royal px-7 py-3 text-sm font-semibold uppercase tracking-[0.25em] text-white shadow-lg shadow-royal/35 transition-transform duration-200 hover:-translate-y-1 hover:bg-[#4338ca] sm:text-base"
+            >
+              FOR FOUNDERS
+            </MotionButton>
+            <MotionButton
+              type="button"
+              whileHover={{ scale: 1.03, y: -4 }}
+              whileTap={{ scale: 0.97 }}
+              className="inline-flex min-w-[170px] items-center justify-center rounded-2xl border border-night/10 bg-sprout px-7 py-3 text-sm font-semibold uppercase tracking-[0.25em] text-white shadow-lg shadow-sprout/30 transition-transform duration-200 hover:-translate-y-1 hover:bg-mint sm:text-base"
+            >
+              FOR INVESTORS
+            </MotionButton>
           </div>
 
-          <MotionDiv
-            animate={{ y: [0, -8, 0] }}
-            transition={{
-              duration: 4,
-              repeat: Infinity,
-              ease: 'easeInOut',
-            }}
-            className="relative"
-          >
-            <div className="rounded-2xl border border-white/60 bg-white/70 p-5 backdrop-blur-xl shadow-lg shadow-[#FFB347]/30">
-              <div className="flex items-center justify-between mb-4">
-                <span className="text-sm font-semibold uppercase tracking-wide text-midnight/60">Find a mentor</span>
-                <button className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/70 text-midnight shadow-sm transition-colors hover:bg-white">
-                  <svg className="h-4 w-4 text-solstice" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+          {/* <ul className="mt-8 space-y-3">
+            {heroAdvantages.map((text, index) => (
+              <MotionLi
+                key={text}
+                className="flex items-center gap-3"
+                initial={{ opacity: 0, x: -12 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5, delay: 0.15 * index }}
+                whileHover={{ x: 4 }}
+              >
+                <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-sprout to-mint shadow-[0_12px_30px_rgba(46,220,146,0.28)]">
+                  <svg className="h-4 w-4 text-night" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                   </svg>
-                </button>
-              </div>
+                </div>
+                <span className="text-sm text-night/80 sm:text-base">{text}</span>
+              </MotionLi>
+            ))}
+          </ul> */}
 
-              <div className="inline-flex items-center gap-2 rounded-full bg-midnight/90 px-4 py-2 text-sm font-medium text-white">
-                <span className="text-amberflare">#</span>
-                Fundraising partner
-              </div>
-            </div>
+          {/* <div className="mt-10 flex max-w-xl flex-wrap gap-x-10 gap-y-6 border-t border-night/10 pt-8">
+            {heroStats.map((stat) => (
+              <AnimatedStat key={stat.label} value={stat.number} label={stat.label} />
+            ))}
+          </div> */}
+        </div>
 
-            <MotionDiv
-              whileHover={{ scale: 1.03 }}
-              transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-              className="mt-4 flex cursor-pointer items-center gap-3 rounded-xl bg-white/90 px-4 py-3 shadow-xl shadow-[#FFBC58]/40 backdrop-blur"
-            >
-              <div className="h-10 w-10 flex-shrink-0 rounded-full bg-gradient-to-br from-[#FF9E5E] to-[#FD7A47]" />
-
-              <div className="flex-1 min-w-0">
-                <div className="text-sm font-semibold leading-tight text-midnight">Agata</div>
-                <div className="text-[11px] leading-tight text-midnight/60">VP Growth at DemoCo</div>
-              </div>
-
-              <button className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-solstice text-midnight shadow-md shadow-[#FF935C]/40 transition-colors hover:bg-[#FF6F3C] hover:text-white">
-                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        <div className="flex w-full flex-1 items-center justify-center lg:justify-end">
+          <MotionDiv
+            aria-hidden="true"
+            animate={{ y: [0, -12, 0] }}
+            transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
+            style={{
+              x: cardTranslateX,
+              y: cardTranslateY,
+              rotateX: cardRotateX,
+              rotateY: cardRotateY,
+            }}
+            className="launch-hero-visual-wrapper"
+          >
+            <div className="launch-hero-visual">
+              <div className="launch-hero-growth-line">
+                <svg viewBox="0 0 400 300" preserveAspectRatio="none">
+                  <path className="launch-hero-growth-path" d="M 0,280 Q 100,200 200,100 T 400,20" />
                 </svg>
-              </button>
-            </MotionDiv>
+              </div>
 
-            <MotionDiv
-              animate={{ x: [0, 3, 0, -3, 0] }}
-              transition={{
-                duration: 6,
-                repeat: Infinity,
-                ease: 'easeInOut',
-              }}
-              className="mt-6 flex items-center gap-3 pl-4"
-            >
-              <div className="flex -space-x-2">
-                {[
-                  'from-[#FFE066] to-[#FFB100]',
-                  'from-[#FFB347] to-[#FF6F3C]',
-                  'from-[#FFC15E] to-[#F79256]',
-                  'from-[#FFF1A6] to-[#FFBD3F]',
-                ].map((gradient) => (
+              <div className="launch-hero-bar-chart">
+                {barConfig.map((bar, index) => (
                   <div
-                    key={gradient}
-                    className={`h-10 w-10 rounded-full bg-gradient-to-br ${gradient} ring-2 ring-white/70 shadow-lg shadow-[#FFAB4C]/40`}
+                    key={`bar-${index}`}
+                    className="launch-hero-bar"
+                    style={{ height: `${bar.height}px`, animationDelay: bar.delay }}
                   />
                 ))}
               </div>
 
-              <svg className="h-5 w-5 rotate-12 text-midnight/70" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z" stroke="currentColor" strokeWidth={1.5} strokeLinejoin="round" />
-              </svg>
-            </MotionDiv>
+              <div className="launch-hero-rocket-trail" />
+
+              <div className="launch-hero-rocket">
+                <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M50 10 L60 70 L50 65 L40 70 Z" fill="#4F46E5" />
+                  <ellipse cx="50" cy="25" rx="8" ry="12" fill="#6366F1" />
+                  <circle cx="50" cy="30" r="5" fill="#93C5FD" opacity="0.8" />
+                  <path d="M40 60 L30 85 L40 75 Z" fill="#EF4444" />
+                  <path d="M60 60 L70 85 L60 75 Z" fill="#EF4444" />
+                  <path d="M45 70 L50 85 L55 70 L50 78 Z" fill="#FB923C">
+                    <animate attributeName="opacity" values="1;0.6;1" dur="0.3s" repeatCount="indefinite" />
+                  </path>
+                </svg>
+              </div>
+
+              <div className="launch-hero-arrow-layer">
+                {arrowConfig.map((arrow, index) => (
+                  <div
+                    key={`arrow-${index}`}
+                    className="launch-hero-arrow"
+                    style={{ left: arrow.left, animationDelay: arrow.delay }}
+                  >
+                    <svg viewBox="0 0 30 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M15 5 L25 20 L20 20 L20 35 L10 35 L10 20 L5 20 Z" fill={arrow.color} opacity="0.6" />
+                    </svg>
+                  </div>
+                ))}
+              </div>
+
+              {particleConfig.map((particle, index) => (
+                <div
+                  key={`particle-${index}`}
+                  className="launch-hero-particle"
+                  style={{ left: particle.left, animationDelay: particle.delay }}
+                />
+              ))}
+            </div>
           </MotionDiv>
         </div>
       </div>
-    </div>
-  </section>
-);
+    </section>
+  );
+};
 
 export default HeroSection;

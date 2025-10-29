@@ -6,6 +6,7 @@ const authRoutes = require('./routes/authRoutes');
 const portfolioRoutes = require('./routes/portfolioRoutes');
 const contentRoutes = require('./routes/contentRoutes');
 const adminRoutes = require('./routes/adminRoutes');
+const intakeRoutes = require('./routes/intakeRoutes');
 
 const app = express();
 
@@ -19,6 +20,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/portfolio', portfolioRoutes);
 app.use('/api/content', contentRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/intakes', intakeRoutes);
 
 app.use((req, res) => {
   res.status(404).json({ message: 'Endpoint not found' });

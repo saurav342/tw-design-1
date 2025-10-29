@@ -19,15 +19,15 @@ const ToastViewport = forwardRef(({ className, ...props }, ref) => (
 ToastViewport.displayName = ToastPrimitives.Viewport.displayName;
 
 const toastVariants = cva(
-  'group pointer-events-auto relative flex w-full items-start space-x-3 overflow-hidden rounded-2xl border border-white/60 bg-white/85 p-4 text-midnight shadow-lg shadow-white/40 backdrop-blur transition-all',
+  'group pointer-events-auto relative flex w-full items-start space-x-3 overflow-hidden rounded-2xl border border-white/60 bg-white/85 p-4 text-night shadow-lg shadow-white/40 backdrop-blur transition-all',
   {
     variants: {
       variant: {
         default: 'border-white/60',
         success:
-          'border-emerald-300/40 bg-emerald-200/40 text-emerald-900 shadow-emerald-300/20',
+          'border-sprout/40 bg-sprout/15 text-sprout shadow-[0_16px_40px_rgba(46,220,146,0.2)]',
         destructive:
-          'border-rose-300/50 bg-rose-200/50 text-rose-900 shadow-rose-300/25',
+          'border-blossom/40 bg-blossom/15 text-blossom shadow-[0_16px_40px_rgba(255,79,154,0.2)]',
       },
     },
     defaultVariants: {
@@ -49,7 +49,7 @@ const ToastAction = forwardRef(({ className, ...props }, ref) => (
   <ToastPrimitives.Action
     ref={ref}
     className={cn(
-      'inline-flex shrink-0 items-center rounded-lg border border-midnight/15 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-midnight transition hover:bg-white focus:outline-none focus:ring-2 focus:ring-solstice focus:ring-offset-2 focus:ring-offset-white',
+      'inline-flex shrink-0 items-center rounded-lg border border-night/15 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-night transition hover:bg-white focus:outline-none focus:ring-2 focus:ring-blossom focus:ring-offset-2 focus:ring-offset-white',
       className,
     )}
     {...props}
@@ -61,7 +61,7 @@ const ToastClose = forwardRef(({ className, ...props }, ref) => (
   <ToastPrimitives.Close
     ref={ref}
     className={cn(
-      'absolute right-3 top-3 rounded-full p-1 text-midnight/50 transition hover:bg-white/70 hover:text-midnight focus:outline-none focus:ring-2 focus:ring-solstice focus:ring-offset-2 focus:ring-offset-white',
+      'absolute right-3 top-3 rounded-full p-1 text-night/50 transition hover:bg-white/70 hover:text-night focus:outline-none focus:ring-2 focus:ring-blossom focus:ring-offset-2 focus:ring-offset-white',
       className,
     )}
     toast-close=""
@@ -75,7 +75,7 @@ ToastClose.displayName = ToastPrimitives.Close.displayName;
 const ToastTitle = forwardRef(({ className, ...props }, ref) => (
   <ToastPrimitives.Title
     ref={ref}
-    className={cn('text-sm font-semibold text-midnight', className)}
+    className={cn('text-sm font-semibold text-night', className)}
     {...props}
   />
 ));
@@ -84,7 +84,7 @@ ToastTitle.displayName = ToastPrimitives.Title.displayName;
 const ToastDescription = forwardRef(({ className, ...props }, ref) => (
   <ToastPrimitives.Description
     ref={ref}
-    className={cn('text-sm text-midnight/70', className)}
+    className={cn('text-sm text-night/70', className)}
     {...props}
   />
 ));

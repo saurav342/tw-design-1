@@ -5,11 +5,11 @@ const SectionHeader = ({ eyebrow, title, description, align }) => (
     className={`mx-auto max-w-3xl ${align === 'left' ? 'text-left' : 'text-center'}`}
   >
     {eyebrow && (
-      <p className="text-xs font-semibold uppercase tracking-[0.3em] text-lagoon">
+      <p className="text-xs font-semibold uppercase tracking-[0.3em] text-sprout">
         {eyebrow}
       </p>
     )}
-    <h2 className="mt-3 text-3xl font-semibold text-brand-dark sm:text-4xl">
+    <h2 className="mt-3 text-3xl font-semibold text-night sm:text-4xl">
       {title}
     </h2>
     {description && <p className="mt-4 text-base text-slate-600">{description}</p>}

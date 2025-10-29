@@ -6,12 +6,23 @@ import { Button } from '../components/ui/button.jsx';
 import { Input } from '../components/ui/input.jsx';
 import { Label } from '../components/ui/label.jsx';
 import { Textarea } from '../components/ui/textarea.jsx';
-import { sendFounderDashboardMock } from '../lib/emailClientMock.js';
+import { showGenericInfo, showGenericSuccess } from '../lib/emailClientMock.js';
 import { generateAISummary } from '../lib/fakeAI.js';
 import { useAppStore } from '../store/useAppStore.js';
 import { useAuth } from '../context/useAuth.js';
 
-const STEPS = ['Founder', 'Company', 'Metrics', 'AI Preview'];
+const STEPS = [
+  {
+    id: 'profile',
+    title: 'Founder & company',
+    summary: 'Core context to calibrate our mentor pods.',
+  },
+  {
+    id: 'insights',
+    title: 'Metrics & preview',
+    summary: 'Performance signals and AI-generated readiness.',
+  },
+];
 
 const initialForm = {
   fullName: '',
@@ -41,6 +52,7 @@ const FounderSignup = () => {
   const addFounder = useAppStore((state) => state.addFounder);
   const [step, setStep] = useState(0);
   const [form, setForm] = useState(initialForm);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const currentStep = STEPS[step];
 
   const aiPreview = useMemo(
@@ -71,7 +83,7 @@ const FounderSignup = () => {
     }));
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
     if (step < STEPS.length - 1) {
       setStep((prev) => prev + 1);
@@ -91,69 +103,77 @@ const FounderSignup = () => {
       },
     };
 
-    const added = addFounder(formatted);
-    if (typeof window !== 'undefined') {
-      window.sessionStorage.setItem('launch.activeFounderId', added.id);
+    setIsSubmitting(true);
+    try {
+      const added = await addFounder(formatted);
+
+      if (typeof window !== 'undefined') {
+        window.sessionStorage.setItem('launch.activeFounderId', added.id);
+      }
+
+      establishSession({
+        user: {
+          id: added.id,
+          role: 'founder',
+          email: added.email,
+          fullName: added.fullName,
+        },
+      });
+
+      showGenericSuccess('Founder profile submitted successfully. We will follow up shortly.');
+      navigate('/dashboard/founder', { replace: true });
+    } catch (error) {
+      console.error('Founder submission failed', error);
+      showGenericInfo('We could not submit your profile. Please try again.');
+    } finally {
+      setIsSubmitting(false);
     }
-
-    establishSession({
-      user: {
-        id: added.id,
-        role: 'founder',
-        email: added.email,
-        fullName: added.fullName,
-      },
-    });
-
-    sendFounderDashboardMock({ recipientName: form.fullName });
-    navigate('/dashboard/founder', { replace: true });
   };
 
   const previousStep = () => {
     setStep((prev) => Math.max(0, prev - 1));
   };
 
+  const progress = ((step + 1) / STEPS.length) * 100;
+
   return (
-    <div className="flex min-h-[80vh] items-center justify-center bg-gradient-to-br from-[#FFF6D7] via-[#FFE6A8] to-[#FF985F] px-4 py-16 text-midnight">
-      <div className="w-full max-w-4xl overflow-hidden rounded-[2.5rem] border border-white/60 bg-white/80 shadow-[0_35px_120px_-25px_rgba(255,152,95,0.6)] backdrop-blur-xl">
-        <div className="grid gap-0 md:grid-cols-[1.1fr_0.9fr]">
-          <div className="border-b border-white/60 bg-white/60 p-8 md:border-b-0 md:border-r">
-            <div className="space-y-2">
-              <p className="text-xs font-semibold uppercase tracking-[0.35em] text-midnight/60">Founder intake</p>
-              <h1 className="font-display text-3xl font-semibold text-midnight md:text-4xl">Launch &amp; Lift signup</h1>
-              <p className="text-sm text-midnight/70">
-                Tell us about your company. We will prep your AI-assisted investor readiness workspace within minutes.
+    <div className="flex min-h-[90vh] items-center justify-center bg-gradient-to-br from-lilac via-honey to-blossom px-4 py-20 text-night">
+      <div className="relative w-full max-w-5xl overflow-hidden rounded-[2.75rem] border border-white/70 bg-white/85 shadow-[0_45px_140px_-30px_rgba(91,33,209,0.45)] backdrop-blur-2xl">
+        <div className="pointer-events-none absolute -left-12 top-16 h-64 w-64 rounded-full bg-white/70 blur-[130px]" />
+        <div className="pointer-events-none absolute -right-10 bottom-10 h-72 w-72 rounded-full bg-honey/80 blur-[160px]" />
+        <div className="relative grid gap-0 md:grid-cols-[0.95fr_1.05fr]">
+          <div className="border-b border-white/70 bg-gradient-to-b from-white/90 via-white/75 to-white/65 px-8 py-10 md:border-b-0 md:border-r md:px-12">
+            <div className="space-y-3">
+              <p className="text-xs font-semibold uppercase tracking-[0.35em] text-night/60">Founder intake</p>
+              <h1 className="font-display text-3xl font-semibold text-night md:text-4xl">Launch &amp; Lift signup</h1>
+              <p className="text-sm text-night/70">
+                Outline the essentials and we&apos;ll assemble your investor readiness workspace in minutes.
               </p>
             </div>
 
-            <ol className="mt-8 space-y-3">
-              {STEPS.map((label, index) => {
+            <ol className="mt-10 grid gap-3">
+              {STEPS.map((item, index) => {
                 const isActive = index === step;
                 const isCompleted = index < step;
                 return (
                   <li
-                    key={label}
+                    key={item.id}
                     className={`flex items-center gap-3 rounded-2xl border px-4 py-3 text-sm transition ${
                       isActive
-                        ? 'border-white/70 bg-white/80 text-midnight shadow-lg shadow-[#FFAF58]/25'
-                        : 'border-white/40 bg-white/50 text-midnight/60'
+                        ? 'border-white/70 bg-white/80 text-night shadow-lg shadow-[0_25px_70px_rgba(247,201,72,0.25)]'
+                        : 'border-white/40 bg-white/50 text-night/60'
                     }`}
                   >
                     {isCompleted ? (
-                      <CheckCircle2 className="h-5 w-5 text-solstice" />
+                      <CheckCircle2 className="h-5 w-5 text-blossom" />
                     ) : (
-                      <span className="flex h-5 w-5 items-center justify-center rounded-full border border-midnight/15 text-xs text-midnight/50">
+                      <span className="flex h-5 w-5 items-center justify-center rounded-full border border-night/15 text-xs text-night/50">
                         {index + 1}
                       </span>
                     )}
                     <div>
-                      <p className="font-semibold text-midnight">{label}</p>
-                      <p className="text-xs text-midnight/50">
-                        {index === 0 && 'Founder essentials'}
-                        {index === 1 && 'Company snapshot'}
-                        {index === 2 && 'Key fundraising metrics'}
-                        {index === 3 && 'Review AI generated insights'}
-                      </p>
+                      <p className="font-semibold text-night">{item.title}</p>
+                      <p className="text-xs text-night/50">{item.summary}</p>
                     </div>
                   </li>
                 );
@@ -161,23 +181,29 @@ const FounderSignup = () => {
             </ol>
           </div>
 
-          <form className="bg-white/70 p-8" onSubmit={handleSubmit}>
-            <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-[0.25em] text-midnight/50">
+          <form className="bg-white/70 p-10" onSubmit={handleSubmit}>
+            <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-[0.25em] text-night/50">
               <span>Step {step + 1} of {STEPS.length}</span>
-              <span>{currentStep}</span>
+              <span>{currentStep.title}</span>
+            </div>
+            <div className="mt-4 h-1.5 w-full rounded-full bg-night/10">
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-sunbeam via-blossom to-royal transition-all duration-300"
+                style={{ width: `${progress}%` }}
+              />
             </div>
 
             <div className="mt-6 min-h-[420px]">
               <AnimatePresence mode="wait">
                 <Motion.div
-                  key={currentStep}
+                  key={currentStep.id}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
                   transition={{ duration: 0.2 }}
                   className="space-y-6"
                 >
-                  {currentStep === 'Founder' && (
+                  {currentStep.id === 'profile' && (
                     <div className="grid gap-6 md:grid-cols-2">
                       <Field label="Full Name">
                         <Input
@@ -211,11 +237,6 @@ const FounderSignup = () => {
                           placeholder="AI observability stack for enterprise ML teams"
                         />
                       </Field>
-                    </div>
-                  )}
-
-                  {currentStep === 'Company' && (
-                    <div className="grid gap-6 md:grid-cols-2">
                       <Field label="Primary Sector">
                         <Input
                           value={form.sector}
@@ -296,7 +317,7 @@ const FounderSignup = () => {
                     </div>
                   )}
 
-                  {currentStep === 'Metrics' && (
+                  {currentStep.id === 'insights' && (
                     <div className="grid gap-6 md:grid-cols-2">
                       <Field label="MoM Growth">
                         <Input
@@ -333,35 +354,32 @@ const FounderSignup = () => {
                           placeholder="9 months"
                         />
                       </Field>
-                    </div>
-                  )}
-
-                  {currentStep === 'AI Preview' && (
-                    <div className="space-y-6">
-                      <div className="rounded-2xl border border-white/60 bg-white/80 p-6 shadow-inner shadow-white/40">
-                        <p className="text-xs font-semibold uppercase tracking-[0.25em] text-solstice">
-                          AI generated summary
-                        </p>
-                        <p className="mt-3 text-sm text-midnight/75">{aiPreview.overview}</p>
-                      </div>
-                      <div className="space-y-3 rounded-2xl border border-white/60 bg-white/75 p-6 shadow-inner shadow-white/40">
-                        <p className="text-xs font-semibold uppercase tracking-[0.25em] text-solstice">
-                          Highlights
-                        </p>
-                        <ul className="space-y-2 text-sm text-midnight/75">
-                          {aiPreview.highlights.map((highlight) => (
-                            <li key={highlight} className="flex items-start gap-2">
-                              <span className="mt-1 h-2 w-2 rounded-full bg-solstice" />
-                              <span>{highlight}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                      <div className="rounded-2xl border border-white/60 bg-white/75 p-6 text-sm text-midnight/75 shadow-inner shadow-white/40">
-                        <p className="text-xs font-semibold uppercase tracking-[0.25em] text-solstice">
-                          Recommended focus
-                        </p>
-                        <p className="mt-2">{aiPreview.recommendedFocus}</p>
+                      <div className="md:col-span-2 grid gap-6">
+                        <div className="rounded-2xl border border-white/60 bg-white/80 p-6 shadow-inner shadow-white/40">
+                          <p className="text-xs font-semibold uppercase tracking-[0.25em] text-blossom">
+                            AI generated summary
+                          </p>
+                          <p className="mt-3 text-sm text-night/75">{aiPreview.overview}</p>
+                        </div>
+                        <div className="space-y-3 rounded-2xl border border-white/60 bg-white/75 p-6 shadow-inner shadow-white/40">
+                          <p className="text-xs font-semibold uppercase tracking-[0.25em] text-blossom">
+                            Highlights
+                          </p>
+                          <ul className="space-y-2 text-sm text-night/75">
+                            {aiPreview.highlights.map((highlight) => (
+                              <li key={highlight} className="flex items-start gap-2">
+                                <span className="mt-1 h-2 w-2 rounded-full bg-blossom" />
+                                <span>{highlight}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                        <div className="rounded-2xl border border-white/60 bg-white/75 p-6 text-sm text-night/75 shadow-inner shadow-white/40">
+                          <p className="text-xs font-semibold uppercase tracking-[0.25em] text-blossom">
+                            Recommended focus
+                          </p>
+                          <p className="mt-2">{aiPreview.recommendedFocus}</p>
+                        </div>
                       </div>
                     </div>
                   )}
@@ -375,16 +393,16 @@ const FounderSignup = () => {
                 variant="ghost"
                 onClick={previousStep}
                 disabled={step === 0}
-                className="gap-2 text-midnight/70 hover:text-midnight"
+                className="gap-2 text-night/70 hover:text-night"
               >
                 <ChevronLeft className="h-4 w-4" />
                 Back
               </Button>
-              <Button type="submit" className="gap-2">
+              <Button type="submit" className="gap-2" disabled={isSubmitting}>
                 {step === STEPS.length - 1 ? (
                   <>
-                    Generate dashboard
-                    <CheckCircle2 className="h-4 w-4" />
+                    {isSubmitting ? 'Submitting…' : 'Submit'}
+                    {!isSubmitting ? <CheckCircle2 className="h-4 w-4" /> : null}
                   </>
                 ) : (
                   <>
@@ -403,7 +421,7 @@ const FounderSignup = () => {
 
 const Field = ({ label, children }) => (
   <div className="space-y-2">
-    <Label className="text-xs font-semibold uppercase tracking-[0.25em] text-midnight/50">{label}</Label>
+    <Label className="text-xs font-semibold uppercase tracking-[0.25em] text-night/50">{label}</Label>
     {children}
   </div>
 );

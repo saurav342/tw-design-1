@@ -4,15 +4,15 @@ const TeamGrid = ({ members }) => (
   <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
     {members.map((member) => (
       <div key={member.name} className="rounded-3xl border border-slate-100 bg-white p-6 shadow-sm shadow-slate-200">
-        <div className="h-16 w-16 rounded-2xl bg-brand-muted" />
-        <h3 className="mt-4 text-lg font-semibold text-brand-dark">{member.name}</h3>
-        <p className="text-sm font-medium text-lagoon">{member.title}</p>
+        <div className="h-16 w-16 rounded-2xl bg-night-soft" />
+        <h3 className="mt-4 text-lg font-semibold text-night">{member.name}</h3>
+        <p className="text-sm font-medium text-sprout">{member.title}</p>
         <p className="mt-3 text-sm text-slate-600">{member.bio}</p>
         <a
           href={member.linkedin}
           target="_blank"
           rel="noreferrer"
-          className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-burnt hover:text-blaze"
+          className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-sunbeam hover:text-blossom"
         >
           LinkedIn Profile
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4">

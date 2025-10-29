@@ -3,6 +3,7 @@ import { buildReadinessScores, generateAISummary } from '../lib/fakeAI';
 import { defaultBenchmarkRows } from '../mock/benchmarksMock';
 import { foundersMock } from '../mock/foundersMock';
 import { investorsMock } from '../mock/investorsMock';
+import { intakeApi } from '../services/api.js';
 
 const randomId = () =>
   (typeof crypto !== 'undefined' && crypto.randomUUID
@@ -69,7 +70,7 @@ const generateMatches = (founder, investors) =>
 export const useAppStore = create((set, get) => ({
   founders: foundersMock,
   investors: investorsMock,
-  addFounder: (input) => {
+  addFounder: async (input) => {
     const id = `founder-${randomId()}`;
     const aiPayload = generateAISummary({
       ...input,
@@ -108,8 +109,13 @@ export const useAppStore = create((set, get) => ({
     const investors = get().investors;
     newFounder.matches = generateMatches(newFounder, investors);
 
+    await intakeApi.submitFounder(newFounder);
+
     set((state) => ({
-      founders: [newFounder, ...state.founders],
+      founders: [
+        newFounder,
+        ...state.founders.filter((founder) => founder.id !== newFounder.id),
+      ],
     }));
 
     return newFounder;
@@ -132,6 +138,36 @@ export const useAppStore = create((set, get) => ({
     }));
 
     return newInvestor;
+  },
+  syncFoundersFromBackend: async (token) => {
+    try {
+      const response = await intakeApi.listFounders(token);
+      const items = Array.isArray(response?.items) ? response.items : [];
+
+      if (!items.length) {
+        return items;
+      }
+
+      set((state) => {
+        const merged = new Map(state.founders.map((founder) => [founder.id, founder]));
+        items.forEach((founder) => {
+          const existing = merged.get(founder.id) ?? {};
+          merged.set(founder.id, { ...existing, ...founder });
+        });
+        const nextFounders = Array.from(merged.values()).sort((a, b) => {
+          const aTime = new Date(a.createdAt ?? 0).getTime();
+          const bTime = new Date(b.createdAt ?? 0).getTime();
+          return bTime - aTime;
+        });
+
+        return { founders: nextFounders };
+      });
+
+      return items;
+    } catch (error) {
+      console.error('Failed to sync founder intakes', error);
+      throw error;
+    }
   },
   updateFounderStatus: (founderId, status) => {
     set((state) => ({

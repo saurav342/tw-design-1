@@ -1,8 +1,8 @@
 const Footer = () => (
-  <footer className="bg-brand-dark text-white">
+  <footer className="bg-night text-white">
     <div className="mx-auto flex max-w-7xl flex-col gap-10 px-4 py-12 lg:flex-row lg:items-start lg:justify-between lg:px-8">
       <div className="max-w-sm space-y-4">
-        <h3 className="font-display text-2xl font-semibold text-neon">LaunchAndLift</h3>
+        <h3 className="font-display text-2xl font-semibold text-mint">LaunchAndLift</h3>
         <p className="text-sm text-slate-200">
           LaunchAndLift accelerates private market growth by pairing visionary founders with long-term capital, operational
           expertise, and a supportive ecosystem built for scale.
@@ -15,20 +15,20 @@ const Footer = () => (
 
       <div className="grid flex-1 grid-cols-2 gap-8 text-sm sm:grid-cols-3">
         <div>
-          <h4 className="font-semibold text-neon">Company</h4>
+          <h4 className="font-semibold text-mint">Company</h4>
           <ul className="mt-3 space-y-2 text-slate-300">
             <li>
-              <a href="#mission" className="hover:text-neon">
+              <a href="#mission" className="hover:text-mint">
                 Mission
               </a>
             </li>
             <li>
-              <a href="#ecosystem" className="hover:text-neon">
+              <a href="#ecosystem" className="hover:text-mint">
                 Ecosystem
               </a>
             </li>
             <li>
-              <a href="#portfolio" className="hover:text-neon">
+              <a href="#portfolio" className="hover:text-mint">
                 Portfolio
               </a>
             </li>
@@ -36,20 +36,20 @@ const Footer = () => (
         </div>
 
         <div>
-          <h4 className="font-semibold text-neon">Legal</h4>
+          <h4 className="font-semibold text-mint">Legal</h4>
           <ul className="mt-3 space-y-2 text-slate-300">
             <li>
-              <a href="#terms" className="hover:text-neon">
+              <a href="#terms" className="hover:text-mint">
                 Terms &amp; Conditions
               </a>
             </li>
             <li>
-              <a href="#privacy" className="hover:text-neon">
+              <a href="#privacy" className="hover:text-mint">
                 Privacy Policy
               </a>
             </li>
             <li>
-              <a href="#ethics" className="hover:text-neon">
+              <a href="#ethics" className="hover:text-mint">
                 Ethics &amp; Compliance
               </a>
             </li>
@@ -57,15 +57,15 @@ const Footer = () => (
         </div>
 
         <div>
-          <h4 className="font-semibold text-neon">Contact</h4>
+          <h4 className="font-semibold text-mint">Contact</h4>
           <ul className="mt-3 space-y-2 text-slate-300">
             <li>
-              <a href="mailto:hello@launchandlift.com" className="hover:text-neon">
+              <a href="mailto:hello@launchandlift.com" className="hover:text-mint">
                 hello@launchandlift.com
               </a>
             </li>
             <li>
-              <a href="tel:+14155551234" className="hover:text-neon">
+              <a href="tel:+14155551234" className="hover:text-mint">
                 (415) 555-1234
               </a>
             </li>

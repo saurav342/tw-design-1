@@ -4,17 +4,17 @@ import { cva } from 'class-variance-authority';
 import { cn } from '../../lib/utils';
 
 const buttonVariants = cva(
-  'inline-flex items-center justify-center whitespace-nowrap rounded-xl text-sm font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-solstice focus-visible:ring-offset-2 focus-visible:ring-offset-white disabled:pointer-events-none disabled:opacity-60',
+  'inline-flex items-center justify-center whitespace-nowrap rounded-xl text-sm font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blossom focus-visible:ring-offset-2 focus-visible:ring-offset-white disabled:pointer-events-none disabled:opacity-60',
   {
     variants: {
       variant: {
         default:
-          'bg-gradient-to-r from-aurora via-solstice to-[#FF6F3C] text-midnight shadow-[0_18px_45px_-20px_rgba(255,146,90,0.65)] transition-transform hover:-translate-y-[1px] hover:shadow-[0_25px_60px_-20px_rgba(255,146,90,0.55)]',
+          'bg-gradient-to-r from-royal via-blossom to-sunbeam text-white shadow-[0_22px_60px_-20px_rgba(91,33,209,0.6)] transition-transform hover:-translate-y-[1px] hover:shadow-[0_28px_70px_-18px_rgba(255,79,154,0.5)]',
         secondary:
-          'border border-midnight/15 bg-white/70 text-midnight shadow-sm shadow-white/50 hover:bg-white',
+          'border border-night/15 bg-white/70 text-night shadow-sm shadow-white/50 hover:bg-white',
         outline:
-          'border border-midnight/15 bg-transparent text-midnight hover:bg-white/60 hover:text-midnight',
-        ghost: 'text-midnight/70 hover:bg-white/60 hover:text-midnight',
+          'border border-night/15 bg-transparent text-night hover:bg-white/60 hover:text-night',
+        ghost: 'text-night/70 hover:bg-white/60 hover:text-night',
       },
       size: {
         default: 'h-11 px-5 py-2',

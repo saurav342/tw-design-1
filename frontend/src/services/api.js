@@ -97,3 +97,8 @@ export const contentApi = {
   upsertPortfolio: (data, token) => apiClient.post('/portfolio', data, token),
   deletePortfolio: (id, token) => apiClient.delete(`/portfolio/${id}`, token),
 };
+
+export const intakeApi = {
+  submitFounder: (data) => apiClient.post('/intakes/founders', data),
+  listFounders: (token) => apiClient.get('/intakes/founders', token),
+};

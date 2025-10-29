@@ -125,6 +125,7 @@ const store = {
   team: defaultTeam,
   stats: { metrics: defaultStats, lastUpdated: new Date().toISOString() },
   news: defaultNews,
+  founderIntakes: [],
   passwordResets: [],
 };
 

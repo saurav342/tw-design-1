@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { motion as Motion } from 'framer-motion';
 import { MailPlus, Users } from 'lucide-react';
 import { Button } from '../components/ui/button.jsx';
@@ -15,17 +15,31 @@ import { MatchScoreBadge } from '../components/MatchScoreBadge.jsx';
 import { sendIntroEmailMock, showGenericSuccess } from '../lib/emailClientMock.js';
 import { formatCurrency } from '../lib/formatters.js';
 import { useAppStore } from '../store/useAppStore.js';
+import { useAuth } from '../context/useAuth.js';
 
 const AdminDashboard = () => {
+  const { token } = useAuth();
   const founders = useAppStore((state) => state.founders);
   const investors = useAppStore((state) => state.investors);
   const updateFounderStatus = useAppStore((state) => state.updateFounderStatus);
+  const syncFoundersFromBackend = useAppStore((state) => state.syncFoundersFromBackend);
 
   const pendingFounders = founders.filter((founder) => founder.status === 'pending');
   const approvedFounders = founders.filter((founder) => founder.status === 'approved');
 
   const [selectedFounderId, setSelectedFounderId] = useState(() => approvedFounders[0]?.id ?? '');
   const [selectedInvestors, setSelectedInvestors] = useState([]);
+  const [hasSynced, setHasSynced] = useState(false);
+
+  useEffect(() => {
+    if (!token || hasSynced) return;
+
+    syncFoundersFromBackend(token)
+      .catch((error) => {
+        console.error('Unable to sync founder intakes', error);
+      })
+      .finally(() => setHasSynced(true));
+  }, [token, hasSynced, syncFoundersFromBackend]);
 
   const selectedFounder = useMemo(
     () => approvedFounders.find((founder) => founder.id === selectedFounderId),

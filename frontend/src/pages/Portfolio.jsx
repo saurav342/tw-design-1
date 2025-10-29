@@ -10,7 +10,7 @@ const Portfolio = () => (
       description="A cross-section of LaunchAndLift-backed companies building climate resilience, applied AI, health, and infrastructure solutions."
     />
     <PortfolioGrid items={portfolioEntries} />
-    <section className="rounded-3xl bg-brand-muted p-8 text-sm text-slate-600">
+    <section className="rounded-3xl bg-night-soft p-8 text-sm text-slate-600">
       <p>
         Portfolio companies highlighted represent a subset of LaunchAndLift’s investments and may include realized and
         unrealized holdings. Data reflects publicly shareable information as of Q1 2025. For full details, investors can log in

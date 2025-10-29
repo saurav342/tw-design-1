@@ -10,10 +10,255 @@
 }
 
 body {
-  @apply font-body text-midnight bg-sand antialiased;
+  @apply font-body text-night bg-lilac antialiased;
 }
 
 ::selection {
-  background-color: #FFB100;
-  color: #111322;
+  background-color: #FF4F9A;
+  color: #170B2E;
+}
+
+.launch-hero-visual-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+  min-height: 460px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem 1rem;
+  pointer-events: none;
+}
+
+.launch-hero-visual {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  height: 420px;
+}
+
+@media (min-width: 1024px) {
+  .launch-hero-visual {
+    height: 480px;
+  }
+}
+
+.launch-hero-visual::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 28px;
+  background: radial-gradient(circle at 30% 20%, rgba(79, 70, 229, 0.12), transparent 60%),
+    radial-gradient(circle at 70% 80%, rgba(37, 99, 235, 0.16), transparent 65%);
+  filter: blur(10px);
+  opacity: 0.9;
+}
+
+.launch-hero-growth-line {
+  position: absolute;
+  bottom: 100px;
+  left: 10%;
+  width: 80%;
+  height: 300px;
+  z-index: 0;
+}
+
+.launch-hero-growth-line svg {
+  width: 100%;
+  height: 100%;
+}
+
+.launch-hero-growth-path {
+  fill: none;
+  stroke: #059669;
+  stroke-width: 3;
+  stroke-dasharray: 1000;
+  stroke-dashoffset: 1000;
+  opacity: 0.4;
+  animation: launch-draw-line 4s ease-in-out infinite;
+}
+
+.launch-hero-bar-chart {
+  position: absolute;
+  bottom: 96px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 18px;
+  align-items: flex-end;
+  z-index: 1;
+}
+
+.launch-hero-bar {
+  width: 46px;
+  background: linear-gradient(180deg, #4F46E5 0%, #2563EB 100%);
+  border-radius: 14px 14px 0 0;
+  box-shadow: 0 10px 25px rgba(79, 70, 229, 0.28);
+  transform-origin: bottom;
+  animation: launch-bar-grow 2s ease-in-out infinite;
+}
+
+.launch-hero-rocket {
+  position: absolute;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 88px;
+  height: 88px;
+  animation: launch-rocket 4s ease-in-out infinite;
+  z-index: 3;
+}
+
+.launch-hero-rocket svg {
+  width: 100%;
+  height: 100%;
+}
+
+.launch-hero-rocket-trail {
+  position: absolute;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 24px;
+  height: 80px;
+  background: linear-gradient(180deg, rgba(251, 146, 60, 0.85) 0%, rgba(251, 146, 60, 0) 100%);
+  border-radius: 16px;
+  filter: blur(8px);
+  animation: launch-trail 4s ease-in-out infinite;
+  z-index: 2;
+}
+
+.launch-hero-arrow-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.launch-hero-arrow {
+  position: absolute;
+  bottom: 0;
+  width: 32px;
+  height: 42px;
+  opacity: 0;
+  animation: launch-arrow-float 3s ease-in-out infinite;
+}
+
+.launch-hero-arrow svg {
+  width: 100%;
+  height: 100%;
+}
+
+.launch-hero-particle {
+  position: absolute;
+  bottom: 0;
+  width: 8px;
+  height: 8px;
+  border-radius: 9999px;
+  background: #4F46E5;
+  opacity: 0;
+  animation: launch-particle-float 5s ease-in-out infinite;
+  z-index: 1;
+  box-shadow: 0 0 18px rgba(79, 70, 229, 0.45);
+}
+
+@keyframes launch-bar-grow {
+  0%, 100% {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scaleY(1.12);
+    opacity: 0.92;
+  }
+}
+
+@keyframes launch-rocket {
+  0% {
+    bottom: 80px;
+    opacity: 1;
+    transform: translateX(-50%) rotate(0deg);
+  }
+  50% {
+    bottom: 440px;
+    opacity: 1;
+    transform: translateX(-50%) rotate(-6deg);
+  }
+  70% {
+    opacity: 0.5;
+  }
+  100% {
+    bottom: 80px;
+    opacity: 0;
+    transform: translateX(-50%) rotate(0deg);
+  }
+}
+
+@keyframes launch-trail {
+  0% {
+    bottom: 40px;
+    opacity: 0;
+    height: 60px;
+  }
+  10% {
+    opacity: 1;
+  }
+  50% {
+    bottom: 400px;
+    opacity: 1;
+    height: 120px;
+  }
+  70% {
+    opacity: 0.4;
+  }
+  100% {
+    bottom: 40px;
+    opacity: 0;
+    height: 60px;
+  }
+}
+
+@keyframes launch-arrow-float {
+  0% {
+    bottom: 0;
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.7;
+  }
+  80% {
+    opacity: 0.3;
+  }
+  100% {
+    bottom: 100%;
+    opacity: 0;
+  }
+}
+
+@keyframes launch-draw-line {
+  0% {
+    stroke-dashoffset: 1000;
+  }
+  50%, 100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes launch-particle-float {
+  0% {
+    bottom: 0;
+    opacity: 0;
+    transform: scale(1);
+  }
+  20% {
+    opacity: 0.9;
+  }
+  80% {
+    opacity: 0.45;
+    transform: scale(1.4);
+  }
+  100% {
+    bottom: 100%;
+    opacity: 0;
+    transform: scale(0.6);
+  }
 }

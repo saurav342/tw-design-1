@@ -12,7 +12,7 @@ const VideoCarousel = ({ items }) => {
   const handlePrevious = () => setIndex((prev) => (prev - 1 + items.length) % items.length);
 
   return (
-    <div className="overflow-hidden rounded-3xl bg-brand-dark text-white shadow-2xl shadow-brand-dark/40">
+    <div className="overflow-hidden rounded-3xl bg-night text-white shadow-2xl shadow-[0_30px_90px_rgba(23,11,46,0.5)]">
       <div className="grid gap-0 lg:grid-cols-2">
         <div className="relative">
           <iframe
@@ -39,7 +39,7 @@ const VideoCarousel = ({ items }) => {
 
         <div className="flex flex-col justify-between gap-6 p-8">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-neon">
+            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-mint">
               Multimedia Briefings
             </p>
             <h3 className="mt-4 text-2xl font-semibold text-white">{activeItem.title}</h3>

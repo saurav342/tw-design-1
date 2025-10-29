@@ -134,10 +134,6 @@ const HeroSection = () => {
   ];
 
   const heroCopy = {
-    welcome: 'WELCOME TO',
-    brandPrimary: 'Launch',
-    brandSecondary: 'Lift',
-    brandConnector: 'and',
     tagline: 'Connecting Founders & Investors!',
     subheadline:
       'Your Complete Fundraising Partner: End-to-end fundraising support that connects founders with investors, mentors, and the resources to close deals.',
@@ -200,29 +196,37 @@ const HeroSection = () => {
         className="pointer-events-none absolute inset-0 opacity-40 blur-[60px]"
       />
 
-      <div className="relative z-10 mx-auto flex max-w-screen-xl flex-col items-center gap-16 px-4 pt-28 pb-24 sm:px-6 lg:flex-row lg:px-8 lg:pt-10 lg:pb-32">
-        <div className="flex-1 max-w-xl">
-          <motion.span
-            className="inline-flex items-center gap-2 rounded-full bg-white/65 px-4 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.35em] text-night/60 shadow-glow-sunbeam"
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-          >
-            {heroCopy.welcome}
-          </motion.span>
-          <motion.h1
-            className="mt-6 font-display text-[2.75rem] font-semibold leading-[1.08] tracking-tight text-night sm:text-5xl lg:text-[3.75rem]"
+      <div className="relative z-10 mx-auto grid max-w-screen-xl items-center gap-16 px-4 pb-24 pt-36 text-center sm:px-6 lg:grid-cols-2 lg:px-8 lg:pb-32 lg:pt-44">
+        <div className="mx-auto w-full max-w-3xl">
+          <motion.div
+            className="space-y-5"
             initial={{ opacity: 0, y: 28 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
           >
-            <span className="text-royal">{heroCopy.brandPrimary}</span>
-            <span className="mx-2 text-night/60">{heroCopy.brandConnector}</span>
-            <span className="text-royal">{heroCopy.brandSecondary}</span>
-          </motion.h1>
+            <span
+              className="block text-2xl font-semibold uppercase tracking-[0.32em] text-white sm:text-3xl"
+              style={{ fontFamily: 'var(--hero-display-font)' }}
+            >
+              Welcome to
+            </span>
+            <h1
+              className="text-white"
+              style={{
+                fontFamily: 'var(--hero-display-font)',
+                fontSize: '5.0rem',
+                fontWeight: 600,
+                lineHeight: 1.05,
+                letterSpacing: '-0.02em',
+                textTransform: 'uppercase',
+              }}
+            >
+              Launch & Lift
+            </h1>
+          </motion.div>
 
           <motion.p
-            className="mt-4 text-lg font-medium text-night/80 sm:text-xl"
+            className="mt-8 text-3xl font-medium text-night/80 sm:text-4xl"
             initial={{ opacity: 0, y: 28 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
@@ -231,7 +235,7 @@ const HeroSection = () => {
           </motion.p>
 
           <motion.p
-            className="mt-4 max-w-xl text-sm leading-relaxed text-night/70 sm:text-base"
+            className="mt-6 mx-auto max-w-2xl text-xl leading-relaxed text-night/70 sm:text-2xl"
             initial={{ opacity: 0, y: 28 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.25 }}
@@ -239,7 +243,7 @@ const HeroSection = () => {
             {heroCopy.subheadline}
           </motion.p>
 
-          <div className="mt-8 flex flex-wrap items-center gap-3">
+          <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
             <MotionButton
               type="button"
               whileHover={{ scale: 1.05, y: -6 }}
@@ -285,7 +289,7 @@ const HeroSection = () => {
           </div> */}
         </div>
 
-        <div className="flex w-full flex-1 items-center justify-center lg:justify-end">
+        <div className="flex w-full items-center justify-center">
           <MotionDiv
             aria-hidden="true"
             animate={{ y: [0, -12, 0] }}

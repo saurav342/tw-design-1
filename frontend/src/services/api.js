@@ -2,11 +2,23 @@ const trimTrailingSlash = (value) => (value.endsWith('/') ? value.slice(0, -1) :
 
 const resolveApiBaseUrl = () => {
   const explicit = import.meta.env.VITE_API_URL;
+  const hasWindow = typeof window !== 'undefined';
+
   if (explicit) {
-    return trimTrailingSlash(explicit);
+    const normalized = trimTrailingSlash(explicit);
+
+    if (hasWindow && window.location.protocol === 'https:' && normalized.startsWith('http://')) {
+      console.warn(
+        '[LaunchAndLift] Detected insecure API base on HTTPS page. Falling back to same-origin /api. ' +
+          'Set up a reverse proxy or provide an HTTPS API URL to avoid mixed-content blocks.',
+      );
+      return `${window.location.origin}/api`;
+    }
+
+    return normalized;
   }
 
-  if (typeof window !== 'undefined') {
+  if (hasWindow) {
     return `${window.location.origin}/api`;
   }
 

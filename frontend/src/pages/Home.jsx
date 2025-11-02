@@ -5,6 +5,7 @@ import FAQAccordion from '../components/FAQAccordion';
 import Testimonials from '../components/Testimonials';
 import {
   benefitHighlights,
+  dashboardOfferings,
   blogIdeas,
   brandStory,
   corePromises,
@@ -62,6 +63,67 @@ const Home = () => {
       />
       <div className="space-y-24 pb-24">
         <HeroSection />
+        <MotionSection
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.3 }}
+          variants={stagger}
+          className="relative overflow-hidden py-24"
+        >
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-royal/15 via-white/30 to-sprout/15" />
+          <div className="pointer-events-none absolute -right-32 -top-20 h-72 w-72 rounded-full bg-royal/20 blur-[140px]" />
+          <div className="pointer-events-none absolute -bottom-36 left-20 h-72 w-72 rounded-full bg-sunbeam/30 blur-[160px]" />
+          <div className="relative mx-auto max-w-7xl space-y-12 px-4 sm:px-6 lg:px-8">
+            <div className="space-y-5 text-center">
+              <span className="inline-flex items-center justify-center rounded-full bg-white/70 px-5 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.45em] text-night/60 shadow-sm shadow-white/80">
+                {dashboardOfferings.intro.eyebrow}
+              </span>
+              <h2 className="font-display text-3xl font-semibold text-night md:text-5xl">
+                {dashboardOfferings.intro.title}
+              </h2>
+              <p className="mx-auto max-w-3xl text-base text-night/70">
+                {dashboardOfferings.intro.description}
+              </p>
+            </div>
+            <div className="grid gap-6 lg:grid-cols-3">
+              {dashboardOfferings.tracks.map((track) => (
+                <MotionDiv
+                  key={track.name}
+                  variants={fadeUp}
+                  whileHover={{ y: -14, scale: 1.015 }}
+                  transition={{ type: 'spring', stiffness: 230, damping: 24 }}
+                  className="group relative flex h-full flex-col rounded-3xl border border-white/60 bg-white/85 p-7 shadow-xl shadow-[0_22px_60px_rgba(79,70,229,0.16)] backdrop-blur-sm transition-all duration-300"
+                >
+                  <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-white/0 via-white/0 to-royal/0 transition-opacity duration-300 group-hover:via-white/60 group-hover:to-royal/10" />
+                  <div className="relative flex items-center justify-between text-xs font-semibold uppercase tracking-[0.36em] text-night/50">
+                    <span>{track.name}</span>
+                    <span className="rounded-full bg-royal/10 px-3 py-1 text-[0.6rem] text-royal">{track.badge}</span>
+                  </div>
+                  <p className="relative mt-5 text-night/80">
+                    {track.summary}
+                  </p>
+                  <ul className="relative mt-6 space-y-3 text-sm text-night/70">
+                    {track.benefits.map((benefit) => (
+                      <li key={benefit} className="flex items-start gap-3">
+                        <span className="mt-1 h-2.5 w-2.5 flex-shrink-0 rounded-full bg-royal/70 shadow-[0_8px_20px_rgba(79,70,229,0.35)]" />
+                        <span>{benefit}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <button
+                    type="button"
+                    className="relative mt-8 inline-flex items-center justify-center rounded-full bg-royal px-5 py-2 text-xs font-semibold uppercase tracking-[0.35em] text-white shadow-lg shadow-royal/40 transition-transform duration-200 hover:-translate-y-1 hover:bg-[#4338ca]"
+                  >
+                    {track.cta}
+                  </button>
+                </MotionDiv>
+              ))}
+            </div>
+            <div className="mx-auto max-w-4xl rounded-3xl border border-white/60 bg-white/75 p-6 text-center text-sm text-night/60 shadow-lg shadow-[0_18px_40px_rgba(79,70,229,0.12)] backdrop-blur-sm">
+              {dashboardOfferings.adminNote}
+            </div>
+          </div>
+        </MotionSection>
 
     {/* <MotionSection
       initial="hidden"

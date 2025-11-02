@@ -53,7 +53,7 @@ npm install
 npm run dev
 ```
 
-The dev server defaults to `http://localhost:5173`. Configure the API base URL if needed via `VITE_API_URL` in a `.env` file (defaults to `http://localhost:5000/api`).
+The dev server defaults to `http://localhost:5173`. By default, the SPA targets `/api` on the same origin. Override this by adding `VITE_API_URL` (for example `http://ec2-3-25-171-207.ap-southeast-2.compute.amazonaws.com:5000/api`) in a `.env` file. During local development, Vite proxies `/api` requests to `VITE_PROXY_TARGET` (falling back to `http://localhost:5000`), so set that value if your backend runs on a different host.
 
 ### Backend Setup
 

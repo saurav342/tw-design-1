@@ -1,4 +1,19 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:5000/api';
+const trimTrailingSlash = (value) => (value.endsWith('/') ? value.slice(0, -1) : value);
+
+const resolveApiBaseUrl = () => {
+  const explicit = import.meta.env.VITE_API_URL;
+  if (explicit) {
+    return trimTrailingSlash(explicit);
+  }
+
+  if (typeof window !== 'undefined') {
+    return `${window.location.origin}/api`;
+  }
+
+  return 'http://localhost:5000/api';
+};
+
+const API_BASE_URL = resolveApiBaseUrl();
 
 const buildHeaders = (token, extraHeaders = {}) => {
   const headers = {

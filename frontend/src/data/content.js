@@ -206,6 +206,56 @@ export const testimonials = [
   },
 ];
 
+export const dashboardOfferings = {
+  intro: {
+    eyebrow: 'Founder control room',
+    title: 'Activated services the moment you land inside the dashboard',
+    description:
+      'From a single login founders can publish their raise, request guided execution, and plug into specialist support. Each track connects directly into our operator and investor network so momentum never stalls.',
+  },
+  tracks: [
+    {
+      name: 'Marketplace listing',
+      badge: 'Live beta',
+      summary:
+        'Launch a single raise request and circulate it across the LaunchAndLift investor marketplace—similar to how Grip syndicates new allocations.',
+      benefits: [
+        'Add your target amount, valuation, and use-of-funds in minutes',
+        'Verification workflow keeps investors informed and warm',
+        'Real-time interest dashboard tracks soft commitments and questions',
+      ],
+      cta: 'Start your listing',
+    },
+    {
+      name: 'Success-fee raise program',
+      badge: 'Hands-on',
+      summary:
+        'Dedicated operators partner with you across narrative, numbers, and investor conversations. We only win when you wire the raise.',
+      benefits: [
+        'Kick-off with an engagement fee (₹2–3L) to assemble the deal squad',
+        'Weekly deal rooms, investor targeting, and founder coaching',
+        'Success fee applied only on capital actually closed',
+      ],
+      cta: 'Book a scoping call',
+    },
+    {
+      name: 'On-demand specialist services',
+      badge: 'Request & deploy',
+      summary:
+        'Layer in the precise support you need—from storytelling to diligence-ready financial models—directly from the founder dashboard.',
+      benefits: [
+        'Pitch deck creation and narrative refinement',
+        'Mentorship sessions with sector and fundraising leads',
+        'Financial model reviews & diligence-ready data rooms',
+        'Legal, compliance, and term-sheet guidance',
+        'Growth marketing and traction amplification sprints',
+      ],
+      cta: 'Request a service',
+    },
+  ],
+  adminNote: 'Each request routes to the LaunchAndLift command center so our team can respond, staff the right operators, and keep every raise moving.',
+};
+
 export const newsItems = [
   {
     outlet: 'Growth Weekly',

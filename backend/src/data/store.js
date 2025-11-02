@@ -16,6 +16,25 @@ const createAdminUser = () => ({
   updatedAt: new Date().toISOString(),
 });
 
+const createTestFounder = () => ({
+  id: randomUUID(),
+  fullName: 'Demo Founder',
+  email: 'fe@fe.com',
+  role: 'founder',
+  organization: 'Launch & Lift Demo',
+  notes: null,
+  investorDetails: null,
+  founderDetails: {
+    startupName: 'Test Founder Venture',
+    raiseStage: 'Seed',
+    geography: 'India',
+  },
+  adminDetails: null,
+  passwordHash: bcrypt.hashSync('123', 10),
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
+});
+
 const defaultStats = [
   { label: 'Family offices', value: '190+', caption: 'Deep relationships across 18 countries' },
   { label: 'Average IRR', value: '27%', caption: 'Gross annualized net of fees since 2018' },
@@ -118,7 +137,7 @@ const defaultNews = [
 ];
 
 const store = {
-  users: [createAdminUser()],
+  users: [createAdminUser(), createTestFounder()],
   portfolio: defaultPortfolio,
   testimonials: defaultTestimonials,
   faqs: defaultFaqs,

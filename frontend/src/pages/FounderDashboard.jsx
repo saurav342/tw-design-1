@@ -67,11 +67,25 @@ const FounderDashboard = () => {
     }
   }, [activeFounder]);
 
+  const BackgroundDecor = () => (
+    <div className="pointer-events-none absolute inset-0 -z-10">
+      <div className="absolute inset-0 bg-gradient-to-br from-night via-royal/70 to-blossom/35 opacity-95" />
+      <div className="absolute -top-40 -left-32 h-[420px] w-[420px] rounded-full bg-blossom/45 blur-[180px]" />
+      <div className="absolute -bottom-48 -right-24 h-[520px] w-[520px] rounded-full bg-sunbeam/25 blur-[220px]" />
+      <div className="absolute inset-x-0 top-0 h-48 bg-gradient-to-b from-white/20 via-transparent to-transparent opacity-80" />
+    </div>
+  );
+
   if (!activeFounder) {
     return (
-      <Card className="p-10 text-center text-slate-200">
-        <p>No founder data yet. Submit the intake flow to unlock insights.</p>
-      </Card>
+      <section className="relative overflow-hidden pb-20">
+        <BackgroundDecor />
+        <div className="relative mx-auto max-w-5xl px-4 pt-12 text-slate-100 sm:px-6 lg:px-8">
+          <Card className="border-white/15 bg-black/45 p-12 text-center text-slate-100 shadow-[0_30px_120px_-40px_rgba(91,33,209,0.9)]">
+            <p>No founder data yet. Submit the intake flow to unlock insights.</p>
+          </Card>
+        </div>
+      </section>
     );
   }
 
@@ -91,138 +105,143 @@ const FounderDashboard = () => {
   };
 
   return (
-    <div className="space-y-10">
-      <Motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="flex flex-col gap-6 rounded-3xl border border-white/10 bg-white/5 p-8 shadow-xl backdrop-blur md:flex-row md:items-center md:justify-between"
-      >
-        <div>
-          <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-black/20 px-4 py-1 text-xs uppercase tracking-[0.2em] text-slate-300">
-            <Rocket className="h-4 w-4 text-indigo-300" />
-            Ready to Lift
-          </div>
-          <h1 className="mt-4 text-4xl font-semibold text-white">
-            {activeFounder.startupName}
-          </h1>
-          <p className="mt-2 max-w-xl text-sm text-slate-200">
-            {activeFounder.aiSummary}
-          </p>
-          <p className="mt-4 text-xs uppercase tracking-[0.18em] text-indigo-200">
-            Founder: {user?.fullName ?? activeFounder.fullName}
-          </p>
-        </div>
-        <div className="h-full rounded-2xl border border-indigo-400/30 bg-indigo-500/10 px-6 py-4 text-right text-sm text-indigo-100">
-          <p>Raise Target</p>
-          <p className="mt-1 text-2xl font-semibold text-white">
-            {formatCurrency(activeFounder.raiseAmountUSD)}
-          </p>
-          <p className="mt-2 text-xs uppercase tracking-[0.18em] text-indigo-200">
-            {activeFounder.raiseStage}
-          </p>
-        </div>
-      </Motion.div>
-
-      <Motion.div
-        initial={{ opacity: 0, y: 24 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.05 }}
-        className="grid gap-6 md:grid-cols-4"
-      >
-        {activeFounder.readiness.map((stat, index) => (
-          <CardStat
-            key={stat.id}
-            label={stat.label}
-            value={stat.score}
-            accent={index % 3 === 0 ? 'indigo' : index % 3 === 1 ? 'emerald' : 'fuchsia'}
-          />
-        ))}
-      </Motion.div>
-
-      <AdditionalFundingSection />
-
-      <Motion.div
-        initial={{ opacity: 0, y: 24 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
-        className="space-y-6"
-      >
-        <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-semibold text-white">Benchmark Notes</h2>
-          <div className="flex items-center gap-2 text-sm text-slate-300">
-            <NotebookPen className="h-4 w-4" />
-            Investor-facing view with your context
-          </div>
-        </div>
-        <BenchmarkTable
-          rows={activeFounder.benchmarks}
-          founderNotes={notes}
-          onChangeNote={(rowId, note) => setNotes((prev) => ({ ...prev, [rowId]: note }))}
-          onSave={handleSave}
-          isDisabled={isPending}
-        />
-        {isPending ? (
-          <div className="flex items-center gap-3 rounded-2xl border border-amber-300/30 bg-amber-500/10 px-5 py-4 text-sm text-amber-200">
-            <Lock className="h-4 w-4" /> Benchmark notes can be edited but matches remain locked until approval.
-          </div>
-        ) : null}
-      </Motion.div>
-
-      <Motion.div
-        initial={{ opacity: 0, y: 24 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.15 }}
-      >
-        <Card className="relative overflow-hidden">
-          <CardHeader className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-            <div>
-              <CardTitle className="text-2xl text-white">Investor Match Preview</CardTitle>
-              <p className="text-sm text-slate-300">
-                Top aligned funds for your raise. Admin will send intros once approved.
-              </p>
+    <section className="relative overflow-hidden pb-20">
+      <BackgroundDecor />
+      <div className="relative mx-auto max-w-7xl space-y-12 px-4 pt-12 text-slate-100 sm:px-6 lg:px-8">
+        <Motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="relative flex flex-col gap-6 overflow-hidden rounded-3xl border border-white/15 bg-[linear-gradient(140deg,rgba(32,17,66,0.88),rgba(91,33,209,0.55))] p-8 text-slate-100 shadow-[0_32px_140px_-48px_rgba(91,33,209,0.95)] backdrop-blur md:flex-row md:items-center md:justify-between"
+        >
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,79,154,0.38),transparent_55%)] opacity-80" />
+          <div className="relative z-10">
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-black/30 px-4 py-1 text-xs uppercase tracking-[0.2em] text-slate-100/80">
+              <Rocket className="h-4 w-4 text-indigo-300" />
+              Ready to Lift
             </div>
-            {isPending ? (
-              <div className="flex items-center gap-2 rounded-full border border-white/20 bg-black/40 px-4 py-2 text-xs uppercase tracking-[0.2em] text-slate-300">
-                <Lock className="h-4 w-4" /> Matches locked pending review
-              </div>
-            ) : null}
-          </CardHeader>
-          <CardContent className="grid gap-4 md:grid-cols-3">
-            {matchPreview.map(({ match, investor }) => (
-              <div key={match.investorId} className="rounded-2xl border border-white/10 bg-black/30 p-5">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-semibold text-white">
-                    {investor.fundName}
-                  </h3>
-                  <MatchScoreBadge score={match.matchScore} />
-                </div>
-                <p className="mt-2 text-sm text-slate-300">{investor.thesis}</p>
-                <div className="mt-4 flex flex-wrap gap-1 text-xs text-slate-400">
-                  {investor.stageFocus.map((stage) => (
-                    <span key={stage} className="rounded-full border border-white/10 px-2 py-0.5">
-                      {stage}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            ))}
-            {matchPreview.length === 0 ? (
-              <p className="text-sm text-slate-300">
-                Matches will appear here once investors share aligned theses.
-              </p>
-            ) : null}
-          </CardContent>
+            <h1 className="mt-4 text-4xl font-semibold text-white drop-shadow-[0_6px_25px_rgba(0,0,0,0.35)]">
+              {activeFounder.startupName}
+            </h1>
+            <p className="mt-2 max-w-xl text-sm text-slate-200">
+              {activeFounder.aiSummary}
+            </p>
+            <p className="mt-4 text-xs uppercase tracking-[0.18em] text-indigo-100">
+              Founder: {user?.fullName ?? activeFounder.fullName}
+            </p>
+          </div>
+          <div className="relative z-10 h-full rounded-2xl border border-indigo-300/40 bg-indigo-600/20 px-6 py-4 text-right text-sm text-indigo-100 shadow-inner shadow-indigo-900/25">
+            <p className="uppercase tracking-[0.18em] text-indigo-200/90">Raise Target</p>
+            <p className="mt-2 text-3xl font-semibold text-white">
+              {formatCurrency(activeFounder.raiseAmountUSD)}
+            </p>
+            <p className="mt-2 text-xs uppercase tracking-[0.18em] text-indigo-100">
+              {activeFounder.raiseStage}
+            </p>
+          </div>
+        </Motion.div>
+
+        <Motion.div
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.05 }}
+          className="grid gap-6 md:grid-cols-4"
+        >
+          {activeFounder.readiness.map((stat, index) => (
+            <CardStat
+              key={stat.id}
+              label={stat.label}
+              value={stat.score}
+              accent={index % 3 === 0 ? 'indigo' : index % 3 === 1 ? 'emerald' : 'fuchsia'}
+            />
+          ))}
+        </Motion.div>
+
+        <AdditionalFundingSection />
+
+        <Motion.div
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="space-y-6"
+        >
+          <div className="flex items-center justify-between">
+            <h2 className="text-2xl font-semibold text-white">Benchmark Notes</h2>
+            <div className="flex items-center gap-2 text-sm text-slate-200">
+              <NotebookPen className="h-4 w-4" />
+              Investor-facing view with your context
+            </div>
+          </div>
+          <BenchmarkTable
+            rows={activeFounder.benchmarks}
+            founderNotes={notes}
+            onChangeNote={(rowId, note) => setNotes((prev) => ({ ...prev, [rowId]: note }))}
+            onSave={handleSave}
+            isDisabled={isPending}
+          />
           {isPending ? (
-            <div className="absolute inset-0 flex items-center justify-center rounded-3xl bg-black/60 text-sm text-slate-200 backdrop-blur">
-              <div className="flex items-center gap-3">
-                <Lock className="h-5 w-5" />
-                Awaiting Launch & Lift approval to unlock investor outreach.
-              </div>
+            <div className="flex items-center gap-3 rounded-2xl border border-amber-300/40 bg-amber-400/15 px-5 py-4 text-sm text-amber-100">
+              <Lock className="h-4 w-4" /> Benchmark notes can be edited but matches remain locked until approval.
             </div>
           ) : null}
-        </Card>
-      </Motion.div>
-    </div>
+        </Motion.div>
+
+        <Motion.div
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15 }}
+        >
+          <Card className="relative overflow-hidden border-white/15 bg-black/45 shadow-[0_40px_160px_-70px_rgba(37,99,235,0.9)]">
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(46,220,146,0.25),transparent_60%)] opacity-70" />
+            <CardHeader className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+              <div className="relative z-10">
+                <CardTitle className="text-2xl text-white">Investor Match Preview</CardTitle>
+                <p className="text-sm text-slate-300">
+                  Top aligned funds for your raise. Admin will send intros once approved.
+                </p>
+              </div>
+              {isPending ? (
+                <div className="relative z-10 flex items-center gap-2 rounded-full border border-white/25 bg-black/40 px-4 py-2 text-xs uppercase tracking-[0.2em] text-slate-200">
+                  <Lock className="h-4 w-4" /> Matches locked pending review
+                </div>
+              ) : null}
+            </CardHeader>
+            <CardContent className="relative z-10 grid gap-4 md:grid-cols-3">
+              {matchPreview.map(({ match, investor }) => (
+                <div key={match.investorId} className="rounded-2xl border border-white/10 bg-black/30 p-5">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-semibold text-white">
+                      {investor.fundName}
+                    </h3>
+                    <MatchScoreBadge score={match.matchScore} />
+                  </div>
+                  <p className="mt-2 text-sm text-slate-300">{investor.thesis}</p>
+                  <div className="mt-4 flex flex-wrap gap-1 text-xs text-slate-400">
+                    {investor.stageFocus.map((stage) => (
+                      <span key={stage} className="rounded-full border border-white/10 px-2 py-0.5">
+                        {stage}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              ))}
+              {matchPreview.length === 0 ? (
+                <p className="text-sm text-slate-300">
+                  Matches will appear here once investors share aligned theses.
+                </p>
+              ) : null}
+            </CardContent>
+            {isPending ? (
+              <div className="absolute inset-0 flex items-center justify-center rounded-3xl bg-black/60 text-sm text-slate-200 backdrop-blur">
+                <div className="flex items-center gap-3">
+                  <Lock className="h-5 w-5" />
+                  Awaiting Launch & Lift approval to unlock investor outreach.
+                </div>
+              </div>
+            ) : null}
+          </Card>
+        </Motion.div>
+      </div>
+    </section>
   );
 };
 

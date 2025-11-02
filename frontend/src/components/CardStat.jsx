@@ -9,15 +9,19 @@ const accentMap = {
 export const CardStat = ({ label, value, accent = 'indigo' }) => {
   const clamped = Math.min(100, Math.max(0, value));
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur">
-      <div className="flex items-center justify-between">
-        <span className="text-xs uppercase tracking-[0.18em] text-slate-400">{label}</span>
-        <span className="text-sm text-slate-300">{clamped}/100</span>
+    <div className="group relative overflow-hidden rounded-2xl border border-white/15 bg-black/40 p-5 text-slate-100 shadow-[0_24px_80px_-48px_rgba(91,33,209,0.9)] backdrop-blur">
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-transparent opacity-50 transition-opacity duration-500 group-hover:opacity-80" />
+      <div className="relative flex items-center justify-between">
+        <span className="text-xs uppercase tracking-[0.18em] text-slate-300">{label}</span>
+        <span className="text-sm text-slate-200">{clamped}/100</span>
       </div>
-      <div className="mt-3 text-3xl font-semibold text-white">{clamped}</div>
-      <div className="mt-4 h-2 rounded-full bg-white/10">
+      <div className="relative z-10 mt-3 text-3xl font-semibold text-white">{clamped}</div>
+      <div className="relative z-10 mt-4 h-2 rounded-full bg-white/20">
         <div
-          className={cn('h-2 rounded-full bg-gradient-to-r transition-all', accentMap[accent])}
+          className={cn(
+            'h-2 rounded-full bg-gradient-to-r shadow-[0_0_18px_rgba(255,255,255,0.35)] transition-all',
+            accentMap[accent],
+          )}
           style={{ width: `${clamped}%` }}
         />
       </div>

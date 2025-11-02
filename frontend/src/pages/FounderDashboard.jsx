@@ -69,10 +69,10 @@ const FounderDashboard = () => {
 
   const BackgroundDecor = () => (
     <div className="pointer-events-none absolute inset-0 -z-10">
-      <div className="absolute inset-0 bg-gradient-to-br from-night via-royal/70 to-blossom/35 opacity-95" />
-      <div className="absolute -top-40 -left-32 h-[420px] w-[420px] rounded-full bg-blossom/45 blur-[180px]" />
-      <div className="absolute -bottom-48 -right-24 h-[520px] w-[520px] rounded-full bg-sunbeam/25 blur-[220px]" />
-      <div className="absolute inset-x-0 top-0 h-48 bg-gradient-to-b from-white/20 via-transparent to-transparent opacity-80" />
+      <div className="absolute inset-0 bg-gradient-to-br from-white via-white/85 to-lilac/40" />
+      <div className="absolute -top-40 -left-32 h-[420px] w-[420px] rounded-full bg-blossom/35 blur-[180px]" />
+      <div className="absolute -bottom-48 -right-24 h-[520px] w-[520px] rounded-full bg-sunbeam/35 blur-[220px]" />
+      <div className="absolute inset-x-0 top-0 h-48 bg-gradient-to-b from-white via-white/40 to-transparent" />
     </div>
   );
 
@@ -80,8 +80,8 @@ const FounderDashboard = () => {
     return (
       <section className="relative overflow-hidden pb-20">
         <BackgroundDecor />
-        <div className="relative mx-auto max-w-5xl px-4 pt-12 text-slate-100 sm:px-6 lg:px-8">
-          <Card className="border-white/15 bg-black/45 p-12 text-center text-slate-100 shadow-[0_30px_120px_-40px_rgba(91,33,209,0.9)]">
+        <div className="relative mx-auto max-w-5xl px-4 pt-12 text-night sm:px-6 lg:px-8">
+          <Card className="border-white/70 bg-white/90 p-12 text-center text-night shadow-[0_30px_90px_-40px_rgba(147,112,219,0.25)]">
             <p>No founder data yet. Submit the intake flow to unlock insights.</p>
           </Card>
         </div>
@@ -107,34 +107,34 @@ const FounderDashboard = () => {
   return (
     <section className="relative overflow-hidden pb-20">
       <BackgroundDecor />
-      <div className="relative mx-auto max-w-7xl space-y-12 px-4 pt-12 text-slate-100 sm:px-6 lg:px-8">
+      <div className="relative mx-auto max-w-7xl space-y-12 px-4 pt-12 text-night sm:px-6 lg:px-8">
         <Motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="relative flex flex-col gap-6 overflow-hidden rounded-3xl border border-white/15 bg-[linear-gradient(140deg,rgba(32,17,66,0.88),rgba(91,33,209,0.55))] p-8 text-slate-100 shadow-[0_32px_140px_-48px_rgba(91,33,209,0.95)] backdrop-blur md:flex-row md:items-center md:justify-between"
+          className="relative flex flex-col gap-6 overflow-hidden rounded-3xl border border-white/70 bg-white/95 p-8 text-night shadow-[0_32px_120px_-48px_rgba(147,112,219,0.28)] backdrop-blur-sm md:flex-row md:items-center md:justify-between"
         >
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,79,154,0.38),transparent_55%)] opacity-80" />
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,79,154,0.25),transparent_55%)] opacity-80" />
           <div className="relative z-10">
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-black/30 px-4 py-1 text-xs uppercase tracking-[0.2em] text-slate-100/80">
-              <Rocket className="h-4 w-4 text-indigo-300" />
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/70 bg-white/80 px-4 py-1 text-xs uppercase tracking-[0.2em] text-night/60 shadow-sm shadow-white/70">
+              <Rocket className="h-4 w-4 text-royal" />
               Ready to Lift
             </div>
-            <h1 className="mt-4 text-4xl font-semibold text-white drop-shadow-[0_6px_25px_rgba(0,0,0,0.35)]">
+            <h1 className="mt-4 text-4xl font-semibold text-night drop-shadow-[0_6px_20px_rgba(209,196,255,0.6)]">
               {activeFounder.startupName}
             </h1>
-            <p className="mt-2 max-w-xl text-sm text-slate-200">
+            <p className="mt-2 max-w-xl text-sm text-night/70">
               {activeFounder.aiSummary}
             </p>
-            <p className="mt-4 text-xs uppercase tracking-[0.18em] text-indigo-100">
+            <p className="mt-4 text-xs uppercase tracking-[0.18em] text-royal/80">
               Founder: {user?.fullName ?? activeFounder.fullName}
             </p>
           </div>
-          <div className="relative z-10 h-full rounded-2xl border border-indigo-300/40 bg-indigo-600/20 px-6 py-4 text-right text-sm text-indigo-100 shadow-inner shadow-indigo-900/25">
-            <p className="uppercase tracking-[0.18em] text-indigo-200/90">Raise Target</p>
-            <p className="mt-2 text-3xl font-semibold text-white">
+          <div className="relative z-10 h-full rounded-2xl border border-royal/20 bg-gradient-to-br from-royal/10 via-white/70 to-sunbeam/20 px-6 py-4 text-right text-sm text-night shadow-inner shadow-white/60">
+            <p className="uppercase tracking-[0.18em] text-royal/70">Raise Target</p>
+            <p className="mt-2 text-3xl font-semibold text-night">
               {formatCurrency(activeFounder.raiseAmountUSD)}
             </p>
-            <p className="mt-2 text-xs uppercase tracking-[0.18em] text-indigo-100">
+            <p className="mt-2 text-xs uppercase tracking-[0.18em] text-royal/70">
               {activeFounder.raiseStage}
             </p>
           </div>
@@ -165,8 +165,8 @@ const FounderDashboard = () => {
           className="space-y-6"
         >
           <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-semibold text-white">Benchmark Notes</h2>
-            <div className="flex items-center gap-2 text-sm text-slate-200">
+            <h2 className="text-2xl font-semibold text-night">Benchmark Notes</h2>
+            <div className="flex items-center gap-2 text-sm text-night/60">
               <NotebookPen className="h-4 w-4" />
               Investor-facing view with your context
             </div>
@@ -190,34 +190,34 @@ const FounderDashboard = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.15 }}
         >
-          <Card className="relative overflow-hidden border-white/15 bg-black/45 shadow-[0_40px_160px_-70px_rgba(37,99,235,0.9)]">
-            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(46,220,146,0.25),transparent_60%)] opacity-70" />
+          <Card className="relative overflow-hidden border-white/70 bg-white/95 text-night shadow-[0_36px_120px_-70px_rgba(91,33,209,0.25)]">
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(46,220,146,0.18),transparent_60%)] opacity-80" />
             <CardHeader className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
               <div className="relative z-10">
-                <CardTitle className="text-2xl text-white">Investor Match Preview</CardTitle>
-                <p className="text-sm text-slate-300">
+                <CardTitle className="text-2xl text-night">Investor Match Preview</CardTitle>
+                <p className="text-sm text-night/65">
                   Top aligned funds for your raise. Admin will send intros once approved.
                 </p>
               </div>
               {isPending ? (
-                <div className="relative z-10 flex items-center gap-2 rounded-full border border-white/25 bg-black/40 px-4 py-2 text-xs uppercase tracking-[0.2em] text-slate-200">
-                  <Lock className="h-4 w-4" /> Matches locked pending review
+                <div className="relative z-10 flex items-center gap-2 rounded-full border border-white/70 bg-white/85 px-4 py-2 text-xs uppercase tracking-[0.2em] text-night/60 shadow-sm shadow-white/70">
+                  <Lock className="h-4 w-4 text-royal" /> Matches locked pending review
                 </div>
               ) : null}
             </CardHeader>
             <CardContent className="relative z-10 grid gap-4 md:grid-cols-3">
               {matchPreview.map(({ match, investor }) => (
-                <div key={match.investorId} className="rounded-2xl border border-white/10 bg-black/30 p-5">
+                <div key={match.investorId} className="rounded-2xl border border-white/70 bg-white/85 p-5 text-night shadow-inner shadow-white/60">
                   <div className="flex items-center justify-between">
-                    <h3 className="text-lg font-semibold text-white">
+                    <h3 className="text-lg font-semibold text-night">
                       {investor.fundName}
                     </h3>
                     <MatchScoreBadge score={match.matchScore} />
                   </div>
-                  <p className="mt-2 text-sm text-slate-300">{investor.thesis}</p>
-                  <div className="mt-4 flex flex-wrap gap-1 text-xs text-slate-400">
+                  <p className="mt-2 text-sm text-night/70">{investor.thesis}</p>
+                  <div className="mt-4 flex flex-wrap gap-1 text-xs text-night/60">
                     {investor.stageFocus.map((stage) => (
-                      <span key={stage} className="rounded-full border border-white/10 px-2 py-0.5">
+                      <span key={stage} className="rounded-full border border-white/70 bg-white/75 px-2 py-0.5">
                         {stage}
                       </span>
                     ))}
@@ -225,15 +225,15 @@ const FounderDashboard = () => {
                 </div>
               ))}
               {matchPreview.length === 0 ? (
-                <p className="text-sm text-slate-300">
+                <p className="text-sm text-night/65">
                   Matches will appear here once investors share aligned theses.
                 </p>
               ) : null}
             </CardContent>
             {isPending ? (
-              <div className="absolute inset-0 flex items-center justify-center rounded-3xl bg-black/60 text-sm text-slate-200 backdrop-blur">
+              <div className="absolute inset-0 flex items-center justify-center rounded-3xl bg-white/75 text-sm text-night/70 backdrop-blur">
                 <div className="flex items-center gap-3">
-                  <Lock className="h-5 w-5" />
+                  <Lock className="h-5 w-5 text-royal" />
                   Awaiting Launch & Lift approval to unlock investor outreach.
                 </div>
               </div>
@@ -414,15 +414,15 @@ const AdditionalFundingSection = () => {
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.12 }}
-        className="rounded-3xl border border-white/10 bg-black/30 p-8 shadow-xl backdrop-blur"
+        className="rounded-3xl border border-white/60 bg-white/90 p-8 text-night shadow-[0_32px_90px_-48px_rgba(91,33,209,0.18)] backdrop-blur-sm"
       >
         <div className="space-y-3">
-          <Badge className="w-fit border-white/15 bg-white/10 text-[0.65rem] tracking-[0.35em] text-slate-100">
+          <Badge className="w-fit border-white/70 bg-white/85 text-[0.65rem] tracking-[0.35em] text-night/60 shadow-sm shadow-white/70">
             New
           </Badge>
           <div>
-            <h2 className="text-2xl font-semibold text-white">Grow your raise with Launch & Lift</h2>
-            <p className="mt-1 max-w-2xl text-sm text-slate-300">
+            <h2 className="text-2xl font-semibold text-night">Grow your raise with Launch & Lift</h2>
+            <p className="mt-1 max-w-2xl text-sm text-night/70">
               List in our marketplace, let us run a success-fee raise, or request extra services —
               all from your dashboard.
             </p>
@@ -430,42 +430,44 @@ const AdditionalFundingSection = () => {
         </div>
 
         <div className="mt-7 grid grid-cols-1 gap-6 lg:grid-cols-3">
-          <Card className="h-full border-white/15 bg-black/40">
+          <Card className="h-full border-white/70 bg-white/90 text-night shadow-[0_24px_70px_-50px_rgba(91,33,209,0.3)]">
             <CardHeader className="space-y-3">
-              <CardTitle className="text-xl text-white">List on our Marketplace</CardTitle>
-              <p className="text-sm text-slate-300">
+              <CardTitle className="text-xl text-night">List on our Marketplace</CardTitle>
+              <p className="text-sm text-night/70">
                 Create one live listing with your raise amount, use-of-funds, and minimum ticket so
                 Launch &amp; Lift investors can review it.
               </p>
             </CardHeader>
             <CardContent className="space-y-5">
               <div>
-                <p className={`text-sm font-semibold ${hasListing ? 'text-indigo-200' : 'text-slate-400'}`}>
+                <p
+                  className={`text-sm font-semibold ${hasListing ? 'text-royal' : 'text-night/50'}`}
+                >
                   {hasListing ? 'Active listing' : 'No active listing'}
                 </p>
-                <p className="mt-1 text-xs text-slate-400">{listingStatus}</p>
+                <p className="mt-1 text-xs text-night/50">{listingStatus}</p>
               </div>
               {hasListing ? (
-                <div className="rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-xs text-slate-200">
+                <div className="rounded-2xl border border-white/70 bg-white/80 px-4 py-3 text-xs text-night/70 shadow-inner shadow-white/60">
                   <div className="flex items-center justify-between">
-                    <span className="text-slate-400">Raise amount</span>
-                    <span className="font-semibold text-white">
+                    <span className="text-night/50">Raise amount</span>
+                    <span className="font-semibold text-night">
                       {formatCurrencyInr(marketplaceListing.raiseAmount)}
                     </span>
                   </div>
                   <div className="mt-2 flex items-center justify-between">
-                    <span className="text-slate-400">Min. ticket</span>
-                    <span className="font-semibold text-white">
+                    <span className="text-night/50">Min. ticket</span>
+                    <span className="font-semibold text-night">
                       {formatCurrencyInr(marketplaceListing.minTicket)}
                     </span>
                   </div>
                   <div className="mt-2">
-                    <p className="text-slate-400">Use of funds</p>
-                    <p className="mt-1 text-slate-200">{marketplaceListing.useOfFunds}</p>
+                    <p className="text-night/50">Use of funds</p>
+                    <p className="mt-1 text-night/70">{marketplaceListing.useOfFunds}</p>
                   </div>
                   <div className="mt-2 flex items-center justify-between">
-                    <span className="text-slate-400">Industry / category</span>
-                    <span className="font-semibold text-white">
+                    <span className="text-night/50">Industry / category</span>
+                    <span className="font-semibold text-night">
                       {marketplaceListing.industry || 'Not set'}
                     </span>
                   </div>
@@ -476,27 +478,27 @@ const AdditionalFundingSection = () => {
                 {hasListing ? 'View / edit listing' : 'Create listing'}
               </Button>
 
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-night/55">
                 Currently we allow 1 active listing per founder.
               </p>
             </CardContent>
           </Card>
 
-          <Card className="h-full border-white/15 bg-black/40">
+          <Card className="h-full border-white/70 bg-white/90 text-night shadow-[0_24px_70px_-50px_rgba(91,33,209,0.3)]">
             <CardHeader className="space-y-3">
-              <CardTitle className="text-xl text-white">Success-fee raise support</CardTitle>
-              <p className="text-sm text-slate-300">
+              <CardTitle className="text-xl text-night">Success-fee raise support</CardTitle>
+              <p className="text-sm text-night/70">
                 Hands-on support to close your round. We help with investor outreach, materials, and
                 follow-ups. We charge a small onboarding fee plus success fee on the raise.
               </p>
             </CardHeader>
             <CardContent className="space-y-5">
-              <div className="flex flex-wrap gap-2 text-xs text-slate-200">
+              <div className="flex flex-wrap gap-2 text-xs text-night/70">
                 {['Onboarding: ₹2–3L', 'Success fee on final raise', 'Investor introductions'].map(
                   (chip) => (
                     <span
                       key={chip}
-                      className="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-[0.7rem] text-slate-200"
+                      className="rounded-full border border-white/70 bg-white/80 px-3 py-1 text-[0.7rem] text-night/70 shadow-sm shadow-white/70"
                     >
                       {chip}
                     </span>
@@ -505,11 +507,11 @@ const AdditionalFundingSection = () => {
               </div>
 
               {founderRequests.successFee ? (
-                <div className="rounded-2xl border border-white/15 bg-black/35 px-4 py-3 text-xs text-slate-200">
-                  <p className="font-semibold text-indigo-200">
+                <div className="rounded-2xl border border-white/70 bg-white/80 px-4 py-3 text-xs text-night/70 shadow-inner shadow-white/60">
+                  <p className="font-semibold text-royal">
                     Request sent — our team will reach out.
                   </p>
-                  <p className="mt-1 text-slate-300">
+                  <p className="mt-1 text-night/60">
                     Round: {founderRequests.successFee.round} • Target:{' '}
                     {founderRequests.successFee.targetAmount
                       ? formatCurrencyInr(founderRequests.successFee.targetAmount)
@@ -522,30 +524,30 @@ const AdditionalFundingSection = () => {
                 Request success-fee plan
               </Button>
 
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-night/55">
                 This request will be visible to admin on the backend.
               </p>
             </CardContent>
           </Card>
 
-          <Card className="h-full border-white/15 bg-black/40">
+          <Card className="h-full border-white/70 bg-white/90 text-night shadow-[0_24px_70px_-50px_rgba(91,33,209,0.3)]">
             <CardHeader className="space-y-3">
-              <CardTitle className="text-xl text-white">Other services for founders</CardTitle>
-              <p className="text-sm text-slate-300">
+              <CardTitle className="text-xl text-night">Other services for founders</CardTitle>
+              <p className="text-sm text-night/70">
                 Need help polishing your materials? Ask and we’ll loop in the right expert.
               </p>
             </CardHeader>
             <CardContent className="space-y-5">
-              <ul className="grid gap-2 text-sm text-slate-200">
+              <ul className="grid gap-2 text-sm text-night/70">
                 {FOUNDER_SERVICE_OPTIONS.map((service) => (
                   <li
                     key={service}
-                    className="flex items-center justify-between rounded-xl border border-white/10 bg-black/30 px-3 py-2 text-xs sm:text-sm"
+                    className="flex items-center justify-between rounded-xl border border-white/70 bg-white/80 px-3 py-2 text-xs text-night sm:text-sm shadow-inner shadow-white/60"
                   >
                     <span>{service}</span>
                     <button
                       type="button"
-                      className="text-[0.7rem] text-indigo-200 underline underline-offset-4 hover:text-white"
+                      className="text-[0.7rem] text-royal underline underline-offset-4 hover:text-night"
                       onClick={() => openServicesModal(service)}
                     >
                       Request
@@ -555,11 +557,11 @@ const AdditionalFundingSection = () => {
               </ul>
 
               {latestServiceRequest ? (
-                <div className="rounded-2xl border border-white/15 bg-black/35 px-4 py-3 text-xs text-slate-200">
-                  <p className="font-semibold text-indigo-200">
+                <div className="rounded-2xl border border-white/70 bg-white/80 px-4 py-3 text-xs text-night/70 shadow-inner shadow-white/60">
+                  <p className="font-semibold text-royal">
                     Request created. Our team will contact you.
                   </p>
-                  <p className="mt-1 text-slate-300">
+                  <p className="mt-1 text-night/60">
                     Latest: {latestServiceRequest.serviceType} • Urgency:{' '}
                     {latestServiceRequest.urgency}
                   </p>
@@ -570,14 +572,14 @@ const AdditionalFundingSection = () => {
                 Request a service
               </Button>
 
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-night/55">
                 All founder service requests should be visible on the admin side.
               </p>
             </CardContent>
           </Card>
         </div>
 
-        <p className="mt-6 text-xs text-slate-500">
+        <p className="mt-6 text-xs text-night/55">
           These requests are stored locally so Launch &amp; Lift admin can wire them into the
           backend when ready.
         </p>
@@ -596,25 +598,25 @@ const AdditionalFundingSection = () => {
               initial={{ opacity: 0, y: 20, scale: 0.96 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 20, scale: 0.96 }}
-              className="relative w-full max-w-xl rounded-3xl border border-white/15 bg-black/85 p-7 text-slate-100 shadow-2xl"
+              className="relative w-full max-w-xl rounded-3xl border border-white/70 bg-white/98 p-7 text-night shadow-2xl shadow-[0_40px_120px_-60px_rgba(147,112,219,0.35)]"
             >
               <button
                 type="button"
-                className="absolute right-6 top-6 rounded-full border border-white/10 bg-white/10 p-1 text-slate-200 transition hover:bg-white/20"
+                className="absolute right-6 top-6 rounded-full border border-night/10 bg-white/80 p-1 text-night/60 transition hover:bg-white"
                 onClick={() => setIsMarketplaceModalOpen(false)}
                 aria-label="Close marketplace form"
               >
                 <X className="h-4 w-4" />
               </button>
 
-              <h3 className="text-xl font-semibold text-white">Marketplace listing</h3>
-              <p className="mt-1 text-sm text-slate-300">
+              <h3 className="text-xl font-semibold text-night">Marketplace listing</h3>
+              <p className="mt-1 text-sm text-night/70">
                 Update the details investors see on Launch &amp; Lift.
               </p>
 
               <form className="mt-6 space-y-5" onSubmit={handleMarketplaceSubmit}>
                 <div className="grid gap-3">
-                  <Label className="text-slate-200" htmlFor="raiseAmount">
+                  <Label className="text-night/70" htmlFor="raiseAmount">
                     Raise amount (₹)
                   </Label>
                   <Input
@@ -625,12 +627,12 @@ const AdditionalFundingSection = () => {
                     required
                     value={marketplaceForm.raiseAmount}
                     onChange={handleMarketplaceChange}
-                    className="h-11 border-white/15 bg-black/40 text-slate-100 placeholder:text-slate-500 focus-visible:ring-indigo-300 focus-visible:ring-offset-0"
+                    className="h-11"
                   />
                 </div>
 
                 <div className="grid gap-3">
-                  <Label className="text-slate-200" htmlFor="minTicket">
+                  <Label className="text-night/70" htmlFor="minTicket">
                     Min. ticket size (₹)
                   </Label>
                   <Input
@@ -641,12 +643,12 @@ const AdditionalFundingSection = () => {
                     required
                     value={marketplaceForm.minTicket}
                     onChange={handleMarketplaceChange}
-                    className="h-11 border-white/15 bg-black/40 text-slate-100 placeholder:text-slate-500 focus-visible:ring-indigo-300 focus-visible:ring-offset-0"
+                    className="h-11"
                   />
                 </div>
 
                 <div className="grid gap-3">
-                  <Label className="text-slate-200" htmlFor="industry">
+                  <Label className="text-night/70" htmlFor="industry">
                     Industry / category
                   </Label>
                   <Input
@@ -655,12 +657,12 @@ const AdditionalFundingSection = () => {
                     required
                     value={marketplaceForm.industry}
                     onChange={handleMarketplaceChange}
-                    className="h-11 border-white/15 bg-black/40 text-slate-100 placeholder:text-slate-500 focus-visible:ring-indigo-300 focus-visible:ring-offset-0"
+                    className="h-11"
                   />
                 </div>
 
                 <div className="grid gap-3">
-                  <Label className="text-slate-200" htmlFor="useOfFunds">
+                  <Label className="text-night/70" htmlFor="useOfFunds">
                     Use of funds
                   </Label>
                   <Textarea
@@ -669,7 +671,7 @@ const AdditionalFundingSection = () => {
                     required
                     value={marketplaceForm.useOfFunds}
                     onChange={handleMarketplaceChange}
-                    className="min-h-[120px] border-white/15 bg-black/40 text-slate-100 placeholder:text-slate-500 focus-visible:ring-indigo-300 focus-visible:ring-offset-0"
+                    className="min-h-[120px]"
                   />
                 </div>
 
@@ -677,7 +679,7 @@ const AdditionalFundingSection = () => {
                   <Button
                     type="button"
                     variant="ghost"
-                    className="text-slate-200 hover:bg-white/10 hover:text-white"
+                    className="hover:bg-night/5"
                     onClick={() => setIsMarketplaceModalOpen(false)}
                   >
                     Cancel
@@ -705,25 +707,25 @@ const AdditionalFundingSection = () => {
               initial={{ opacity: 0, y: 20, scale: 0.96 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 20, scale: 0.96 }}
-              className="relative w-full max-w-xl rounded-3xl border border-white/15 bg-black/85 p-7 text-slate-100 shadow-2xl"
+              className="relative w-full max-w-xl rounded-3xl border border-white/70 bg-white/98 p-7 text-night shadow-2xl shadow-[0_40px_120px_-60px_rgba(147,112,219,0.35)]"
             >
               <button
                 type="button"
-                className="absolute right-6 top-6 rounded-full border border-white/10 bg-white/10 p-1 text-slate-200 transition hover:bg-white/20"
+                className="absolute right-6 top-6 rounded-full border border-night/10 bg-white/80 p-1 text-night/60 transition hover:bg-white"
                 onClick={() => setIsSuccessModalOpen(false)}
                 aria-label="Close success-fee request form"
               >
                 <X className="h-4 w-4" />
               </button>
 
-              <h3 className="text-xl font-semibold text-white">Request success-fee support</h3>
-              <p className="mt-1 text-sm text-slate-300">
+              <h3 className="text-xl font-semibold text-night">Request success-fee support</h3>
+              <p className="mt-1 text-sm text-night/70">
                 Tell us about your round so the Launch &amp; Lift capital team can respond.
               </p>
 
               <form className="mt-6 space-y-5" onSubmit={handleSuccessSubmit}>
                 <div className="grid gap-3">
-                  <Label className="text-slate-200" htmlFor="round">
+                  <Label className="text-night/70" htmlFor="round">
                     Current round
                   </Label>
                   <select
@@ -731,7 +733,7 @@ const AdditionalFundingSection = () => {
                     name="round"
                     value={successForm.round}
                     onChange={handleSuccessChange}
-                    className="h-11 w-full rounded-xl border border-white/15 bg-black/40 px-4 text-sm text-slate-100 focus:border-indigo-300 focus:outline-none focus:ring-2 focus:ring-indigo-300"
+                    className="h-11 w-full rounded-xl border border-night/10 bg-white/90 px-4 text-sm text-night focus:border-royal focus:outline-none focus:ring-2 focus:ring-royal/40"
                   >
                     {SUCCESS_FEE_ROUNDS.map((round) => (
                       <option key={round} value={round}>
@@ -742,7 +744,7 @@ const AdditionalFundingSection = () => {
                 </div>
 
                 <div className="grid gap-3">
-                  <Label className="text-slate-200" htmlFor="targetAmount">
+                  <Label className="text-night/70" htmlFor="targetAmount">
                     Target amount (₹)
                   </Label>
                   <Input
@@ -753,13 +755,13 @@ const AdditionalFundingSection = () => {
                     required
                     value={successForm.targetAmount}
                     onChange={handleSuccessChange}
-                    className="h-11 border-white/15 bg-black/40 text-slate-100 placeholder:text-slate-500 focus-visible:ring-indigo-300 focus-visible:ring-offset-0"
+                    className="h-11"
                   />
                 </div>
 
                 <div className="grid gap-3">
-                  <Label className="text-slate-200" htmlFor="committed">
-                    Current committed amount (₹) <span className="text-slate-500">(optional)</span>
+                  <Label className="text-night/70" htmlFor="committed">
+                    Current committed amount (₹) <span className="text-night/45">(optional)</span>
                   </Label>
                   <Input
                     id="committed"
@@ -768,13 +770,13 @@ const AdditionalFundingSection = () => {
                     min="0"
                     value={successForm.committed}
                     onChange={handleSuccessChange}
-                    className="h-11 border-white/15 bg-black/40 text-slate-100 placeholder:text-slate-500 focus-visible:ring-indigo-300 focus-visible:ring-offset-0"
+                    className="h-11"
                   />
                 </div>
 
                 <div className="grid gap-3">
-                  <Label className="text-slate-200" htmlFor="deckUrl">
-                    Company deck link <span className="text-slate-500">(optional)</span>
+                  <Label className="text-night/70" htmlFor="deckUrl">
+                    Company deck link <span className="text-night/45">(optional)</span>
                   </Label>
                   <Input
                     id="deckUrl"
@@ -783,12 +785,12 @@ const AdditionalFundingSection = () => {
                     value={successForm.deckUrl}
                     onChange={handleSuccessChange}
                     placeholder="https://..."
-                    className="h-11 border-white/15 bg-black/40 text-slate-100 placeholder:text-slate-500 focus-visible:ring-indigo-300 focus-visible:ring-offset-0"
+                    className="h-11"
                   />
                 </div>
 
                 <div className="grid gap-3">
-                  <Label className="text-slate-200" htmlFor="notes">
+                  <Label className="text-night/70" htmlFor="notes">
                     Notes to Launch &amp; Lift
                   </Label>
                   <Textarea
@@ -796,7 +798,7 @@ const AdditionalFundingSection = () => {
                     name="notes"
                     value={successForm.notes}
                     onChange={handleSuccessChange}
-                    className="min-h-[120px] border-white/15 bg-black/40 text-slate-100 placeholder:text-slate-500 focus-visible:ring-indigo-300 focus-visible:ring-offset-0"
+                    className="min-h-[120px]"
                   />
                 </div>
 
@@ -804,7 +806,7 @@ const AdditionalFundingSection = () => {
                   <Button
                     type="button"
                     variant="ghost"
-                    className="text-slate-200 hover:bg-white/10 hover:text-white"
+                    className="hover:bg-night/5"
                     onClick={() => setIsSuccessModalOpen(false)}
                   >
                     Cancel
@@ -832,25 +834,25 @@ const AdditionalFundingSection = () => {
               initial={{ opacity: 0, y: 20, scale: 0.96 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 20, scale: 0.96 }}
-              className="relative w-full max-w-xl rounded-3xl border border-white/15 bg-black/85 p-7 text-slate-100 shadow-2xl"
+              className="relative w-full max-w-xl rounded-3xl border border-white/70 bg-white/98 p-7 text-night shadow-2xl shadow-[0_40px_120px_-60px_rgba(147,112,219,0.35)]"
             >
               <button
                 type="button"
-                className="absolute right-6 top-6 rounded-full border border-white/10 bg-white/10 p-1 text-slate-200 transition hover:bg-white/20"
+                className="absolute right-6 top-6 rounded-full border border-night/10 bg-white/80 p-1 text-night/60 transition hover:bg-white"
                 onClick={() => setIsServicesModalOpen(false)}
                 aria-label="Close service request form"
               >
                 <X className="h-4 w-4" />
               </button>
 
-              <h3 className="text-xl font-semibold text-white">Request founder services</h3>
-              <p className="mt-1 text-sm text-slate-300">
+              <h3 className="text-xl font-semibold text-night">Request founder services</h3>
+              <p className="mt-1 text-sm text-night/70">
                 Choose the support you need and we’ll loop in the right expert.
               </p>
 
               <form className="mt-6 space-y-5" onSubmit={handleServicesSubmit}>
                 <div className="grid gap-3">
-                  <Label className="text-slate-200" htmlFor="serviceType">
+                  <Label className="text-night/70" htmlFor="serviceType">
                     Service
                   </Label>
                   <select
@@ -858,7 +860,7 @@ const AdditionalFundingSection = () => {
                     name="serviceType"
                     value={servicesForm.serviceType}
                     onChange={handleServicesChange}
-                    className="h-11 w-full rounded-xl border border-white/15 bg-black/40 px-4 text-sm text-slate-100 focus:border-indigo-300 focus:outline-none focus:ring-2 focus:ring-indigo-300"
+                    className="h-11 w-full rounded-xl border border-night/10 bg-white/90 px-4 text-sm text-night focus:border-royal focus:outline-none focus:ring-2 focus:ring-royal/40"
                   >
                     {FOUNDER_SERVICE_OPTIONS.map((service) => (
                       <option key={service} value={service}>
@@ -869,7 +871,7 @@ const AdditionalFundingSection = () => {
                 </div>
 
                 <div className="grid gap-3">
-                  <Label className="text-slate-200" htmlFor="note">
+                  <Label className="text-night/70" htmlFor="note">
                     Brief requirement
                   </Label>
                   <Textarea
@@ -878,12 +880,12 @@ const AdditionalFundingSection = () => {
                     required
                     value={servicesForm.note}
                     onChange={handleServicesChange}
-                    className="min-h-[120px] border-white/15 bg-black/40 text-slate-100 placeholder:text-slate-500 focus-visible:ring-indigo-300 focus-visible:ring-offset-0"
+                    className="min-h-[120px]"
                   />
                 </div>
 
                 <div className="grid gap-3">
-                  <Label className="text-slate-200" htmlFor="urgency">
+                  <Label className="text-night/70" htmlFor="urgency">
                     Urgency
                   </Label>
                   <select
@@ -891,7 +893,7 @@ const AdditionalFundingSection = () => {
                     name="urgency"
                     value={servicesForm.urgency}
                     onChange={handleServicesChange}
-                    className="h-11 w-full rounded-xl border border-white/15 bg-black/40 px-4 text-sm text-slate-100 focus:border-indigo-300 focus:outline-none focus:ring-2 focus:ring-indigo-300"
+                    className="h-11 w-full rounded-xl border border-night/10 bg-white/90 px-4 text-sm text-night focus:border-royal focus:outline-none focus:ring-2 focus:ring-royal/40"
                   >
                     {['Low', 'Normal', 'High'].map((option) => (
                       <option key={option} value={option}>
@@ -905,7 +907,7 @@ const AdditionalFundingSection = () => {
                   <Button
                     type="button"
                     variant="ghost"
-                    className="text-slate-200 hover:bg-white/10 hover:text-white"
+                    className="hover:bg-night/5"
                     onClick={() => setIsServicesModalOpen(false)}
                   >
                     Cancel

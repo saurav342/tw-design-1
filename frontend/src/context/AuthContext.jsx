@@ -40,6 +40,9 @@ export const AuthProvider = ({ children }) => {
 
     try {
       const response = await action(payload);
+      if (!response || typeof response !== 'object' || !response.token || !response.user) {
+        throw new Error('Received an unexpected response from the server. Please try again later.');
+      }
       setAuthState({ token: response.token, user: response.user });
       setStatus({ loading: false, error: null });
       return response;

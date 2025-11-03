@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { buildReadinessScores, generateAISummary } from '../lib/fakeAI';
+import { createDefaultFounderExtras } from '../data/founderExtras.js';
 import { defaultBenchmarkRows } from '../mock/benchmarksMock';
 import { foundersMock } from '../mock/foundersMock';
 import { investorsMock } from '../mock/investorsMock';
@@ -67,9 +68,25 @@ const generateMatches = (founder, investors) =>
     matchScore: computeMatchScore(founder, investor),
   }));
 
+const buildInitialFounderExtras = () => {
+  const entries = {};
+  foundersMock.forEach((founder) => {
+    const base = createDefaultFounderExtras();
+    if (base.marketplaceListing) {
+      base.marketplaceListing = {
+        ...base.marketplaceListing,
+        startupName: founder.startupName ?? base.marketplaceListing.startupName,
+      };
+    }
+    entries[founder.id] = base;
+  });
+  return entries;
+};
+
 export const useAppStore = create((set, get) => ({
   founders: foundersMock,
   investors: investorsMock,
+  founderExtras: buildInitialFounderExtras(),
   addFounder: async (input) => {
     const id = `founder-${randomId()}`;
     const aiPayload = generateAISummary({
@@ -199,6 +216,70 @@ export const useAppStore = create((set, get) => ({
   },
   getFounderById: (founderId) => get().founders.find((founder) => founder.id === founderId),
   getInvestorById: (investorId) => get().investors.find((investor) => investor.id === investorId),
+  upsertFounderMarketplace: (founderId, listing) => {
+    if (!founderId) return;
+    set((state) => {
+      const current = state.founderExtras[founderId] ?? createDefaultFounderExtras();
+      const next = {
+        ...current,
+        marketplaceListing: listing ? { ...listing } : null,
+      };
+
+      return {
+        founderExtras: {
+          ...state.founderExtras,
+          [founderId]: next,
+        },
+      };
+    });
+  },
+  recordFounderSuccessFee: (founderId, request) => {
+    if (!founderId) return;
+    set((state) => {
+      const current = state.founderExtras[founderId] ?? createDefaultFounderExtras();
+      const next = {
+        ...current,
+        successFeeRequest: request ? { ...request } : null,
+      };
+
+      return {
+        founderExtras: {
+          ...state.founderExtras,
+          [founderId]: next,
+        },
+      };
+    });
+  },
+  addFounderServiceRequest: (founderId, request) => {
+    if (!founderId || !request) return;
+    set((state) => {
+      const current = state.founderExtras[founderId] ?? createDefaultFounderExtras();
+      const next = {
+        ...current,
+        serviceRequests: [
+          ...(Array.isArray(current.serviceRequests)
+            ? current.serviceRequests.map((item) => ({ ...item }))
+            : []),
+          { ...request },
+        ],
+      };
+
+      return {
+        founderExtras: {
+          ...state.founderExtras,
+          [founderId]: next,
+        },
+      };
+    });
+  },
+  clearFounderExtras: (founderId) => {
+    if (!founderId) return;
+    set((state) => {
+      const next = { ...state.founderExtras };
+      delete next[founderId];
+      return { founderExtras: next };
+    });
+  },
   recordMatchPreference: (founderId, investorId, score) => {
     set((state) => ({
       founders: state.founders.map((founder) => {

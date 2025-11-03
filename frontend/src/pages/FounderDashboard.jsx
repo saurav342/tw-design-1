@@ -1,39 +1,20 @@
 import { useEffect, useMemo, useState } from 'react';
-import { AnimatePresence, motion as Motion } from 'framer-motion';
-import { Lock, NotebookPen, Rocket, X } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { motion as Motion } from 'framer-motion';
+import { ArrowUpRight, Lock, NotebookPen, Rocket } from 'lucide-react';
 import { useAuth } from '../context/useAuth.js';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card.jsx';
 import { Badge } from '../components/ui/badge.jsx';
 import { Button } from '../components/ui/button.jsx';
-import { Input } from '../components/ui/input.jsx';
-import { Label } from '../components/ui/label.jsx';
-import { Textarea } from '../components/ui/textarea.jsx';
 import { CardStat } from '../components/CardStat.jsx';
 import { BenchmarkTable } from '../components/BenchmarkTable.jsx';
 import { MatchScoreBadge } from '../components/MatchScoreBadge.jsx';
 import { showGenericSuccess } from '../lib/emailClientMock.js';
-import { formatCurrency } from '../lib/formatters.js';
+import { formatCurrency, formatCurrencyInr, formatDateDisplay } from '../lib/formatters.js';
+import { useFounderExtras } from '../hooks/useFounderExtras.js';
+import { FOUNDER_SERVICE_OPTIONS } from '../data/founderExtras.js';
 import { useAppStore } from '../store/useAppStore.js';
-
-const ACTIVE_FOUNDER_KEY = 'launch.activeFounderId';
-const INITIAL_MARKETPLACE_LISTING = {
-  id: 'mock-1',
-  raiseAmount: 2500000,
-  minTicket: 50000,
-  useOfFunds: 'Team, GTM, Product polish',
-  status: 'active',
-  lastUpdated: '2025-11-01',
-  industry: 'SaaS / GTM enablement',
-};
-const SUCCESS_FEE_ROUNDS = ['Pre-seed', 'Seed', 'Bridge', 'Series A'];
-const FOUNDER_SERVICE_OPTIONS = [
-  'Pitch deck preparation',
-  'Mentorship / advisory',
-  'Financial projections',
-  'Legal & compliance',
-  'Tech enhancement support',
-  'Growth marketing',
-];
+import { persistActiveFounderId, readActiveFounderId } from '../lib/founderSession.js';
 
 const FounderDashboard = () => {
   const { user } = useAuth();
@@ -43,9 +24,7 @@ const FounderDashboard = () => {
   const [activeId, setActiveId] = useState(null);
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const persisted = window.sessionStorage.getItem(ACTIVE_FOUNDER_KEY);
-    setActiveId(persisted);
+    setActiveId(readActiveFounderId());
   }, []);
 
   const activeFounder = useMemo(() => {
@@ -56,14 +35,17 @@ const FounderDashboard = () => {
     return founders[0];
   }, [founders, activeId]);
 
+  const activeFounderId = activeFounder?.id ?? null;
+  const { extras } = useFounderExtras(activeFounderId);
+
   const [notes, setNotes] = useState(activeFounder?.benchmarkNotes ?? {});
 
   useEffect(() => {
     if (activeFounder) {
       setNotes(activeFounder.benchmarkNotes ?? {});
-      if (typeof window !== 'undefined') {
-        window.sessionStorage.setItem(ACTIVE_FOUNDER_KEY, activeFounder.id);
-      }
+      persistActiveFounderId(activeFounder.id);
+    } else {
+      persistActiveFounderId(null);
     }
   }, [activeFounder]);
 
@@ -156,7 +138,7 @@ const FounderDashboard = () => {
           ))}
         </Motion.div>
 
-        <AdditionalFundingSection />
+        <AdditionalFundingSection extras={extras} />
 
         <Motion.div
           initial={{ opacity: 0, y: 24 }}
@@ -245,683 +227,194 @@ const FounderDashboard = () => {
   );
 };
 
-const formatDateDisplay = (value) => {
-  if (!value) return 'Not updated yet';
-  const safeDate = typeof value === 'string' || value instanceof Date ? new Date(value) : null;
-  if (!safeDate || Number.isNaN(safeDate.getTime())) return 'Not updated yet';
-  return safeDate.toLocaleDateString('en-IN', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  });
-};
-
-const formatCurrencyInr = (value) => {
-  if (value === null || value === undefined) return '—';
-  const numeric = Number(value);
-  if (Number.isNaN(numeric)) return '—';
-  return new Intl.NumberFormat('en-IN', {
-    style: 'currency',
-    currency: 'INR',
-    maximumFractionDigits: 0,
-  }).format(numeric);
-};
-
-const toNumberOrNull = (value) => {
-  const parsed = Number(String(value ?? '').replace(/,/g, '').trim());
-  if (Number.isNaN(parsed)) return null;
-  return parsed;
-};
-
-const AdditionalFundingSection = () => {
-  const createMarketplaceFormState = (listing) => ({
-    raiseAmount: listing?.raiseAmount ? String(listing.raiseAmount) : '',
-    minTicket: listing?.minTicket ? String(listing.minTicket) : '',
-    useOfFunds: listing?.useOfFunds ?? '',
-    industry: listing?.industry ?? '',
-  });
-
-  const [marketplaceListing, setMarketplaceListing] = useState(INITIAL_MARKETPLACE_LISTING);
-  const [founderRequests, setFounderRequests] = useState({
-    marketplace: INITIAL_MARKETPLACE_LISTING,
-    successFee: null,
-    services: [],
-  });
-  const [isMarketplaceModalOpen, setIsMarketplaceModalOpen] = useState(false);
-  const [marketplaceForm, setMarketplaceForm] = useState(() =>
-    createMarketplaceFormState(INITIAL_MARKETPLACE_LISTING),
-  );
-  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
-  const [successForm, setSuccessForm] = useState({
-    round: 'Seed',
-    targetAmount: '',
-    committed: '',
-    deckUrl: '',
-    notes: '',
-  });
-  const [isServicesModalOpen, setIsServicesModalOpen] = useState(false);
-  const [servicesForm, setServicesForm] = useState({
-    serviceType: FOUNDER_SERVICE_OPTIONS[0],
-    note: '',
-    urgency: 'Normal',
-  });
-
-  const hasListing = Boolean(marketplaceListing);
+const AdditionalFundingSection = ({ extras }) => {
+  const listing = extras?.marketplaceListing ?? null;
+  const hasListing = Boolean(listing);
   const listingStatus = hasListing
-    ? `Active • Last updated: ${formatDateDisplay(marketplaceListing.lastUpdated)}`
-    : 'No active listing';
-
-  const latestServiceRequest =
-    founderRequests.services[founderRequests.services.length - 1] ?? null;
-
-  const openMarketplaceModal = () => {
-    setMarketplaceForm(createMarketplaceFormState(marketplaceListing));
-    setIsMarketplaceModalOpen(true);
-  };
-
-  const handleMarketplaceChange = (event) => {
-    const { name, value } = event.target;
-    setMarketplaceForm((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleMarketplaceSubmit = (event) => {
-    event.preventDefault();
-    const nextListing = {
-      id: marketplaceListing?.id ?? `mock-${Date.now()}`,
-      raiseAmount: toNumberOrNull(marketplaceForm.raiseAmount) ?? 0,
-      minTicket: toNumberOrNull(marketplaceForm.minTicket) ?? 0,
-      useOfFunds: marketplaceForm.useOfFunds,
-      industry: marketplaceForm.industry,
-      status: 'active',
-      lastUpdated: new Date().toISOString(),
-    };
-
-    setMarketplaceListing(nextListing);
-    setFounderRequests((prev) => ({ ...prev, marketplace: nextListing }));
-    setIsMarketplaceModalOpen(false);
-  };
-
-  const openSuccessModal = () => {
-    setSuccessForm({
-      round: founderRequests.successFee?.round ?? 'Seed',
-      targetAmount:
-        founderRequests.successFee?.targetAmount != null
-          ? String(founderRequests.successFee.targetAmount)
-          : '',
-      committed:
-        founderRequests.successFee?.committed != null
-          ? String(founderRequests.successFee.committed)
-          : '',
-      deckUrl: founderRequests.successFee?.deckUrl ?? '',
-      notes: founderRequests.successFee?.notes ?? '',
-    });
-    setIsSuccessModalOpen(true);
-  };
-
-  const handleSuccessChange = (event) => {
-    const { name, value } = event.target;
-    setSuccessForm((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleSuccessSubmit = (event) => {
-    event.preventDefault();
-    const request = {
-      round: successForm.round,
-      targetAmount: toNumberOrNull(successForm.targetAmount),
-      committed: toNumberOrNull(successForm.committed),
-      deckUrl: successForm.deckUrl?.trim() || null,
-      notes: successForm.notes?.trim() || null,
-      createdAt: new Date().toISOString(),
-    };
-
-    setFounderRequests((prev) => ({ ...prev, successFee: request }));
-    setIsSuccessModalOpen(false);
-  };
-
-  const openServicesModal = (serviceType) => {
-    setServicesForm({
-      serviceType: serviceType ?? FOUNDER_SERVICE_OPTIONS[0],
-      note: '',
-      urgency: 'Normal',
-    });
-    setIsServicesModalOpen(true);
-  };
-
-  const handleServicesChange = (event) => {
-    const { name, value } = event.target;
-    setServicesForm((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleServicesSubmit = (event) => {
-    event.preventDefault();
-    const request = {
-      serviceType: servicesForm.serviceType,
-      note: servicesForm.note?.trim() || null,
-      urgency: servicesForm.urgency,
-      createdAt: new Date().toISOString(),
-    };
-
-    setFounderRequests((prev) => ({
-      ...prev,
-      services: [...prev.services, request],
-    }));
-    setIsServicesModalOpen(false);
-  };
+    ? `Active • Last updated: ${formatDateDisplay(listing.lastUpdated)}`
+    : 'No active listing yet';
+  const successRequest = extras?.successFeeRequest ?? null;
+  const serviceRequests = Array.isArray(extras?.serviceRequests) ? extras.serviceRequests : [];
+  const latestServiceRequest = serviceRequests[serviceRequests.length - 1] ?? null;
 
   return (
-    <>
-      <Motion.section
-        initial={{ opacity: 0, y: 24 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.12 }}
-        className="rounded-3xl border border-white/60 bg-white/90 p-8 text-night shadow-[0_32px_90px_-48px_rgba(91,33,209,0.18)] backdrop-blur-sm"
-      >
-        <div className="space-y-3">
-          <Badge className="w-fit border-white/70 bg-white/85 text-[0.65rem] tracking-[0.35em] text-night/60 shadow-sm shadow-white/70">
-            New
-          </Badge>
-          <div>
-            <h2 className="text-2xl font-semibold text-night">Grow your raise with Launch & Lift</h2>
-            <p className="mt-1 max-w-2xl text-sm text-night/70">
-              List in our marketplace, let us run a success-fee raise, or request extra services —
-              all from your dashboard.
+    <Motion.section
+      initial={{ opacity: 0, y: 24 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.12 }}
+      className="rounded-3xl border border-white/60 bg-white/90 p-8 text-night shadow-[0_32px_90px_-48px_rgba(91,33,209,0.18)] backdrop-blur-sm"
+    >
+      <div className="space-y-3">
+        <Badge className="w-fit border-white/70 bg-white/85 text-[0.65rem] tracking-[0.35em] text-night/60 shadow-sm shadow-white/70">
+          New
+        </Badge>
+        <div>
+          <h2 className="text-2xl font-semibold text-night">Grow your raise with Launch & Lift</h2>
+          <p className="mt-1 max-w-2xl text-sm text-night/70">
+            Each service now has a dedicated workspace with richer context. Explore the detail pages
+            to manage listings, request capital support, or collaborate with our specialists.
+          </p>
+        </div>
+      </div>
+
+      <div className="mt-7 grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <Card className="h-full border-white/70 bg-white/90 text-night shadow-[0_24px_70px_-50px_rgba(91,33,209,0.3)]">
+          <CardHeader className="space-y-3">
+            <CardTitle className="text-xl text-night">Marketplace presence</CardTitle>
+            <p className="text-sm text-night/70">
+              Keep your raise details polished before we surface you to Launch &amp; Lift investors.
             </p>
-          </div>
-        </div>
-
-        <div className="mt-7 grid grid-cols-1 gap-6 lg:grid-cols-3">
-          <Card className="h-full border-white/70 bg-white/90 text-night shadow-[0_24px_70px_-50px_rgba(91,33,209,0.3)]">
-            <CardHeader className="space-y-3">
-              <CardTitle className="text-xl text-night">List on our Marketplace</CardTitle>
-              <p className="text-sm text-night/70">
-                Create one live listing with your raise amount, use-of-funds, and minimum ticket so
-                Launch &amp; Lift investors can review it.
+          </CardHeader>
+          <CardContent className="space-y-5">
+            <div>
+              <p className={`text-sm font-semibold ${hasListing ? 'text-royal' : 'text-night/50'}`}>
+                {hasListing ? 'Active listing' : 'Awaiting your listing'}
               </p>
-            </CardHeader>
-            <CardContent className="space-y-5">
-              <div>
-                <p
-                  className={`text-sm font-semibold ${hasListing ? 'text-royal' : 'text-night/50'}`}
-                >
-                  {hasListing ? 'Active listing' : 'No active listing'}
+              <p className="mt-1 text-xs text-night/55">{listingStatus}</p>
+            </div>
+            {hasListing ? (
+              <div className="rounded-2xl border border-white/70 bg-white/80 px-4 py-3 text-xs text-night/70 shadow-inner shadow-white/60">
+                <div className="flex items-center justify-between">
+                  <span className="text-night/50">Raise amount</span>
+                  <span className="font-semibold text-night">
+                    {formatCurrencyInr(listing.raiseAmount)}
+                  </span>
+                </div>
+                <div className="mt-2 flex items-center justify-between">
+                  <span className="text-night/50">Min. ticket</span>
+                  <span className="font-semibold text-night">
+                    {formatCurrencyInr(listing.minTicket)}
+                  </span>
+                </div>
+                <div className="mt-2">
+                  <p className="text-night/50">Use of funds</p>
+                  <p className="mt-1 text-night/70">{listing.useOfFunds}</p>
+                </div>
+                <div className="mt-2 flex items-center justify-between">
+                  <span className="text-night/50">Industry / category</span>
+                  <span className="font-semibold text-night">{listing.industry || 'Not set'}</span>
+                </div>
+              </div>
+            ) : (
+              <p className="text-sm text-night/60">
+                Set up your first listing to appear in our curated founder marketplace.
+              </p>
+            )}
+
+            <Button asChild className="w-full">
+              <Link className="flex items-center justify-center gap-2" to="/dashboard/founder/marketplace">
+                {hasListing ? 'View marketplace listing' : 'Create marketplace listing'}
+                <ArrowUpRight className="h-4 w-4" />
+              </Link>
+            </Button>
+            <p className="text-xs text-night/55">
+              You can maintain one live listing at a time. Drafts are saved on the dedicated page.
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card className="h-full border-white/70 bg-white/90 text-night shadow-[0_24px_70px_-50px_rgba(91,33,209,0.3)]">
+          <CardHeader className="space-y-3">
+            <CardTitle className="text-xl text-night">Success-fee raise support</CardTitle>
+            <p className="text-sm text-night/70">
+              Walk through a guided brief so our capital team can champion your round.
+            </p>
+          </CardHeader>
+          <CardContent className="space-y-5">
+            <div className="flex flex-wrap gap-2 text-xs text-night/70">
+              {['Onboarding: ₹2–3L', 'Success fee on final raise', 'Investor introductions'].map(
+                (chip) => (
+                  <span
+                    key={chip}
+                    className="rounded-full border border-white/70 bg-white/80 px-3 py-1 text-[0.7rem] text-night/70 shadow-sm shadow-white/70"
+                  >
+                    {chip}
+                  </span>
+                ),
+              )}
+            </div>
+
+            {successRequest ? (
+              <div className="rounded-2xl border border-white/70 bg-white/80 px-4 py-3 text-xs text-night/70 shadow-inner shadow-white/60">
+                <p className="font-semibold text-royal">Request submitted — our team is reviewing.</p>
+                <p className="mt-1 text-night/60">
+                  Round: {successRequest.round} • Target:{' '}
+                  {successRequest.targetAmount ? formatCurrencyInr(successRequest.targetAmount) : 'Not shared'}
                 </p>
-                <p className="mt-1 text-xs text-night/50">{listingStatus}</p>
+                <p className="mt-1 text-night/55">
+                  Updated {formatDateDisplay(successRequest.createdAt)} • Revisit to edit or add notes.
+                </p>
               </div>
-              {hasListing ? (
-                <div className="rounded-2xl border border-white/70 bg-white/80 px-4 py-3 text-xs text-night/70 shadow-inner shadow-white/60">
-                  <div className="flex items-center justify-between">
-                    <span className="text-night/50">Raise amount</span>
-                    <span className="font-semibold text-night">
-                      {formatCurrencyInr(marketplaceListing.raiseAmount)}
-                    </span>
-                  </div>
-                  <div className="mt-2 flex items-center justify-between">
-                    <span className="text-night/50">Min. ticket</span>
-                    <span className="font-semibold text-night">
-                      {formatCurrencyInr(marketplaceListing.minTicket)}
-                    </span>
-                  </div>
-                  <div className="mt-2">
-                    <p className="text-night/50">Use of funds</p>
-                    <p className="mt-1 text-night/70">{marketplaceListing.useOfFunds}</p>
-                  </div>
-                  <div className="mt-2 flex items-center justify-between">
-                    <span className="text-night/50">Industry / category</span>
-                    <span className="font-semibold text-night">
-                      {marketplaceListing.industry || 'Not set'}
-                    </span>
-                  </div>
-                </div>
-              ) : null}
-
-              <Button className="w-full" onClick={openMarketplaceModal}>
-                {hasListing ? 'View / edit listing' : 'Create listing'}
-              </Button>
-
-              <p className="text-xs text-night/55">
-                Currently we allow 1 active listing per founder.
+            ) : (
+              <p className="text-sm text-night/60">
+                Share stage, traction, and committed capital so the success team can spin up outreach.
               </p>
-            </CardContent>
-          </Card>
+            )}
 
-          <Card className="h-full border-white/70 bg-white/90 text-night shadow-[0_24px_70px_-50px_rgba(91,33,209,0.3)]">
-            <CardHeader className="space-y-3">
-              <CardTitle className="text-xl text-night">Success-fee raise support</CardTitle>
-              <p className="text-sm text-night/70">
-                Hands-on support to close your round. We help with investor outreach, materials, and
-                follow-ups. We charge a small onboarding fee plus success fee on the raise.
-              </p>
-            </CardHeader>
-            <CardContent className="space-y-5">
-              <div className="flex flex-wrap gap-2 text-xs text-night/70">
-                {['Onboarding: ₹2–3L', 'Success fee on final raise', 'Investor introductions'].map(
-                  (chip) => (
-                    <span
-                      key={chip}
-                      className="rounded-full border border-white/70 bg-white/80 px-3 py-1 text-[0.7rem] text-night/70 shadow-sm shadow-white/70"
-                    >
-                      {chip}
-                    </span>
-                  ),
-                )}
+            <Button asChild className="w-full">
+              <Link className="flex items-center justify-center gap-2" to="/dashboard/founder/success-fee">
+                {successRequest ? 'Update success-fee request' : 'Request success-fee plan'}
+                <ArrowUpRight className="h-4 w-4" />
+              </Link>
+            </Button>
+            <p className="text-xs text-night/55">
+              Requests surface instantly on the admin console for Launch &amp; Lift operators.
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card className="h-full border-white/70 bg-white/90 text-night shadow-[0_24px_70px_-50px_rgba(91,33,209,0.3)]">
+          <CardHeader className="space-y-3">
+            <CardTitle className="text-xl text-night">Founder services studio</CardTitle>
+            <p className="text-sm text-night/70">
+              Collaborate with vetted specialists on the assets that close your round faster.
+            </p>
+          </CardHeader>
+          <CardContent className="space-y-5">
+            <ul className="grid gap-2 text-sm text-night/70">
+              {FOUNDER_SERVICE_OPTIONS.map((service) => (
+                <li
+                  key={service}
+                  className="flex items-center justify-between rounded-xl border border-white/70 bg-white/80 px-3 py-2 text-xs text-night sm:text-sm shadow-inner shadow-white/60"
+                >
+                  <span>{service}</span>
+                  <span className="text-[0.7rem] text-royal">Available</span>
+                </li>
+              ))}
+            </ul>
+
+            {latestServiceRequest ? (
+              <div className="rounded-2xl border border-white/70 bg-white/80 px-4 py-3 text-xs text-night/70 shadow-inner shadow-white/60">
+                <p className="font-semibold text-royal">Last request</p>
+                <p className="mt-1 text-night/60">
+                  {latestServiceRequest.serviceType} • Urgency {latestServiceRequest.urgency}
+                </p>
+                <p className="mt-1 text-night/55">
+                  Updated {formatDateDisplay(latestServiceRequest.createdAt)} •{' '}
+                  {serviceRequests.length > 1
+                    ? `${serviceRequests.length} requests in queue`
+                    : 'Ready for review'}
+                </p>
               </div>
-
-              {founderRequests.successFee ? (
-                <div className="rounded-2xl border border-white/70 bg-white/80 px-4 py-3 text-xs text-night/70 shadow-inner shadow-white/60">
-                  <p className="font-semibold text-royal">
-                    Request sent — our team will reach out.
-                  </p>
-                  <p className="mt-1 text-night/60">
-                    Round: {founderRequests.successFee.round} • Target:{' '}
-                    {founderRequests.successFee.targetAmount
-                      ? formatCurrencyInr(founderRequests.successFee.targetAmount)
-                      : 'Not shared'}
-                  </p>
-                </div>
-              ) : null}
-
-              <Button className="w-full" onClick={openSuccessModal}>
-                Request success-fee plan
-              </Button>
-
-              <p className="text-xs text-night/55">
-                This request will be visible to admin on the backend.
+            ) : (
+              <p className="text-sm text-night/60">
+                Spin up a scoped brief for pitch decks, metrics deep dives, or GTM enablement.
               </p>
-            </CardContent>
-          </Card>
+            )}
 
-          <Card className="h-full border-white/70 bg-white/90 text-night shadow-[0_24px_70px_-50px_rgba(91,33,209,0.3)]">
-            <CardHeader className="space-y-3">
-              <CardTitle className="text-xl text-night">Other services for founders</CardTitle>
-              <p className="text-sm text-night/70">
-                Need help polishing your materials? Ask and we’ll loop in the right expert.
-              </p>
-            </CardHeader>
-            <CardContent className="space-y-5">
-              <ul className="grid gap-2 text-sm text-night/70">
-                {FOUNDER_SERVICE_OPTIONS.map((service) => (
-                  <li
-                    key={service}
-                    className="flex items-center justify-between rounded-xl border border-white/70 bg-white/80 px-3 py-2 text-xs text-night sm:text-sm shadow-inner shadow-white/60"
-                  >
-                    <span>{service}</span>
-                    <button
-                      type="button"
-                      className="text-[0.7rem] text-royal underline underline-offset-4 hover:text-night"
-                      onClick={() => openServicesModal(service)}
-                    >
-                      Request
-                    </button>
-                  </li>
-                ))}
-              </ul>
-
-              {latestServiceRequest ? (
-                <div className="rounded-2xl border border-white/70 bg-white/80 px-4 py-3 text-xs text-night/70 shadow-inner shadow-white/60">
-                  <p className="font-semibold text-royal">
-                    Request created. Our team will contact you.
-                  </p>
-                  <p className="mt-1 text-night/60">
-                    Latest: {latestServiceRequest.serviceType} • Urgency:{' '}
-                    {latestServiceRequest.urgency}
-                  </p>
-                </div>
-              ) : null}
-
-              <Button className="w-full" onClick={() => openServicesModal()}>
-                Request a service
-              </Button>
-
-              <p className="text-xs text-night/55">
-                All founder service requests should be visible on the admin side.
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-
-        <p className="mt-6 text-xs text-night/55">
-          These requests are stored locally so Launch &amp; Lift admin can wire them into the
-          backend when ready.
-        </p>
-      </Motion.section>
-
-      <AnimatePresence>
-        {isMarketplaceModalOpen ? (
-          <Motion.div
-            key="marketplace-modal"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur"
-          >
-            <Motion.div
-              initial={{ opacity: 0, y: 20, scale: 0.96 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 20, scale: 0.96 }}
-              className="relative w-full max-w-xl rounded-3xl border border-white/70 bg-white/98 p-7 text-night shadow-2xl shadow-[0_40px_120px_-60px_rgba(147,112,219,0.35)]"
-            >
-              <button
-                type="button"
-                className="absolute right-6 top-6 rounded-full border border-night/10 bg-white/80 p-1 text-night/60 transition hover:bg-white"
-                onClick={() => setIsMarketplaceModalOpen(false)}
-                aria-label="Close marketplace form"
-              >
-                <X className="h-4 w-4" />
-              </button>
-
-              <h3 className="text-xl font-semibold text-night">Marketplace listing</h3>
-              <p className="mt-1 text-sm text-night/70">
-                Update the details investors see on Launch &amp; Lift.
-              </p>
-
-              <form className="mt-6 space-y-5" onSubmit={handleMarketplaceSubmit}>
-                <div className="grid gap-3">
-                  <Label className="text-night/70" htmlFor="raiseAmount">
-                    Raise amount (₹)
-                  </Label>
-                  <Input
-                    id="raiseAmount"
-                    name="raiseAmount"
-                    type="number"
-                    min="0"
-                    required
-                    value={marketplaceForm.raiseAmount}
-                    onChange={handleMarketplaceChange}
-                    className="h-11"
-                  />
-                </div>
-
-                <div className="grid gap-3">
-                  <Label className="text-night/70" htmlFor="minTicket">
-                    Min. ticket size (₹)
-                  </Label>
-                  <Input
-                    id="minTicket"
-                    name="minTicket"
-                    type="number"
-                    min="0"
-                    required
-                    value={marketplaceForm.minTicket}
-                    onChange={handleMarketplaceChange}
-                    className="h-11"
-                  />
-                </div>
-
-                <div className="grid gap-3">
-                  <Label className="text-night/70" htmlFor="industry">
-                    Industry / category
-                  </Label>
-                  <Input
-                    id="industry"
-                    name="industry"
-                    required
-                    value={marketplaceForm.industry}
-                    onChange={handleMarketplaceChange}
-                    className="h-11"
-                  />
-                </div>
-
-                <div className="grid gap-3">
-                  <Label className="text-night/70" htmlFor="useOfFunds">
-                    Use of funds
-                  </Label>
-                  <Textarea
-                    id="useOfFunds"
-                    name="useOfFunds"
-                    required
-                    value={marketplaceForm.useOfFunds}
-                    onChange={handleMarketplaceChange}
-                    className="min-h-[120px]"
-                  />
-                </div>
-
-                <div className="flex flex-col-reverse gap-3 pt-2 sm:flex-row sm:justify-end">
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    className="hover:bg-night/5"
-                    onClick={() => setIsMarketplaceModalOpen(false)}
-                  >
-                    Cancel
-                  </Button>
-                  <Button type="submit" className="sm:min-w-[160px]">
-                    Save listing
-                  </Button>
-                </div>
-              </form>
-            </Motion.div>
-          </Motion.div>
-        ) : null}
-      </AnimatePresence>
-
-      <AnimatePresence>
-        {isSuccessModalOpen ? (
-          <Motion.div
-            key="success-modal"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur"
-          >
-            <Motion.div
-              initial={{ opacity: 0, y: 20, scale: 0.96 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 20, scale: 0.96 }}
-              className="relative w-full max-w-xl rounded-3xl border border-white/70 bg-white/98 p-7 text-night shadow-2xl shadow-[0_40px_120px_-60px_rgba(147,112,219,0.35)]"
-            >
-              <button
-                type="button"
-                className="absolute right-6 top-6 rounded-full border border-night/10 bg-white/80 p-1 text-night/60 transition hover:bg-white"
-                onClick={() => setIsSuccessModalOpen(false)}
-                aria-label="Close success-fee request form"
-              >
-                <X className="h-4 w-4" />
-              </button>
-
-              <h3 className="text-xl font-semibold text-night">Request success-fee support</h3>
-              <p className="mt-1 text-sm text-night/70">
-                Tell us about your round so the Launch &amp; Lift capital team can respond.
-              </p>
-
-              <form className="mt-6 space-y-5" onSubmit={handleSuccessSubmit}>
-                <div className="grid gap-3">
-                  <Label className="text-night/70" htmlFor="round">
-                    Current round
-                  </Label>
-                  <select
-                    id="round"
-                    name="round"
-                    value={successForm.round}
-                    onChange={handleSuccessChange}
-                    className="h-11 w-full rounded-xl border border-night/10 bg-white/90 px-4 text-sm text-night focus:border-royal focus:outline-none focus:ring-2 focus:ring-royal/40"
-                  >
-                    {SUCCESS_FEE_ROUNDS.map((round) => (
-                      <option key={round} value={round}>
-                        {round}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="grid gap-3">
-                  <Label className="text-night/70" htmlFor="targetAmount">
-                    Target amount (₹)
-                  </Label>
-                  <Input
-                    id="targetAmount"
-                    name="targetAmount"
-                    type="number"
-                    min="0"
-                    required
-                    value={successForm.targetAmount}
-                    onChange={handleSuccessChange}
-                    className="h-11"
-                  />
-                </div>
-
-                <div className="grid gap-3">
-                  <Label className="text-night/70" htmlFor="committed">
-                    Current committed amount (₹) <span className="text-night/45">(optional)</span>
-                  </Label>
-                  <Input
-                    id="committed"
-                    name="committed"
-                    type="number"
-                    min="0"
-                    value={successForm.committed}
-                    onChange={handleSuccessChange}
-                    className="h-11"
-                  />
-                </div>
-
-                <div className="grid gap-3">
-                  <Label className="text-night/70" htmlFor="deckUrl">
-                    Company deck link <span className="text-night/45">(optional)</span>
-                  </Label>
-                  <Input
-                    id="deckUrl"
-                    name="deckUrl"
-                    type="url"
-                    value={successForm.deckUrl}
-                    onChange={handleSuccessChange}
-                    placeholder="https://..."
-                    className="h-11"
-                  />
-                </div>
-
-                <div className="grid gap-3">
-                  <Label className="text-night/70" htmlFor="notes">
-                    Notes to Launch &amp; Lift
-                  </Label>
-                  <Textarea
-                    id="notes"
-                    name="notes"
-                    value={successForm.notes}
-                    onChange={handleSuccessChange}
-                    className="min-h-[120px]"
-                  />
-                </div>
-
-                <div className="flex flex-col-reverse gap-3 pt-2 sm:flex-row sm:justify-end">
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    className="hover:bg-night/5"
-                    onClick={() => setIsSuccessModalOpen(false)}
-                  >
-                    Cancel
-                  </Button>
-                  <Button type="submit" className="sm:min-w-[200px]">
-                    Submit request
-                  </Button>
-                </div>
-              </form>
-            </Motion.div>
-          </Motion.div>
-        ) : null}
-      </AnimatePresence>
-
-      <AnimatePresence>
-        {isServicesModalOpen ? (
-          <Motion.div
-            key="services-modal"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur"
-          >
-            <Motion.div
-              initial={{ opacity: 0, y: 20, scale: 0.96 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 20, scale: 0.96 }}
-              className="relative w-full max-w-xl rounded-3xl border border-white/70 bg-white/98 p-7 text-night shadow-2xl shadow-[0_40px_120px_-60px_rgba(147,112,219,0.35)]"
-            >
-              <button
-                type="button"
-                className="absolute right-6 top-6 rounded-full border border-night/10 bg-white/80 p-1 text-night/60 transition hover:bg-white"
-                onClick={() => setIsServicesModalOpen(false)}
-                aria-label="Close service request form"
-              >
-                <X className="h-4 w-4" />
-              </button>
-
-              <h3 className="text-xl font-semibold text-night">Request founder services</h3>
-              <p className="mt-1 text-sm text-night/70">
-                Choose the support you need and we’ll loop in the right expert.
-              </p>
-
-              <form className="mt-6 space-y-5" onSubmit={handleServicesSubmit}>
-                <div className="grid gap-3">
-                  <Label className="text-night/70" htmlFor="serviceType">
-                    Service
-                  </Label>
-                  <select
-                    id="serviceType"
-                    name="serviceType"
-                    value={servicesForm.serviceType}
-                    onChange={handleServicesChange}
-                    className="h-11 w-full rounded-xl border border-night/10 bg-white/90 px-4 text-sm text-night focus:border-royal focus:outline-none focus:ring-2 focus:ring-royal/40"
-                  >
-                    {FOUNDER_SERVICE_OPTIONS.map((service) => (
-                      <option key={service} value={service}>
-                        {service}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="grid gap-3">
-                  <Label className="text-night/70" htmlFor="note">
-                    Brief requirement
-                  </Label>
-                  <Textarea
-                    id="note"
-                    name="note"
-                    required
-                    value={servicesForm.note}
-                    onChange={handleServicesChange}
-                    className="min-h-[120px]"
-                  />
-                </div>
-
-                <div className="grid gap-3">
-                  <Label className="text-night/70" htmlFor="urgency">
-                    Urgency
-                  </Label>
-                  <select
-                    id="urgency"
-                    name="urgency"
-                    value={servicesForm.urgency}
-                    onChange={handleServicesChange}
-                    className="h-11 w-full rounded-xl border border-night/10 bg-white/90 px-4 text-sm text-night focus:border-royal focus:outline-none focus:ring-2 focus:ring-royal/40"
-                  >
-                    {['Low', 'Normal', 'High'].map((option) => (
-                      <option key={option} value={option}>
-                        {option}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="flex flex-col-reverse gap-3 pt-2 sm:flex-row sm:justify-end">
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    className="hover:bg-night/5"
-                    onClick={() => setIsServicesModalOpen(false)}
-                  >
-                    Cancel
-                  </Button>
-                  <Button type="submit" className="sm:min-w-[180px]">
-                    Create request
-                  </Button>
-                </div>
-              </form>
-            </Motion.div>
-          </Motion.div>
-        ) : null}
-      </AnimatePresence>
-    </>
+            <Button asChild className="w-full">
+              <Link className="flex items-center justify-center gap-2" to="/dashboard/founder/services">
+                {latestServiceRequest ? 'Manage service requests' : 'Request a founder service'}
+                <ArrowUpRight className="h-4 w-4" />
+              </Link>
+            </Button>
+            <p className="text-xs text-night/55">
+              All service collaboration threads now live on the services page for easy follow-up.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    </Motion.section>
   );
 };
 

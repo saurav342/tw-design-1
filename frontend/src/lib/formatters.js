@@ -13,3 +13,25 @@ export const formatCompactNumber = (value) =>
     notation: 'compact',
     maximumFractionDigits: 1,
   }).format(value);
+
+export const formatCurrencyInr = (value) => {
+  if (value === null || value === undefined) return '—';
+  const numeric = Number(value);
+  if (Number.isNaN(numeric)) return '—';
+  return new Intl.NumberFormat('en-IN', {
+    style: 'currency',
+    currency: 'INR',
+    maximumFractionDigits: 0,
+  }).format(numeric);
+};
+
+export const formatDateDisplay = (value) => {
+  if (!value) return 'Not updated yet';
+  const safeDate = typeof value === 'string' || value instanceof Date ? new Date(value) : null;
+  if (!safeDate || Number.isNaN(safeDate.getTime())) return 'Not updated yet';
+  return safeDate.toLocaleDateString('en-IN', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  });
+};

@@ -15,6 +15,9 @@ import InvestorSignup from './pages/InvestorSignup';
 import FounderSignup from './pages/FounderSignup';
 import InvestorDashboard from './pages/InvestorDashboard';
 import FounderDashboard from './pages/FounderDashboard';
+import FounderMarketplace from './pages/FounderMarketplace';
+import FounderSuccessFee from './pages/FounderSuccessFee';
+import FounderServices from './pages/FounderServices';
 import AdminDashboard from './pages/AdminDashboard';
 import NotFound from './pages/NotFound';
 
@@ -46,6 +49,30 @@ const App = () => (
             element={
               <ProtectedRoute roles={['founder']}>
                 <FounderDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/dashboard/founder/marketplace"
+            element={
+              <ProtectedRoute roles={['founder']}>
+                <FounderMarketplace />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/dashboard/founder/success-fee"
+            element={
+              <ProtectedRoute roles={['founder']}>
+                <FounderSuccessFee />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/dashboard/founder/services"
+            element={
+              <ProtectedRoute roles={['founder']}>
+                <FounderServices />
               </ProtectedRoute>
             }
           />

@@ -214,7 +214,7 @@ const HeroSection = () => {
               className="text-night/80"
               style={{
                 fontFamily: 'var(--hero-display-font)',
-                fontSize: '5.0rem',
+                fontSize: '4.0rem',
                 fontWeight: 600,
                 lineHeight: 1.05,
                 letterSpacing: '-0.02em',

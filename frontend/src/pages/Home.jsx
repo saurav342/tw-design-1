@@ -63,7 +63,7 @@ const Home = () => {
       />
       <div className="space-y-24 pb-24">
         <HeroSection />
-        <MotionSection
+        {/* <MotionSection
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, amount: 0.3 }}
@@ -123,7 +123,7 @@ const Home = () => {
               {dashboardOfferings.adminNote}
             </div>
           </div>
-        </MotionSection>
+        </MotionSection> */}
 
     {/* <MotionSection
       initial="hidden"

@@ -12,7 +12,7 @@ import { MatchScoreBadge } from '../components/MatchScoreBadge.jsx';
 import { showGenericSuccess } from '../lib/emailClientMock.js';
 import { formatCurrency, formatCurrencyInr, formatDateDisplay } from '../lib/formatters.js';
 import { useFounderExtras } from '../hooks/useFounderExtras.js';
-import { FOUNDER_SERVICE_OPTIONS } from '../data/founderExtras.js';
+import { FOUNDER_SERVICE_DETAILS } from '../data/founderExtras.js';
 import { useAppStore } from '../store/useAppStore.js';
 import { persistActiveFounderId, readActiveFounderId } from '../lib/founderSession.js';
 
@@ -371,14 +371,19 @@ const AdditionalFundingSection = ({ extras }) => {
             </p>
           </CardHeader>
           <CardContent className="space-y-5">
-            <ul className="grid gap-2 text-sm text-night/70">
-              {FOUNDER_SERVICE_OPTIONS.map((service) => (
+            <ul className="grid gap-3 text-sm text-night/70">
+              {FOUNDER_SERVICE_DETAILS.map((service) => (
                 <li
-                  key={service}
-                  className="flex items-center justify-between rounded-xl border border-white/70 bg-white/80 px-3 py-2 text-xs text-night sm:text-sm shadow-inner shadow-white/60"
+                  key={service.id}
+                  className="flex flex-col gap-1 rounded-2xl border border-white/70 bg-white/80 px-4 py-3 text-sm text-night shadow-inner shadow-white/60"
                 >
-                  <span>{service}</span>
-                  <span className="text-[0.7rem] text-royal">Available</span>
+                  <div className="flex items-center justify-between">
+                    <span className="font-semibold text-night">{service.title}</span>
+                    <span className="text-[0.7rem] uppercase tracking-[0.25em] text-royal">
+                      Available
+                    </span>
+                  </div>
+                  <p className="text-xs text-night/60">{service.tagline}</p>
                 </li>
               ))}
             </ul>

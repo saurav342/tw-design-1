@@ -1,7 +1,18 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion as Motion } from 'framer-motion';
-import { ArrowLeft, ClipboardList, MessageCircle, Sparkles } from 'lucide-react';
+import {
+  ArrowLeft,
+  ClipboardList,
+  FileText,
+  LineChart,
+  MessageCircle,
+  Rocket,
+  Scale,
+  Sparkles,
+  UserCheck,
+  Cpu,
+} from 'lucide-react';
 import { Button } from '../components/ui/button.jsx';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card.jsx';
 import { Label } from '../components/ui/label.jsx';
@@ -11,6 +22,7 @@ import { useFounderExtras } from '../hooks/useFounderExtras.js';
 import {
   FOUNDER_SERVICE_OPTIONS,
   FOUNDER_SERVICE_URGENCY,
+  FOUNDER_SERVICE_DETAILS,
 } from '../data/founderExtras.js';
 import { formatDateDisplay } from '../lib/formatters.js';
 import { showGenericSuccess } from '../lib/emailClientMock.js';
@@ -65,6 +77,24 @@ const FounderServices = () => {
     setIsDirty(false);
   };
 
+  const serviceIconMap = {
+    'pitch-deck': FileText,
+    mentorship: UserCheck,
+    financials: LineChart,
+    legal: Scale,
+    tech: Cpu,
+    growth: Rocket,
+  };
+
+  const serviceAccentMap = {
+    'pitch-deck': 'from-royal/15 via-white/70 to-blossom/25',
+    mentorship: 'from-emerald/20 via-white/70 to-royal/15',
+    financials: 'from-sunbeam/25 via-white/70 to-royal/10',
+    legal: 'from-night/10 via-white/70 to-royal/20',
+    tech: 'from-indigo-400/20 via-white/70 to-royal/15',
+    growth: 'from-rose-400/25 via-white/70 to-sunbeam/20',
+  };
+
   return (
     <section className="relative overflow-hidden pb-24">
       <div className="absolute inset-0 -z-10 bg-gradient-to-br from-white via-white/85 to-sunbeam/30" />
@@ -98,6 +128,63 @@ const FounderServices = () => {
           </div>
           <div className="rounded-full border border-white/70 bg-white/85 px-4 py-2 text-xs uppercase tracking-[0.35em] text-night/60 shadow-sm shadow-white/70">
             {serviceRequests.length} active request{serviceRequests.length === 1 ? '' : 's'}
+          </div>
+        </Motion.div>
+
+        <Motion.div
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.05 }}
+          className="mt-10 space-y-6"
+        >
+          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            <div>
+              <h2 className="text-2xl font-semibold text-night">Service catalogue</h2>
+              <p className="mt-1 max-w-3xl text-sm text-night/65">
+                Explore what’s included before you submit a brief. Every engagement pairs you with
+                a Launch &amp; Lift specialist plus curated playbooks proven across rounds.
+              </p>
+            </div>
+          </div>
+          <div className="grid gap-5 md:grid-cols-2">
+            {FOUNDER_SERVICE_DETAILS.map((service) => {
+              const Icon = serviceIconMap[service.id] ?? Sparkles;
+              const accent = serviceAccentMap[service.id] ?? 'from-royal/15 via-white/70 to-sunbeam/20';
+              return (
+                <div
+                  key={service.id}
+                  className="relative overflow-hidden rounded-3xl border border-white/65 bg-white/95 p-6 text-night shadow-[0_32px_100px_-70px_rgba(91,33,209,0.45)]"
+                >
+                  <div className={`pointer-events-none absolute inset-0 bg-gradient-to-br ${accent}`} />
+                  <div className="relative z-10 space-y-4">
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/70 bg-white/85 shadow-sm shadow-white/60">
+                        <Icon className="h-5 w-5 text-royal" />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-semibold text-night">{service.title}</h3>
+                        <p className="text-xs uppercase tracking-[0.25em] text-night/50">Available now</p>
+                      </div>
+                    </div>
+                    <p className="text-sm font-medium text-night/75">{service.tagline}</p>
+                    <p className="text-sm leading-6 text-night/70">{service.description}</p>
+                    <div className="space-y-2 rounded-2xl border border-white/70 bg-white/90 p-4 text-sm text-night/70 shadow-inner shadow-white/70">
+                      <p className="text-xs font-semibold uppercase tracking-[0.25em] text-night/45">
+                        Deliverables
+                      </p>
+                      <ul className="space-y-2">
+                        {service.outcomes.map((item) => (
+                          <li key={item} className="flex items-start gap-2">
+                            <span className="mt-1 h-1.5 w-1.5 rounded-full bg-royal" />
+                            <span>{item}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </Motion.div>
 

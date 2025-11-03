@@ -25,7 +25,7 @@ import {
   FOUNDER_SERVICE_DETAILS,
 } from '../data/founderExtras.js';
 import { formatDateDisplay } from '../lib/formatters.js';
-import { showGenericSuccess } from '../lib/emailClientMock.js';
+import { showGenericInfo, showGenericSuccess } from '../lib/emailClientMock.js';
 
 const defaultFormState = () => ({
   serviceType: FOUNDER_SERVICE_OPTIONS[0],
@@ -62,7 +62,7 @@ const FounderServices = () => {
     setIsDirty(true);
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
     const payload = {
       serviceType: form.serviceType,
@@ -71,10 +71,15 @@ const FounderServices = () => {
       createdAt: new Date().toISOString(),
     };
 
-    addServiceRequest(payload);
-    showGenericSuccess('Service request created (mock)');
-    setForm(defaultFormState());
-    setIsDirty(false);
+    try {
+      await addServiceRequest(payload);
+      showGenericSuccess('Service request saved');
+      setForm(defaultFormState());
+      setIsDirty(false);
+    } catch (error) {
+      console.error('Failed to submit service request', error);
+      showGenericInfo('We could not save your brief just now. Please try again in a moment.');
+    }
   };
 
   const serviceIconMap = {

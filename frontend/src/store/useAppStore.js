@@ -4,7 +4,7 @@ import { createDefaultFounderExtras } from '../data/founderExtras.js';
 import { defaultBenchmarkRows } from '../mock/benchmarksMock';
 import { foundersMock } from '../mock/foundersMock';
 import { investorsMock } from '../mock/investorsMock';
-import { intakeApi } from '../services/api.js';
+import { founderExtrasApi, intakeApi } from '../services/api.js';
 
 const randomId = () =>
   (typeof crypto !== 'undefined' && crypto.randomUUID
@@ -83,6 +83,14 @@ const buildInitialFounderExtras = () => {
   return entries;
 };
 
+const normalizeExtrasPayload = (payload) => ({
+  marketplaceListing: payload?.marketplaceListing ? { ...payload.marketplaceListing } : null,
+  successFeeRequest: payload?.successFeeRequest ? { ...payload.successFeeRequest } : null,
+  serviceRequests: Array.isArray(payload?.serviceRequests)
+    ? payload.serviceRequests.map((item) => ({ ...item }))
+    : [],
+});
+
 export const useAppStore = create((set, get) => ({
   founders: foundersMock,
   investors: investorsMock,
@@ -133,6 +141,10 @@ export const useAppStore = create((set, get) => ({
         newFounder,
         ...state.founders.filter((founder) => founder.id !== newFounder.id),
       ],
+      founderExtras: {
+        ...state.founderExtras,
+        [id]: normalizeExtrasPayload(state.founderExtras[id] ?? createDefaultFounderExtras()),
+      },
     }));
 
     return newFounder;
@@ -177,7 +189,14 @@ export const useAppStore = create((set, get) => ({
           return bTime - aTime;
         });
 
-        return { founders: nextFounders };
+        const nextExtras = { ...state.founderExtras };
+        nextFounders.forEach((founder) => {
+          if (!nextExtras[founder.id]) {
+            nextExtras[founder.id] = normalizeExtrasPayload(createDefaultFounderExtras());
+          }
+        });
+
+        return { founders: nextFounders, founderExtras: nextExtras };
       });
 
       return items;
@@ -216,61 +235,141 @@ export const useAppStore = create((set, get) => ({
   },
   getFounderById: (founderId) => get().founders.find((founder) => founder.id === founderId),
   getInvestorById: (investorId) => get().investors.find((investor) => investor.id === investorId),
-  upsertFounderMarketplace: (founderId, listing) => {
-    if (!founderId) return;
-    set((state) => {
-      const current = state.founderExtras[founderId] ?? createDefaultFounderExtras();
-      const next = {
-        ...current,
-        marketplaceListing: listing ? { ...listing } : null,
-      };
+  fetchFounderExtras: async (founderId, token) => {
+    if (!founderId) return null;
 
-      return {
-        founderExtras: {
-          ...state.founderExtras,
-          [founderId]: next,
-        },
-      };
-    });
+    if (!token) {
+      set((state) => {
+        if (state.founderExtras[founderId]) return {};
+        return {
+          founderExtras: {
+            ...state.founderExtras,
+            [founderId]: normalizeExtrasPayload(createDefaultFounderExtras()),
+          },
+        };
+      });
+      return get().founderExtras[founderId] ?? normalizeExtrasPayload(createDefaultFounderExtras());
+    }
+
+    const response = await founderExtrasApi.getByFounder(founderId, token);
+    const extras = normalizeExtrasPayload(response?.extras);
+    set((state) => ({
+      founderExtras: {
+        ...state.founderExtras,
+        [founderId]: extras,
+      },
+    }));
+    return extras;
   },
-  recordFounderSuccessFee: (founderId, request) => {
-    if (!founderId) return;
-    set((state) => {
-      const current = state.founderExtras[founderId] ?? createDefaultFounderExtras();
-      const next = {
-        ...current,
-        successFeeRequest: request ? { ...request } : null,
-      };
+  syncFounderExtrasFromBackend: async (token) => {
+    if (!token) return [];
+    const response = await founderExtrasApi.listAll(token);
+    const items = Array.isArray(response?.items) ? response.items : [];
 
-      return {
-        founderExtras: {
-          ...state.founderExtras,
-          [founderId]: next,
-        },
-      };
+    set((state) => {
+      const next = { ...state.founderExtras };
+      items.forEach((entry) => {
+        if (!entry || !entry.founderId) return;
+        next[entry.founderId] = normalizeExtrasPayload(entry.extras);
+      });
+      return { founderExtras: next };
     });
+
+    return items;
   },
-  addFounderServiceRequest: (founderId, request) => {
-    if (!founderId || !request) return;
-    set((state) => {
-      const current = state.founderExtras[founderId] ?? createDefaultFounderExtras();
-      const next = {
-        ...current,
-        serviceRequests: [
-          ...(Array.isArray(current.serviceRequests)
-            ? current.serviceRequests.map((item) => ({ ...item }))
-            : []),
-          { ...request },
-        ],
-      };
+  upsertFounderMarketplace: async (founderId, listing, token) => {
+    if (!founderId) return null;
 
-      return {
-        founderExtras: {
-          ...state.founderExtras,
-          [founderId]: next,
-        },
-      };
-    });
+    if (!token) {
+      set((state) => {
+        const current = state.founderExtras[founderId] ?? createDefaultFounderExtras();
+        const next = normalizeExtrasPayload({
+          ...current,
+          marketplaceListing: listing ? { ...listing } : null,
+        });
+        return {
+          founderExtras: {
+            ...state.founderExtras,
+            [founderId]: next,
+          },
+        };
+      });
+      return get().founderExtras[founderId] ?? null;
+    }
+
+    const response = await founderExtrasApi.saveMarketplace(founderId, listing, token);
+    const extras = normalizeExtrasPayload(response?.extras);
+    set((state) => ({
+      founderExtras: {
+        ...state.founderExtras,
+        [founderId]: extras,
+      },
+    }));
+    return extras;
+  },
+  recordFounderSuccessFee: async (founderId, request, token) => {
+    if (!founderId) return null;
+
+    if (!token) {
+      set((state) => {
+        const current = state.founderExtras[founderId] ?? createDefaultFounderExtras();
+        const next = normalizeExtrasPayload({
+          ...current,
+          successFeeRequest: request ? { ...request } : null,
+        });
+        return {
+          founderExtras: {
+            ...state.founderExtras,
+            [founderId]: next,
+          },
+        };
+      });
+      return get().founderExtras[founderId] ?? null;
+    }
+
+    const response = await founderExtrasApi.saveSuccessFee(founderId, request, token);
+    const extras = normalizeExtrasPayload(response?.extras);
+    set((state) => ({
+      founderExtras: {
+        ...state.founderExtras,
+        [founderId]: extras,
+      },
+    }));
+    return extras;
+  },
+  addFounderServiceRequest: async (founderId, request, token) => {
+    if (!founderId || !request) return null;
+
+    if (!token) {
+      set((state) => {
+        const current = state.founderExtras[founderId] ?? createDefaultFounderExtras();
+        const queue = Array.isArray(current.serviceRequests)
+          ? current.serviceRequests.map((item) => ({ ...item }))
+          : [];
+        queue.push({ ...request });
+        const next = normalizeExtrasPayload({
+          ...current,
+          serviceRequests: queue,
+        });
+        return {
+          founderExtras: {
+            ...state.founderExtras,
+            [founderId]: next,
+          },
+        };
+      });
+      return get().founderExtras[founderId] ?? null;
+    }
+
+    const response = await founderExtrasApi.createServiceRequest(founderId, request, token);
+    const extras = normalizeExtrasPayload(response?.extras);
+    set((state) => ({
+      founderExtras: {
+        ...state.founderExtras,
+        [founderId]: extras,
+      },
+    }));
+    return extras;
   },
   clearFounderExtras: (founderId) => {
     if (!founderId) return;

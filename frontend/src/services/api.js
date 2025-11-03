@@ -129,3 +129,14 @@ export const intakeApi = {
   submitFounder: (data) => apiClient.post('/intakes/founders', data),
   listFounders: (token) => apiClient.get('/intakes/founders', token),
 };
+
+export const founderExtrasApi = {
+  listAll: (token) => apiClient.get('/founder-extras', token),
+  getByFounder: (founderId, token) => apiClient.get(`/founder-extras/${founderId}`, token),
+  saveMarketplace: (founderId, data, token) =>
+    apiClient.put(`/founder-extras/${founderId}/marketplace`, data, token),
+  saveSuccessFee: (founderId, data, token) =>
+    apiClient.put(`/founder-extras/${founderId}/success-fee`, data, token),
+  createServiceRequest: (founderId, data, token) =>
+    apiClient.post(`/founder-extras/${founderId}/service-requests`, data, token),
+};

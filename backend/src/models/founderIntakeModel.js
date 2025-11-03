@@ -1,5 +1,6 @@
 const { randomUUID } = require('crypto');
 const store = require('../data/store');
+const { ensureExtrasRecord } = require('./founderExtrasModel');
 
 const sanitizeIntake = (record) => ({ ...record });
 
@@ -23,6 +24,8 @@ const createFounderIntake = (input = {}) => {
   } else {
     store.founderIntakes.unshift(normalized);
   }
+
+  ensureExtrasRecord(id);
 
   return sanitizeIntake(normalized);
 };

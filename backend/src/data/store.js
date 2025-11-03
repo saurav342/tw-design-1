@@ -35,6 +35,15 @@ const createTestFounder = () => ({
   updatedAt: new Date().toISOString(),
 });
 
+const createDefaultFounderExtras = () => ({
+  marketplaceListing: null,
+  successFeeRequest: null,
+  serviceRequests: [],
+});
+
+const adminUser = createAdminUser();
+const demoFounder = createTestFounder();
+
 const defaultStats = [
   { label: 'Family offices', value: '190+', caption: 'Deep relationships across 18 countries' },
   { label: 'Average IRR', value: '27%', caption: 'Gross annualized net of fees since 2018' },
@@ -137,7 +146,7 @@ const defaultNews = [
 ];
 
 const store = {
-  users: [createAdminUser(), createTestFounder()],
+  users: [adminUser, demoFounder],
   portfolio: defaultPortfolio,
   testimonials: defaultTestimonials,
   faqs: defaultFaqs,
@@ -146,6 +155,9 @@ const store = {
   news: defaultNews,
   founderIntakes: [],
   passwordResets: [],
+  founderExtras: {
+    [demoFounder.id]: createDefaultFounderExtras(),
+  },
 };
 
 module.exports = store;

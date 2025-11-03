@@ -2,16 +2,20 @@ import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion as Motion } from 'framer-motion';
 import {
+  AlertCircle,
   ArrowLeft,
+  CheckCircle2,
   ClipboardList,
+  Cpu,
   FileText,
   LineChart,
+  Loader2,
   MessageCircle,
   Rocket,
   Scale,
   Sparkles,
   UserCheck,
-  Cpu,
+  X,
 } from 'lucide-react';
 import { Button } from '../components/ui/button.jsx';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card.jsx';
@@ -25,7 +29,6 @@ import {
   FOUNDER_SERVICE_DETAILS,
 } from '../data/founderExtras.js';
 import { formatDateDisplay } from '../lib/formatters.js';
-import { showGenericInfo, showGenericSuccess } from '../lib/emailClientMock.js';
 
 const defaultFormState = () => ({
   serviceType: FOUNDER_SERVICE_OPTIONS[0],
@@ -35,15 +38,18 @@ const defaultFormState = () => ({
 
 const FounderServices = () => {
   const navigate = useNavigate();
-  const { activeFounder, founderId } = useActiveFounder();
+  const { founderId } = useActiveFounder();
   const { extras, addServiceRequest } = useFounderExtras(founderId);
 
   const [form, setForm] = useState(defaultFormState);
   const [isDirty, setIsDirty] = useState(false);
+  const [status, setStatus] = useState({ state: 'idle', message: '' });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     setForm(defaultFormState());
     setIsDirty(false);
+    setStatus({ state: 'idle', message: '' });
   }, [founderId]);
 
   const serviceRequests = useMemo(
@@ -64,6 +70,8 @@ const FounderServices = () => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    setIsSubmitting(true);
+    setStatus({ state: 'pending', message: 'Saving your brief…' });
     const payload = {
       serviceType: form.serviceType,
       urgency: form.urgency,
@@ -73,13 +81,22 @@ const FounderServices = () => {
 
     try {
       await addServiceRequest(payload);
-      showGenericSuccess('Service request saved');
+      setStatus({
+        state: 'success',
+        message: 'Brief submitted — the operator team will follow up soon.',
+      });
       setForm(defaultFormState());
       setIsDirty(false);
     } catch (error) {
       console.error('Failed to submit service request', error);
-      showGenericInfo('We could not save your brief just now. Please try again in a moment.');
+      const baseMessage =
+        error instanceof Error ? error.message : 'We could not save your brief just now.';
+      const friendlyMessage = baseMessage.includes('Failed to fetch')
+        ? 'We could not reach Launch & Lift servers. Check your connection and try again.'
+        : baseMessage || 'We could not save your brief just now. Please try again in a moment.';
+      setStatus({ state: 'error', message: friendlyMessage });
     }
+    setIsSubmitting(false);
   };
 
   const serviceIconMap = {
@@ -99,6 +116,12 @@ const FounderServices = () => {
     tech: 'from-indigo-400/20 via-white/70 to-royal/15',
     growth: 'from-rose-400/25 via-white/70 to-sunbeam/20',
   };
+
+  const resetStatus = () => setStatus({ state: 'idle', message: '' });
+  const isSubmitDisabled = !isDirty || isSubmitting;
+  const isStatusVisible = status.state !== 'idle' && status.message;
+  const StatusIcon =
+    status.state === 'error' ? AlertCircle : status.state === 'success' ? CheckCircle2 : Loader2;
 
   return (
     <section className="relative overflow-hidden pb-24">
@@ -209,6 +232,42 @@ const FounderServices = () => {
             </CardHeader>
             <CardContent>
               <form className="space-y-6" onSubmit={handleSubmit}>
+                {isStatusVisible ? (
+                  <div
+                    className={`flex items-start gap-3 rounded-2xl border px-4 py-3 text-sm ${
+                      status.state === 'error'
+                        ? 'border-rose-200 bg-rose-50 text-rose-700'
+                        : status.state === 'success'
+                        ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
+                        : 'border-royal/20 bg-royal/5 text-royal'
+                    }`}
+                  >
+                    <StatusIcon
+                      className={`mt-0.5 h-4 w-4 shrink-0 ${
+                        status.state === 'pending' ? 'animate-spin' : ''
+                      }`}
+                    />
+                    <div className="flex-1">
+                      <p className="font-medium">
+                        {status.state === 'error'
+                          ? 'Unable to save'
+                          : status.state === 'success'
+                          ? 'Request received'
+                          : 'Working on it'}
+                      </p>
+                      <p className="mt-1 text-sm opacity-90">{status.message}</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={resetStatus}
+                      className="rounded-full p-1 text-xs text-night/40 transition hover:bg-night/5 hover:text-night/70"
+                    >
+                      <X className="h-4 w-4" />
+                      <span className="sr-only">Dismiss</span>
+                    </button>
+                  </div>
+                ) : null}
+
                 <div className="grid gap-3">
                   <Label className="text-night/70" htmlFor="serviceType">
                     Service focus
@@ -271,8 +330,14 @@ const FounderServices = () => {
                   >
                     Cancel
                   </Button>
-                  <Button type="submit" disabled={!isDirty} className="sm:min-w-[200px]">
-                    Send request
+                  <Button type="submit" disabled={isSubmitDisabled} className="sm:min-w-[200px]">
+                    {isSubmitting ? (
+                      <span className="flex items-center justify-center gap-2">
+                        <Loader2 className="h-4 w-4 animate-spin" /> Sending…
+                      </span>
+                    ) : (
+                      'Send request'
+                    )}
                   </Button>
                 </div>
               </form>

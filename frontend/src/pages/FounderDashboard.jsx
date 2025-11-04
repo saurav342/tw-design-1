@@ -1,10 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion as Motion } from 'framer-motion';
-import { ArrowUpRight, Building2, Menu, Rocket } from 'lucide-react';
+import { ArrowUpRight, Building2, Menu } from 'lucide-react';
 import { useAuth } from '../context/useAuth.js';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card.jsx';
-import { Badge } from '../components/ui/badge.jsx';
 import { Button } from '../components/ui/button.jsx';
 import { formatCurrency, formatCurrencyInr, formatDateDisplay } from '../lib/formatters.js';
 import { useFounderExtras } from '../hooks/useFounderExtras.js';
@@ -66,148 +65,55 @@ const FounderDashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <DashboardHeader
-        founderName={founderName}
-        open={sidebarOpen}
-        onToggle={() => setSidebarOpen((prev) => !prev)}
-      />
-      <MobileDashboardNav open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      <header className="sticky top-0 z-10 border-b border-gray-200 bg-white">
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center gap-3">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="lg:hidden"
+              onClick={() => setSidebarOpen((prev) => !prev)}
+              aria-label="Toggle sidebar"
+              aria-pressed={sidebarOpen}
+            >
+              <Menu className="h-5 w-5" />
+            </Button>
+            <Building2 className="h-6 w-6 text-indigo-600" />
+            <span className="text-xl text-slate-900">Launch &amp; Lift</span>
+          </div>
+          <div className="flex items-center gap-4 text-sm text-slate-700">
+            <span className="hidden sm:block text-gray-600">Welcome back,</span>
+            <span className="font-medium">{founderName}</span>
+          </div>
+        </div>
+      </header>
 
-      <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-        <PageTitle founder={activeFounder} founderName={founderName} />
-        <FounderSummaryCard founder={activeFounder} />
-        <DashboardTiles metrics={metrics} />
+      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <div className="space-y-8">
+          <PageTitle founderName={founderName} />
+          <DashboardTiles metrics={metrics} />
 
-        <div className="mt-10 space-y-8">
           <MarketplacePresence listing={listing} />
           <SuccessFeeSupport successRequest={successRequest} />
-          <FounderServices latestServiceRequest={latestServiceRequest} totalRequests={serviceRequests.length} />
+          <FounderServices
+            latestServiceRequest={latestServiceRequest}
+            totalRequests={serviceRequests.length}
+          />
         </div>
       </main>
     </div>
   );
 };
 
-const DashboardHeader = ({ founderName, open, onToggle }) => {
-  const firstName = founderName.split(' ')[0] ?? 'Founder';
-  return (
-    <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/90 backdrop-blur">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center gap-3">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="text-slate-600 hover:text-slate-900 lg:hidden"
-            onClick={onToggle}
-            aria-expanded={open}
-            aria-label="Toggle dashboard navigation"
-          >
-            <Menu className="h-5 w-5" />
-          </Button>
-          <div className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1 text-sm font-semibold text-slate-800 shadow-sm">
-            <Building2 className="h-5 w-5 text-royal" />
-            Launch &amp; Lift
-          </div>
-        </div>
-        <div className="hidden sm:block text-right">
-          <p className="text-xs uppercase tracking-[0.26em] text-slate-400">Founder dashboard</p>
-          <p className="text-sm font-semibold text-slate-800">{founderName}</p>
-        </div>
-        <div className="sm:hidden text-xs uppercase tracking-[0.26em] text-slate-500">
-          Hey, {firstName}
-        </div>
-      </div>
-    </header>
-  );
-};
-
-const MobileDashboardNav = ({ open, onClose }) => {
-  if (!open) return null;
-
-  const links = [
-    { to: '/dashboard/founder', label: 'Overview' },
-    { to: '/dashboard/founder/marketplace', label: 'Marketplace' },
-    { to: '/dashboard/founder/success-fee', label: 'Success-fee support' },
-    { to: '/dashboard/founder/services', label: 'Founder services' },
-  ];
-
-  return (
-    <div className="lg:hidden fixed inset-0 z-40 bg-slate-900/35 backdrop-blur-sm">
-      <div className="absolute inset-x-4 top-24 rounded-3xl border border-slate-200 bg-white p-6 shadow-xl">
-        <div className="flex items-center justify-between">
-          <span className="text-sm font-semibold text-slate-800">Quick links</span>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="text-slate-500 hover:text-slate-800"
-            onClick={onClose}
-          >
-            Close
-          </Button>
-        </div>
-        <div className="mt-4 grid gap-3">
-          {links.map((link) => (
-            <Button
-              key={link.to}
-              asChild
-              variant="secondary"
-              className="justify-between border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
-              onClick={onClose}
-            >
-              <Link to={link.to}>
-                {link.label}
-                <ArrowUpRight className="ml-3 h-4 w-4" />
-              </Link>
-            </Button>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-};
-
-const PageTitle = ({ founder, founderName }) => {
-  const createdAt = founder.createdAt ? formatDateDisplay(founder.createdAt) : null;
-  const isPending = founder.status === 'pending';
-
-  return (
-    <div className="space-y-3">
-      <Badge className="w-fit border border-royal/20 bg-royal/10 px-4 py-1 text-[0.65rem] uppercase tracking-[0.3em] text-royal">
-        Founder dashboard
-      </Badge>
-      <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-        <div>
-          <h1 className="text-3xl font-semibold text-slate-900 sm:text-4xl">
-            Launch plan for {founder.startupName}
-          </h1>
-          <p className="mt-2 max-w-2xl text-sm text-slate-600">
-            Manage your fundraising workflow, keep listings polished, and collaborate with Launch
-            &amp; Lift operators.
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-3">
-          <span
-            className={`rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.26em] ${
-              isPending
-                ? 'border-amber-200 bg-amber-100 text-amber-700'
-                : 'border-sprout/40 bg-sprout/10 text-sprout/70'
-            }`}
-          >
-            {isPending ? 'Pending review' : 'Approved'}
-          </span>
-          <span className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs text-slate-500">
-            Founder: {founderName}
-          </span>
-          {createdAt ? (
-            <span className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs text-slate-500">
-              Joined {createdAt}
-            </span>
-          ) : null}
-        </div>
-      </div>
-    </div>
-  );
-};
+const PageTitle = ({ founderName }) => (
+  <div>
+    <h1 className="text-3xl font-semibold text-slate-900">Founder Dashboard</h1>
+    <p className="mt-2 text-sm text-gray-600">
+      Manage your fundraising journey and access expert support from the Launch &amp; Lift team,
+      tailored to {founderName}.
+    </p>
+  </div>
+);
 
 const DashboardTiles = ({ metrics }) => (
   <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -228,64 +134,6 @@ const DashboardTiles = ({ metrics }) => (
     ))}
   </div>
 );
-
-const FounderSummaryCard = ({ founder }) => {
-  const chips = [founder.sector, founder.geography, founder.raiseStage].filter(Boolean);
-  const raiseTarget =
-    typeof founder.raiseAmountUSD === 'number' ? formatCurrency(founder.raiseAmountUSD) : '—';
-  const runRate =
-    typeof founder.revenueRunRateUSD === 'number'
-      ? formatCurrency(founder.revenueRunRateUSD)
-      : '—';
-
-  return (
-    <MotionDiv
-      initial={{ opacity: 0, y: 14 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, delay: 0.05 }}
-      className="mt-8 rounded-3xl border border-slate-200 bg-white p-7 shadow-sm sm:p-9"
-    >
-      <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
-        <div className="space-y-4">
-          <div className="inline-flex items-center gap-2 rounded-full border border-royal/20 bg-royal/10 px-4 py-1 text-xs uppercase tracking-[0.3em] text-royal">
-            <Rocket className="h-4 w-4 text-royal" />
-            Ready to lift
-          </div>
-          <div>
-            <h2 className="text-3xl font-semibold text-slate-900">{founder.startupName}</h2>
-            <p className="mt-3 max-w-2xl text-sm text-slate-600">{founder.aiSummary}</p>
-          </div>
-          <div className="flex flex-wrap gap-2 text-xs text-slate-500">
-            {chips.map((chip) => (
-              <span
-                key={chip}
-                className="rounded-full border border-slate-200 bg-gray-50 px-3 py-1 uppercase tracking-[0.2em]"
-              >
-                {chip}
-              </span>
-            ))}
-          </div>
-        </div>
-        <div className="grid gap-4 text-sm text-slate-600 sm:grid-cols-2 lg:text-right">
-          <div className="rounded-xl border border-slate-200 bg-slate-50/80 px-5 py-4">
-            <p className="text-xs uppercase tracking-[0.28em] text-slate-400">Raise target</p>
-            <p className="mt-2 text-2xl font-semibold text-slate-900">{raiseTarget}</p>
-            <p className="mt-1 text-xs text-slate-500">
-              {founder.raiseStage ? `${founder.raiseStage} round` : 'Stage to confirm'}
-            </p>
-          </div>
-          <div className="rounded-xl border border-slate-200 bg-slate-50/80 px-5 py-4">
-            <p className="text-xs uppercase tracking-[0.28em] text-slate-400">Revenue run rate</p>
-            <p className="mt-2 text-2xl font-semibold text-slate-900">{runRate}</p>
-            <p className="mt-1 text-xs text-slate-500">
-              Team size {founder.teamSize ?? '—'} • ARR outlook
-            </p>
-          </div>
-        </div>
-      </div>
-    </MotionDiv>
-  );
-};
 
 const MarketplacePresence = ({ listing }) => {
   const hasListing = Boolean(listing);

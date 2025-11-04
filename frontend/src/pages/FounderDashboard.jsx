@@ -5,7 +5,7 @@ import { ArrowUpRight, BarChart3, Briefcase, Building2, Menu, Rocket, Users } fr
 import { useAuth } from '../context/useAuth.js';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card.jsx';
 import { Button } from '../components/ui/button.jsx';
-import { formatCurrency, formatCurrencyInr, formatDateDisplay } from '../lib/formatters.js';
+import { formatCurrencyInr, formatDateDisplay } from '../lib/formatters.js';
 import { useFounderExtras } from '../hooks/useFounderExtras.js';
 import { FOUNDER_SERVICE_DETAILS } from '../data/founderExtras.js';
 import { useAppStore } from '../store/useAppStore.js';
@@ -136,7 +136,7 @@ const DashboardTiles = ({ listing, successRequest, matches, serviceRequests }) =
       description: listing
         ? 'Listing live and investor-ready.'
         : 'Publish your raise details to go live.',
-      href: '/dashboard/founder/marketplace',
+      href: '#marketplace-presence',
       status: listing ? 'Active' : 'Draft',
       bg: 'from-sky-500 to-blue-600',
       icon: BarChart3,
@@ -147,7 +147,7 @@ const DashboardTiles = ({ listing, successRequest, matches, serviceRequests }) =
       description: successRequest
         ? 'Brief submitted to the capital team.'
         : 'Share your traction for hands-on support.',
-      href: '/dashboard/founder/success-fee',
+      href: '#success-fee-support',
       status: successRequest ? 'In review' : 'Get started',
       bg: 'from-violet-500 to-indigo-600',
       icon: Rocket,
@@ -159,7 +159,7 @@ const DashboardTiles = ({ listing, successRequest, matches, serviceRequests }) =
         matches.length > 0
           ? `Warm intros queued for ${matches.length} investors.`
           : 'Line up curated intros matched to your round.',
-      href: '/dashboard/founder/investors',
+      href: '#investor-introductions',
       status: matches.length > 0 ? 'Ready' : 'Pending',
       bg: 'from-emerald-500 to-green-600',
       icon: Users,
@@ -171,7 +171,7 @@ const DashboardTiles = ({ listing, successRequest, matches, serviceRequests }) =
         serviceRequests.length > 0
           ? `${serviceRequests.length} request${serviceRequests.length > 1 ? 's' : ''} in motion.`
           : 'Spin up support for pitch, diligence, and GTM.',
-      href: '/dashboard/founder/services',
+      href: '#founder-services',
       status: 'Available',
       bg: 'from-indigo-500 to-purple-600',
       icon: Briefcase,
@@ -220,6 +220,7 @@ const MarketplacePresence = ({ listing }) => {
 
   return (
     <MotionDiv
+      id="marketplace-presence"
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: 0.08 }}
@@ -319,6 +320,7 @@ const SuccessFeeSupport = ({ successRequest }) => {
   const hasRequest = Boolean(successRequest);
   return (
     <MotionDiv
+      id="success-fee-support"
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: 0.12 }}
@@ -428,33 +430,52 @@ const InvestorIntroductions = ({ matches, investors }) => {
     .sort((a, b) => (b.matchScore ?? 0) - (a.matchScore ?? 0))
     .slice(0, 3);
   const hasIntroductions = introductions.length > 0;
+  const topMatch = introductions[0] ?? null;
 
   return (
     <MotionDiv
+      id="investor-introductions"
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: 0.14 }}
     >
-      <Card className="border border-slate-200 bg-white text-slate-800 shadow-sm">
-        <CardHeader className="space-y-3">
-          <CardTitle className="text-xl text-slate-900">Investor introductions</CardTitle>
+      <Card className="border border-slate-200 bg-white shadow-sm">
+        <CardHeader className="space-y-2">
+          <CardTitle className="text-2xl text-slate-900">Investor introductions</CardTitle>
           <p className="text-sm text-slate-600">
-            Track warm intros and prioritize outreach with the highest match confidence.
+            Share stage, traction, and committed capital so the success team can spin up outreach.
           </p>
         </CardHeader>
         <CardContent className="space-y-6">
+          <div className="rounded-3xl border border-purple-200 bg-purple-50/70 px-6 py-6 text-purple-900">
+            <p className="text-base font-semibold">Get connected to the right investors</p>
+            <p className="mt-2 text-sm text-purple-900/80">
+              Our team reviews your story and metrics to prioritize warm intros aligned with your
+              round pace.
+            </p>
+            {topMatch ? (
+              <div className="mt-4 rounded-2xl border border-purple-200 bg-white/60 px-4 py-3 text-sm text-slate-700">
+                <p className="font-semibold text-slate-900">{topMatch.fundName}</p>
+                <p className="text-xs text-slate-500">
+                  Contact: {topMatch.contactName} • Match confidence{' '}
+                  {topMatch.matchScore !== null ? `${topMatch.matchScore}%` : 'Pending'}
+                </p>
+              </div>
+            ) : null}
+          </div>
+
           {hasIntroductions ? (
             <ul className="space-y-3">
               {introductions.map((intro) => (
                 <li
                   key={intro.id}
-                  className="flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50/60 px-4 py-3"
+                  className="flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700"
                 >
                   <div>
-                    <p className="text-sm font-semibold text-slate-800">{intro.fundName}</p>
+                    <p className="font-semibold text-slate-900">{intro.fundName}</p>
                     <p className="text-xs text-slate-500">Contact: {intro.contactName}</p>
                   </div>
-                  <span className="text-xs font-semibold uppercase tracking-[0.2em] text-royal">
+                  <span className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
                     {intro.matchScore !== null ? `${intro.matchScore}% match` : 'Pending'}
                   </span>
                 </li>
@@ -462,14 +483,14 @@ const InvestorIntroductions = ({ matches, investors }) => {
             </ul>
           ) : (
             <p className="text-sm text-slate-600">
-              When Launch &amp; Lift lines up the next wave of investors, they will appear here with
-              match confidence and contact details.
+              When the next wave of investors is aligned, we will surface curated introductions here
+              with match confidence and context.
             </p>
           )}
 
           <Button asChild className="w-full">
-            <Link className="flex items-center justify-center gap-2" to="/dashboard/founder/investors">
-              {hasIntroductions ? 'Manage investor introductions' : 'View investor network'}
+            <Link className="flex items-center justify-center gap-2" to="/dashboard/founder/success-fee">
+              {hasIntroductions ? 'Manage investor introductions' : 'Request investor introductions'}
               <ArrowUpRight className="h-4 w-4" />
             </Link>
           </Button>
@@ -481,58 +502,80 @@ const InvestorIntroductions = ({ matches, investors }) => {
 
 const FounderServices = ({ latestServiceRequest, totalRequests }) => (
   <MotionDiv
+    id="founder-services"
     initial={{ opacity: 0, y: 16 }}
     animate={{ opacity: 1, y: 0 }}
     transition={{ duration: 0.4, delay: 0.16 }}
   >
-    <Card className="border border-slate-200 bg-white text-slate-800 shadow-sm">
-      <CardHeader className="space-y-3">
-        <CardTitle className="text-xl text-slate-900">Founder services studio</CardTitle>
+    <Card className="border border-slate-200 bg-white shadow-sm">
+      <CardHeader className="space-y-2">
+        <CardTitle className="text-2xl text-slate-900">Founder services studio</CardTitle>
         <p className="text-sm text-slate-600">
-          Collaborate with vetted operators on the assets that close your round faster.
+          Collaborate with vetted specialists on the assets that close your round faster.
         </p>
       </CardHeader>
       <CardContent className="space-y-6">
-        <ul className="grid gap-3 text-sm text-slate-600">
-          {FOUNDER_SERVICE_DETAILS.slice(0, 4).map((service) => (
-            <li
-              key={service.id}
-              className="rounded-2xl border border-slate-200 bg-slate-50/70 px-4 py-3"
-            >
-              <div className="flex items-center justify-between">
-                <span className="font-semibold text-slate-800">{service.title}</span>
-                <span className="text-[0.7rem] uppercase tracking-[0.25em] text-royal">Available</span>
-              </div>
-              <p className="mt-1 text-xs text-slate-500">{service.tagline}</p>
-            </li>
-          ))}
-        </ul>
-
         {latestServiceRequest ? (
-          <div className="rounded-2xl border border-slate-200 bg-slate-50/80 px-5 py-4 text-sm text-slate-600">
-            <p className="font-semibold text-royal">Last request</p>
-            <p className="mt-2 text-xs text-slate-500">
-              {latestServiceRequest.serviceType} • Urgency {latestServiceRequest.urgency}
+          <div className="rounded-3xl border border-emerald-200 bg-emerald-50 px-6 py-5 text-sm text-emerald-900">
+            <p className="text-sm font-semibold">
+              Latest request: {latestServiceRequest.serviceType}
             </p>
-            <p className="mt-2 text-xs text-slate-500">
-              Updated {formatDateDisplay(latestServiceRequest.createdAt)} •{' '}
+            <p className="mt-2 text-xs text-emerald-900/70">
+              Urgency {latestServiceRequest.urgency} • Updated{' '}
+              {formatDateDisplay(latestServiceRequest.createdAt)} •{' '}
               {totalRequests > 1
                 ? `${totalRequests} requests in queue`
                 : 'Ready for next collaboration'}
             </p>
           </div>
-        ) : (
-          <p className="text-sm text-slate-600">
-            Spin up a scoped brief for pitch decks, diligence prep, product polish, or GTM enablement.
-          </p>
-        )}
+        ) : null}
 
-        <Button asChild className="w-full">
-          <Link className="flex items-center justify-center gap-2" to="/dashboard/founder/services">
-            {latestServiceRequest ? 'Manage service requests' : 'Request a founder service'}
-            <ArrowUpRight className="h-4 w-4" />
-          </Link>
-        </Button>
+        <div className="grid gap-6 lg:grid-cols-3">
+          {FOUNDER_SERVICE_DETAILS.slice(0, 6).map((service) => (
+            <div
+              key={service.id}
+              className="flex h-full flex-col justify-between rounded-3xl border border-slate-200 bg-slate-50 px-5 py-5 text-sm text-slate-700"
+            >
+              <div>
+                <div className="flex items-center justify-between">
+                  <p className="text-base font-semibold text-slate-900">{service.title}</p>
+                  <span className="rounded-full bg-emerald-100 px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-emerald-600">
+                    Available
+                  </span>
+                </div>
+                <p className="mt-3 text-sm text-slate-600">{service.tagline}</p>
+              </div>
+              <div className="mt-5 flex gap-3">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex-1 border-slate-200 text-slate-700 hover:text-slate-900"
+                  asChild
+                >
+                  <Link to="/dashboard/founder/services">Learn more</Link>
+                </Button>
+                <Button size="sm" className="flex-1" asChild>
+                  <Link to="/dashboard/founder/services">Request</Link>
+                </Button>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="flex flex-col gap-3 rounded-3xl border border-slate-200 bg-white px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-sm font-semibold text-slate-900">Need something custom?</p>
+            <p className="mt-1 text-sm text-slate-600">
+              Spin up a scoped brief for pitch decks, diligence deep dives, or GTM enablement.
+            </p>
+          </div>
+          <Button asChild className="w-full sm:w-auto">
+            <Link className="flex items-center justify-center gap-2" to="/dashboard/founder/services">
+              Create custom brief
+              <ArrowUpRight className="h-4 w-4" />
+            </Link>
+          </Button>
+        </div>
       </CardContent>
     </Card>
   </MotionDiv>

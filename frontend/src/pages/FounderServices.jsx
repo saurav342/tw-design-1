@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion as Motion } from 'framer-motion';
 import {
   AlertCircle,
@@ -40,6 +40,7 @@ const FounderServices = () => {
   const navigate = useNavigate();
   const { founderId } = useActiveFounder();
   const { extras, addServiceRequest } = useFounderExtras(founderId);
+  const formRef = useRef(null);
 
   const [form, setForm] = useState(defaultFormState);
   const [isDirty, setIsDirty] = useState(false);
@@ -97,6 +98,15 @@ const FounderServices = () => {
       setStatus({ state: 'error', message: friendlyMessage });
     }
     setIsSubmitting(false);
+  };
+
+  const handlePrefillAndFocus = (serviceTitle) => {
+    setForm((prev) => ({ ...prev, serviceType: serviceTitle }));
+    requestAnimationFrame(() => {
+      if (formRef.current) {
+        formRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
   };
 
   const serviceIconMap = {
@@ -209,6 +219,21 @@ const FounderServices = () => {
                         ))}
                       </ul>
                     </div>
+                    <div className="flex flex-wrap items-center gap-3 pt-2">
+                      <Link
+                        to={`/services/${service.id}`}
+                        className="inline-flex items-center justify-center rounded-full border border-night/10 bg-white/90 px-4 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-night/70 transition hover:border-royal/60 hover:text-royal"
+                      >
+                        Learn more
+                      </Link>
+                      <button
+                        type="button"
+                        onClick={() => handlePrefillAndFocus(service.title)}
+                        className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-[#ff4fa3] via-[#8b5cf6] to-[#34d399] px-5 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-white shadow-[0_12px_30px_rgba(139,92,246,0.35)] transition hover:scale-[1.02]"
+                      >
+                        Request
+                      </button>
+                    </div>
                   </div>
                 </div>
               );
@@ -231,7 +256,7 @@ const FounderServices = () => {
               </p>
             </CardHeader>
             <CardContent>
-              <form className="space-y-6" onSubmit={handleSubmit}>
+              <form ref={formRef} className="space-y-6" onSubmit={handleSubmit}>
                 {isStatusVisible ? (
                   <div
                     className={`flex items-start gap-3 rounded-2xl border px-4 py-3 text-sm ${

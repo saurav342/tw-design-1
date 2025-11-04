@@ -18,6 +18,7 @@ import FounderDashboard from './pages/FounderDashboard';
 import FounderMarketplace from './pages/FounderMarketplace';
 import FounderSuccessFee from './pages/FounderSuccessFee';
 import FounderServices from './pages/FounderServices';
+import FounderServiceStory from './pages/FounderServiceStory';
 import AdminDashboard from './pages/AdminDashboard';
 import NotFound from './pages/NotFound';
 
@@ -76,6 +77,7 @@ const App = () => (
               </ProtectedRoute>
             }
           />
+          <Route path="/services/:serviceId" element={<FounderServiceStory />} />
           <Route
             path="/dashboard/admin"
             element={

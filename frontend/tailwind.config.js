@@ -17,8 +17,8 @@ export default {
         mint: '#9FF5CF',
       },
       fontFamily: {
-        display: ['"Roboto"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
-        body: ['"Roboto"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        display: ['"Arial"', '"Helvetica"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        body: ['"Arial"', '"Helvetica"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
       },
       boxShadow: {
         'glow-royal': '0 18px 60px rgba(91, 33, 209, 0.35)',

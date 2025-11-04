@@ -224,7 +224,7 @@ const Home = () => {
           <div className="relative space-y-8">
             <div className="space-y-3 text-center">
               <span className="inline-flex items-center justify-center rounded-full bg-[#f9e4ff] px-5 py-1 text-xs font-semibold uppercase tracking-[0.35em] text-[#8b5cf6]">
-                Section 02 • Questionnaire
+                Questionnaire
               </span>
               <h2 className="text-3xl font-semibold text-[#1a1030] md:text-4xl">
                 Are we the right partner for your raise?
@@ -267,7 +267,7 @@ const Home = () => {
             <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.28),transparent_68%)] opacity-70" />
             <div className="relative space-y-6">
               <span className="inline-flex items-center justify-center rounded-full bg-white/20 px-4 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.35em] text-white/80">
-                Section 03 • Features & benefits
+                Features & benefits
               </span>
               <h2 className="text-3xl font-semibold md:text-4xl">Everything you need to raise with confidence</h2>
               <p className="max-w-lg text-sm text-white/85">
@@ -309,7 +309,7 @@ const Home = () => {
         >
           <div className="space-y-3 text-center">
             <span className="inline-flex items-center justify-center rounded-full bg-[#e9e1ff] px-4 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.35em] text-[#8b5cf6]">
-              Section 04 • What sets us apart
+              What sets us apart
             </span>
             <h2 className="text-3xl font-semibold text-[#1a1030] md:text-4xl">Designed for Indian founders closing now</h2>
             <p className="mx-auto max-w-3xl text-base text-[#3b2a57]">
@@ -344,7 +344,7 @@ const Home = () => {
           <div className="relative space-y-10">
             <div className="space-y-3 text-center md:text-left">
               <span className="inline-flex items-center justify-center rounded-full bg-white/10 px-5 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.35em] text-white/70">
-                Section 05 • Comprehensive services
+                Comprehensive services
               </span>
               <h2 className="text-3xl font-semibold md:text-4xl">Every layer of your fundraise, handled</h2>
               <p className="max-w-3xl text-sm text-white/75">
@@ -384,7 +384,7 @@ const Home = () => {
         >
           <div className="space-y-3 text-center">
             <span className="inline-flex items-center justify-center rounded-full bg-[#dfffea] px-4 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.35em] text-[#34d399]">
-              Section 06 • How it works
+              How it works
             </span>
             <h2 className="text-3xl font-semibold text-[#1a1030] md:text-4xl">A guided arc from first sync to signed wires</h2>
           </div>
@@ -417,7 +417,7 @@ const Home = () => {
             <div className="grid gap-10 md:grid-cols-2 md:items-center">
               <div className="space-y-4">
                 <span className="inline-flex items-center justify-center rounded-full bg-white/60 px-4 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.35em] text-[#8b5cf6]">
-                  Section 07 • Stats
+                  Stats
                 </span>
                 <h2 className="text-3xl font-semibold text-[#1a1030] md:text-4xl">Proof that the vibrant approach works</h2>
                 <p className="text-sm text-[#3b2a57]">
@@ -451,7 +451,7 @@ const Home = () => {
         >
           <div className="space-y-3 text-center">
             <span className="inline-flex items-center justify-center rounded-full bg-[#fce3f3] px-4 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.35em] text-[#ff4fa3]">
-              Section 08 • Testimonials
+              Testimonials
             </span>
             <h2 className="text-3xl font-semibold text-[#1a1030] md:text-4xl">Momentum felt by founders like you</h2>
             <p className="mx-auto max-w-3xl text-base text-[#3b2a57]">
@@ -470,7 +470,7 @@ const Home = () => {
         >
           <div className="space-y-3 text-center">
             <span className="inline-flex items-center justify-center rounded-full bg-[#e9e1ff] px-4 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.35em] text-[#8b5cf6]">
-              Section 09 • FAQ
+              FAQ
             </span>
             <h2 className="text-3xl font-semibold text-[#1a1030] md:text-4xl">Your next questions, already answered</h2>
           </div>
@@ -490,7 +490,7 @@ const Home = () => {
             <div className="relative flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
               <div className="max-w-xl space-y-4">
                 <span className="inline-flex items-center justify-center rounded-full bg-white/10 px-4 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.35em] text-white/70">
-                  Section 10 • Call to action
+                  Call to action
                 </span>
                 <h2 className="text-3xl font-semibold md:text-4xl">{finalCtaContent.heading}</h2>
                 <p className="text-sm text-white/80">{finalCtaContent.body}</p>

@@ -13,9 +13,10 @@ import { persistActiveFounderId, readActiveFounderId } from '../lib/founderSessi
 
 const MotionDiv = Motion.div;
 
-const FounderDashboard = () => {
+const DashboardLayout = () => {
   const { user } = useAuth();
   const founders = useAppStore((state) => state.founders);
+  const investors = useAppStore((state) => state.investors);
 
   const [activeId, setActiveId] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -62,9 +63,11 @@ const FounderDashboard = () => {
   const successRequest = extras?.successFeeRequest ?? null;
   const serviceRequests = Array.isArray(extras?.serviceRequests) ? extras.serviceRequests : [];
   const latestServiceRequest = serviceRequests.at(-1) ?? null;
+  const matches = Array.isArray(activeFounder.matches) ? activeFounder.matches : [];
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Header */}
       <header className="sticky top-0 z-10 border-b border-gray-200 bg-white">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-3">
@@ -88,13 +91,19 @@ const FounderDashboard = () => {
         </div>
       </header>
 
+      {/* Main Content */}
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="space-y-8">
+          {/* Page Title */}
           <PageTitle founderName={founderName} />
+
+          {/* Dashboard Tiles */}
           <DashboardTiles metrics={metrics} />
 
+          {/* Dashboard Sections */}
           <MarketplacePresence listing={listing} />
           <SuccessFeeSupport successRequest={successRequest} />
+          <InvestorIntroductions matches={matches} investors={investors} />
           <FounderServices
             latestServiceRequest={latestServiceRequest}
             totalRequests={serviceRequests.length}
@@ -263,6 +272,72 @@ const SuccessFeeSupport = ({ successRequest }) => (
   </MotionDiv>
 );
 
+const InvestorIntroductions = ({ matches, investors }) => {
+  const introductions = matches
+    .map((match) => {
+      const investor = investors.find((item) => item.id === match.investorId);
+      return {
+        id: match.investorId,
+        fundName: investor?.fundName ?? 'Investor TBD',
+        contactName: investor?.contactName ?? 'Launch & Lift team',
+        matchScore:
+          typeof match.matchScore === 'number' ? Math.round(match.matchScore) : null,
+      };
+    })
+    .sort((a, b) => (b.matchScore ?? 0) - (a.matchScore ?? 0))
+    .slice(0, 3);
+  const hasIntroductions = introductions.length > 0;
+
+  return (
+    <MotionDiv
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, delay: 0.14 }}
+    >
+      <Card className="border border-slate-200 bg-white text-slate-800 shadow-sm">
+        <CardHeader className="space-y-3">
+          <CardTitle className="text-xl text-slate-900">Investor introductions</CardTitle>
+          <p className="text-sm text-slate-600">
+            Track warm intros and prioritize outreach with the highest match confidence.
+          </p>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {hasIntroductions ? (
+            <ul className="space-y-3">
+              {introductions.map((intro) => (
+                <li
+                  key={intro.id}
+                  className="flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50/60 px-4 py-3"
+                >
+                  <div>
+                    <p className="text-sm font-semibold text-slate-800">{intro.fundName}</p>
+                    <p className="text-xs text-slate-500">Contact: {intro.contactName}</p>
+                  </div>
+                  <span className="text-xs font-semibold uppercase tracking-[0.2em] text-royal">
+                    {intro.matchScore !== null ? `${intro.matchScore}% match` : 'Pending'}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-sm text-slate-600">
+              When Launch &amp; Lift lines up the next wave of investors, they will appear here with
+              match confidence and contact details.
+            </p>
+          )}
+
+          <Button asChild className="w-full">
+            <Link className="flex items-center justify-center gap-2" to="/dashboard/founder/investors">
+              {hasIntroductions ? 'Manage investor introductions' : 'View investor network'}
+              <ArrowUpRight className="h-4 w-4" />
+            </Link>
+          </Button>
+        </CardContent>
+      </Card>
+    </MotionDiv>
+  );
+};
+
 const FounderServices = ({ latestServiceRequest, totalRequests }) => (
   <MotionDiv
     initial={{ opacity: 0, y: 16 }}
@@ -365,4 +440,5 @@ const buildDashboardMetrics = ({ founder }) => {
   ];
 };
 
-export default FounderDashboard;
+export { DashboardLayout };
+export default DashboardLayout;

@@ -2,6 +2,27 @@ const { createFounderIntake, listFounderIntakes } = require('../models/founderIn
 
 const REQUIRED_FIELDS = ['fullName', 'email', 'startupName'];
 
+const sanitizeString = (value) => (typeof value === 'string' ? value.trim() : '');
+
+const coercePositiveInteger = (value, fallback = null) => {
+  if (value === undefined || value === null || value === '') return fallback;
+  const parsed = Number.parseInt(value, 10);
+  if (Number.isNaN(parsed) || parsed <= 0) return fallback;
+  return parsed;
+};
+
+const buildSecondFounder = (input = {}) => {
+  const details = {
+    fullName: sanitizeString(input.fullName),
+    email: sanitizeString(input.email),
+    phoneNumber: sanitizeString(input.phoneNumber),
+    linkedInUrl: sanitizeString(input.linkedInUrl ?? input.linkedin ?? ''),
+  };
+
+  const hasContent = Object.values(details).some((field) => field);
+  return hasContent ? details : null;
+};
+
 const submitFounderIntake = (req, res) => {
   try {
     const payload = req.body ?? {};
@@ -17,7 +38,50 @@ const submitFounderIntake = (req, res) => {
       return res.status(400).json({ message: 'matches must be an array when supplied.' });
     }
 
-    const created = createFounderIntake(payload);
+    const numberOfFounders = coercePositiveInteger(payload.numberOfFounders, 1);
+    const secondFounder = buildSecondFounder(payload.secondFounder);
+    const companyInput = payload.company ?? {};
+
+    const companyDetails = {
+      legalName: sanitizeString(companyInput.legalName ?? payload.companyLegalName),
+      brandName: sanitizeString(companyInput.brandName ?? payload.brandName ?? payload.startupName),
+      website: sanitizeString(companyInput.website ?? payload.companyWebsite),
+      foundingDate: sanitizeString(companyInput.foundingDate ?? payload.companyFoundingDate),
+      sector: sanitizeString(companyInput.sector ?? payload.sector),
+      currentStage: sanitizeString(
+        companyInput.currentStage ?? payload.currentStage ?? payload.raiseStage,
+      ),
+      brief: sanitizeString(companyInput.brief ?? payload.brief ?? payload.tractionSummary),
+      pitchDeckUrl: sanitizeString(companyInput.pitchDeckUrl ?? payload.pitchDeck),
+    };
+
+    const normalized = {
+      ...payload,
+      fullName: sanitizeString(payload.fullName),
+      email: sanitizeString(payload.email),
+      phoneNumber: sanitizeString(payload.phoneNumber),
+      linkedInUrl: sanitizeString(payload.linkedInUrl ?? payload.linkedin),
+      numberOfFounders,
+      secondFounder,
+      company: companyDetails,
+      startupName:
+        sanitizeString(payload.startupName) ||
+        companyDetails.brandName ||
+        companyDetails.legalName,
+      brandName: companyDetails.brandName,
+      companyLegalName: companyDetails.legalName,
+      companyWebsite: companyDetails.website,
+      sector: companyDetails.sector,
+      currentStage: companyDetails.currentStage,
+      tractionSummary: companyDetails.brief,
+      raiseStage: companyDetails.currentStage || payload.raiseStage,
+      teamSize: numberOfFounders ?? payload.teamSize,
+      pitchDeckUrl: companyDetails.pitchDeckUrl,
+      matches: Array.isArray(payload.matches) ? payload.matches : [],
+      submittedFrom: payload.submittedFrom ?? 'founder-signup-v2',
+    };
+
+    const created = createFounderIntake(normalized);
     return res.status(201).json({ item: created });
   } catch (error) {
     return res.status(400).json({ message: error.message || 'Unable to submit founder intake.' });

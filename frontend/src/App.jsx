@@ -13,6 +13,7 @@ import Login from './pages/Login';
 import Signup from './pages/Signup';
 import InvestorSignup from './pages/InvestorSignup';
 import FounderSignup from './pages/FounderSignup';
+import PaymentDetails from './pages/PaymentDetails';
 import InvestorDashboard from './pages/InvestorDashboard';
 import FounderDashboard from './pages/FounderDashboard';
 import FounderMarketplace from './pages/FounderMarketplace';
@@ -37,6 +38,7 @@ const App = () => (
           <Route path="/signup" element={<Signup />} />
           <Route path="/signup/investor" element={<InvestorSignup />} />
           <Route path="/signup/founder" element={<FounderSignup />} />
+          <Route path="/payment-details" element={<PaymentDetails />} />
           <Route
             path="/dashboard/investor"
             element={

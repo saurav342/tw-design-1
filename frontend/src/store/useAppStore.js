@@ -104,12 +104,42 @@ export const useAppStore = create((set, get) => ({
 
     const readiness = computeReadinessFromMetrics(input.metrics);
     const benchmarks = composeBenchmarkRows(input.metrics);
+    const normalizedCompany = {
+      legalName: input.company?.legalName ?? input.companyLegalName ?? '',
+      brandName:
+        input.company?.brandName ?? input.brandName ?? input.startupName ?? input.companyLegalName ?? '',
+      website: input.company?.website ?? input.companyWebsite ?? '',
+      foundingDate: input.company?.foundingDate ?? input.companyFoundingDate ?? '',
+      sector: input.company?.sector ?? input.sector ?? '',
+      currentStage:
+        input.company?.currentStage ??
+        input.currentStage ??
+        input.raiseStage ??
+        (Array.isArray(input.stagePreferences) ? input.stagePreferences[0] : ''),
+      brief: input.company?.brief ?? input.brief ?? input.tractionSummary ?? '',
+      pitchDeckUrl: input.company?.pitchDeckUrl ?? input.pitchDeck ?? input.pitchDeckUrl ?? '',
+    };
+
+    const secondFounder =
+      input.secondFounder && Object.values(input.secondFounder).some((value) => !!value)
+        ? { ...input.secondFounder }
+        : null;
+
+    const fallbackHeadline =
+      input.headline ||
+      (normalizedCompany.brief ? normalizedCompany.brief.slice(0, 140) : '') ||
+      `Building ${normalizedCompany.brandName || normalizedCompany.legalName || 'with Launch&Lift'}`;
+
     const newFounder = {
       id,
       fullName: input.fullName,
       email: input.email,
+      phoneNumber: input.phoneNumber ?? '',
+      linkedInUrl: input.linkedInUrl ?? '',
+      numberOfFounders: input.numberOfFounders ?? input.teamSize ?? 1,
+      secondFounder,
       startupName: input.startupName,
-      headline: input.headline,
+      headline: fallbackHeadline,
       sector: input.sector,
       subSectors: input.subSectors ?? [],
       geography: input.geography,
@@ -118,6 +148,13 @@ export const useAppStore = create((set, get) => ({
       tractionSummary: input.tractionSummary,
       teamSize: input.teamSize,
       revenueRunRateUSD: input.revenueRunRateUSD,
+      company: normalizedCompany,
+      companyLegalName: normalizedCompany.legalName,
+      brandName: normalizedCompany.brandName,
+      companyWebsite: normalizedCompany.website,
+      foundedOn: normalizedCompany.foundingDate,
+      pitchDeckUrl: normalizedCompany.pitchDeckUrl,
+      submittedFrom: input.submittedFrom ?? 'founder-signup-v2',
       status: 'pending',
       readiness,
       benchmarkNotes: {},

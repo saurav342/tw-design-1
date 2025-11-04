@@ -1,111 +1,153 @@
-import { useMemo, useState } from 'react';
-import { AnimatePresence, motion as Motion } from 'framer-motion';
-import { CheckCircle2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/ui/button.jsx';
 import { Input } from '../components/ui/input.jsx';
 import { Label } from '../components/ui/label.jsx';
 import { Textarea } from '../components/ui/textarea.jsx';
 import { showGenericInfo, showGenericSuccess } from '../lib/emailClientMock.js';
-import { generateAISummary } from '../lib/fakeAI.js';
 import { useAppStore } from '../store/useAppStore.js';
 import { useAuth } from '../context/useAuth.js';
 
-const STEPS = [
-  {
-    id: 'profile',
-    title: 'Founder & company',
-    summary: 'Core context to calibrate our mentor pods.',
-  },
-  {
-    id: 'insights',
-    title: 'Metrics & preview',
-    summary: 'Performance signals and AI-generated readiness.',
-  },
-];
+const stageOptions = ['Pre-seed', 'Seed', 'Series A', 'Series B', 'Series C+'];
 
 const initialForm = {
-  fullName: '',
+  founderFullName: '',
   email: '',
-  startupName: '',
-  headline: '',
-  sector: '',
-  subSectors: [],
-  geography: '',
-  raiseStage: 'Seed',
-  raiseAmountUSD: 0,
-  tractionSummary: '',
-  teamSize: 3,
-  revenueRunRateUSD: 0,
-  metrics: {
-    growth: '',
-    mrr: '',
-    cac: '',
-    ltv: '',
-    payback: '',
+  phoneNumber: '',
+  linkedInUrl: '',
+  numberOfFounders: 1,
+  secondFounder: {
+    fullName: '',
+    email: '',
+    phoneNumber: '',
+    linkedInUrl: '',
   },
+  companyLegalName: '',
+  brandName: '',
+  companyWebsite: '',
+  companyFoundingDate: '',
+  sector: '',
+  currentStage: '',
+  brief: '',
+  pitchDeck: '',
 };
 
 const FounderSignup = () => {
   const navigate = useNavigate();
   const { establishSession } = useAuth();
   const addFounder = useAppStore((state) => state.addFounder);
-  const [step, setStep] = useState(0);
   const [form, setForm] = useState(initialForm);
+  const [includeSecondFounder, setIncludeSecondFounder] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const currentStep = STEPS[step];
 
-  const aiPreview = useMemo(
-    () =>
-      generateAISummary({
-        fullName: form.fullName,
-        startupName: form.startupName,
-        sector: form.sector,
-        geography: form.geography,
-        raiseStage: form.raiseStage,
-        tractionSummary: form.tractionSummary,
-        revenueRunRateUSD: form.revenueRunRateUSD,
-      }),
-    [form],
-  );
-
-  const updateField = (key, value) => {
-    setForm((prev) => ({ ...prev, [key]: value }));
+  const updateForm = (field) => (event) => {
+    const value = event.target.value;
+    setForm((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleMetricsChange = (key, value) => {
+  const updateNumberField = (field) => (event) => {
+    const { value } = event.target;
     setForm((prev) => ({
       ...prev,
-      metrics: {
-        ...prev.metrics,
-        [key]: value,
+      [field]: value === '' ? '' : Math.max(1, Number.parseInt(value, 10) || 1),
+    }));
+  };
+
+  const updateSecondFounder = (field) => (event) => {
+    const value = event.target.value;
+    setForm((prev) => ({
+      ...prev,
+      secondFounder: {
+        ...prev.secondFounder,
+        [field]: value,
       },
+    }));
+  };
+
+  const resetSecondFounder = () => {
+    setForm((prev) => ({
+      ...prev,
+      secondFounder: { ...initialForm.secondFounder },
     }));
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    if (step < STEPS.length - 1) {
-      setStep((prev) => prev + 1);
+    const requiredFields = [
+      { key: 'founderFullName', label: "Founder's full name" },
+      { key: 'email', label: 'email address' },
+      { key: 'companyLegalName', label: "company's legal name" },
+      { key: 'brandName', label: 'brand name' },
+      { key: 'companyWebsite', label: "company's website" },
+      { key: 'sector', label: "sector's industry" },
+      { key: 'currentStage', label: 'current stage' },
+      { key: 'brief', label: 'brief about what you are building' },
+    ];
+
+    const missing = requiredFields.filter((item) => !form[item.key]?.trim());
+    if (missing.length) {
+      const fieldsList = missing.map((item) => item.label).join(', ');
+      showGenericInfo(`Please complete the following before submitting: ${fieldsList}.`);
       return;
     }
 
-    const { subSectors, metrics, ...rest } = form;
-    const formatted = {
-      ...rest,
-      subSectors,
-      metrics: {
-        growth: metrics.growth || '12%',
-        mrr: metrics.mrr || '$35K',
-        cac: metrics.cac || '$720',
-        ltv: metrics.ltv || '$6.4K',
-        payback: metrics.payback || '11 months',
+    if (!form.numberOfFounders || form.numberOfFounders < 1) {
+      showGenericInfo('Number of founders must be at least 1.');
+      return;
+    }
+
+    const shouldAttachSecondFounder =
+      includeSecondFounder &&
+      Object.values(form.secondFounder).some((value) => typeof value === 'string' && value.trim());
+
+    const payload = {
+      fullName: form.founderFullName.trim(),
+      email: form.email.trim(),
+      phoneNumber: form.phoneNumber.trim(),
+      linkedInUrl: form.linkedInUrl.trim(),
+      numberOfFounders: Number.parseInt(form.numberOfFounders, 10) || 1,
+      companyLegalName: form.companyLegalName.trim(),
+      brandName: form.brandName.trim(),
+      companyWebsite: form.companyWebsite.trim(),
+      companyFoundingDate: form.companyFoundingDate.trim(),
+      sector: form.sector.trim(),
+      currentStage: form.currentStage.trim(),
+      brief: form.brief.trim(),
+      pitchDeck: form.pitchDeck.trim(),
+      startupName: form.brandName.trim() || form.companyLegalName.trim(),
+      raiseStage: form.currentStage.trim(),
+      teamSize: Number.parseInt(form.numberOfFounders, 10) || 1,
+      tractionSummary: form.brief.trim(),
+      metrics: {},
+      subSectors: [],
+      geography: '',
+      raiseAmountUSD: 0,
+      revenueRunRateUSD: 0,
+      submittedFrom: 'founder-signup-v2',
+      company: {
+        legalName: form.companyLegalName.trim(),
+        brandName: form.brandName.trim(),
+        website: form.companyWebsite.trim(),
+        foundingDate: form.companyFoundingDate.trim(),
+        sector: form.sector.trim(),
+        currentStage: form.currentStage.trim(),
+        brief: form.brief.trim(),
+        pitchDeckUrl: form.pitchDeck.trim(),
       },
     };
 
+    if (shouldAttachSecondFounder) {
+      payload.secondFounder = {
+        fullName: form.secondFounder.fullName.trim(),
+        email: form.secondFounder.email.trim(),
+        phoneNumber: form.secondFounder.phoneNumber.trim(),
+        linkedInUrl: form.secondFounder.linkedInUrl.trim(),
+      };
+    }
+
     setIsSubmitting(true);
     try {
-      const added = await addFounder(formatted);
+      const added = await addFounder(payload);
 
       if (typeof window !== 'undefined') {
         window.sessionStorage.setItem('launch.activeFounderId', added.id);
@@ -120,310 +162,268 @@ const FounderSignup = () => {
         },
       });
 
-      showGenericSuccess('Founder profile submitted successfully. We will follow up shortly.');
-      navigate('/dashboard/founder', { replace: true });
+      showGenericSuccess('Founder application submitted successfully.');
+      navigate('/payment-details', { replace: true });
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Founder submission failed', error);
-      showGenericInfo('We could not submit your profile. Please try again.');
+      showGenericInfo('We could not submit your information. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const previousStep = () => {
-    setStep((prev) => Math.max(0, prev - 1));
-  };
-
-  const progress = ((step + 1) / STEPS.length) * 100;
-
   return (
-    <div className="flex min-h-[90vh] items-center justify-center bg-gradient-to-br from-lilac via-honey to-blossom px-4 py-20 text-night">
-      <div className="relative w-full max-w-5xl overflow-hidden rounded-[2.75rem] border border-white/70 bg-white/85 shadow-[0_45px_140px_-30px_rgba(91,33,209,0.45)] backdrop-blur-2xl">
-        <div className="pointer-events-none absolute -left-12 top-16 h-64 w-64 rounded-full bg-white/70 blur-[130px]" />
-        <div className="pointer-events-none absolute -right-10 bottom-10 h-72 w-72 rounded-full bg-honey/80 blur-[160px]" />
-        <div className="relative grid gap-0 md:grid-cols-[0.95fr_1.05fr]">
-          <div className="border-b border-white/70 bg-gradient-to-b from-white/90 via-white/75 to-white/65 px-8 py-10 md:border-b-0 md:border-r md:px-12">
-            <div className="space-y-3">
-              <p className="text-xs font-semibold uppercase tracking-[0.35em] text-night/60">Founder intake</p>
-              <h1 className="font-display text-3xl font-semibold text-night md:text-4xl">Launch &amp; Lift signup</h1>
-              <p className="text-sm text-night/70">
-                Outline the essentials and we&apos;ll assemble your investor readiness workspace in minutes.
-              </p>
+    <div className="bg-gradient-to-br from-lilac via-white to-blossom/40 py-16">
+      <div className="mx-auto max-w-5xl rounded-3xl border border-night/10 bg-white/90 p-10 shadow-2xl backdrop-blur">
+        <header className="mb-10 space-y-4 text-night">
+          <p className="text-xs font-semibold uppercase tracking-[0.25em] text-night/60">
+            Founder intake
+          </p>
+          <h1 className="font-display text-3xl font-semibold md:text-4xl">
+            Tell us about your founding team &amp; company
+          </h1>
+          <p className="max-w-2xl text-sm text-night/70">
+            Share the essentials so we can fast-track your onboarding. This quick snapshot helps us
+            prepare investor materials and line up the right support pods ahead of our call.
+          </p>
+        </header>
+
+        <form className="space-y-12" onSubmit={handleSubmit}>
+          <section>
+            <h2 className="mb-6 text-lg font-semibold text-night">Founder&apos;s Details</h2>
+            <div className="grid gap-6 md:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="founderFullName">Founder's full name</Label>
+                <Input
+                  id="founderFullName"
+                  placeholder="Avery Cole"
+                  required
+                  value={form.founderFullName}
+                  onChange={updateForm('founderFullName')}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="email">Email address</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="avery@example.com"
+                  required
+                  value={form.email}
+                  onChange={updateForm('email')}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="phoneNumber">Phone number</Label>
+                <Input
+                  id="phoneNumber"
+                  type="tel"
+                  placeholder="+1 415 555 1234"
+                  value={form.phoneNumber}
+                  onChange={updateForm('phoneNumber')}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="linkedInUrl">LinkedIn profile URL</Label>
+                <Input
+                  id="linkedInUrl"
+                  type="url"
+                  placeholder="https://www.linkedin.com/in/averycole"
+                  value={form.linkedInUrl}
+                  onChange={updateForm('linkedInUrl')}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="numberOfFounders">Number of founders</Label>
+                <Input
+                  id="numberOfFounders"
+                  type="number"
+                  min={1}
+                  value={form.numberOfFounders}
+                  onChange={updateNumberField('numberOfFounders')}
+                />
+              </div>
             </div>
 
-            <ol className="mt-10 grid gap-3">
-              {STEPS.map((item, index) => {
-                const isActive = index === step;
-                const isCompleted = index < step;
-                return (
-                  <li
-                    key={item.id}
-                    className={`flex items-center gap-3 rounded-2xl border px-4 py-3 text-sm transition ${
-                      isActive
-                        ? 'border-white/70 bg-white/80 text-night shadow-lg shadow-[0_25px_70px_rgba(247,201,72,0.25)]'
-                        : 'border-white/40 bg-white/50 text-night/60'
-                    }`}
-                  >
-                    {isCompleted ? (
-                      <CheckCircle2 className="h-5 w-5 text-blossom" />
-                    ) : (
-                      <span className="flex h-5 w-5 items-center justify-center rounded-full border border-night/15 text-xs text-night/50">
-                        {index + 1}
-                      </span>
-                    )}
-                    <div>
-                      <p className="font-semibold text-night">{item.title}</p>
-                      <p className="text-xs text-night/50">{item.summary}</p>
-                    </div>
-                  </li>
-                );
-              })}
-            </ol>
-          </div>
+            <div className="mt-8 rounded-2xl border border-night/10 bg-night/5 p-6">
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <p className="text-sm font-semibold text-night">Add a co-founder?</p>
+                  <p className="text-xs text-night/60">
+                    Toggle if you would like to share details about a second founder.
+                  </p>
+                </div>
+                <label className="inline-flex cursor-pointer items-center gap-2 text-xs">
+                  <input
+                    checked={includeSecondFounder}
+                    className="h-4 w-4 accent-night"
+                    type="checkbox"
+                    onChange={(event) => {
+                      const next = event.target.checked;
+                      setIncludeSecondFounder(next);
+                      if (!next) {
+                        resetSecondFounder();
+                      }
+                    }}
+                  />
+                  Second founder
+                </label>
+              </div>
 
-          <form className="bg-white/70 p-10" onSubmit={handleSubmit}>
-            <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-[0.25em] text-night/50">
-              <span>Step {step + 1} of {STEPS.length}</span>
-              <span>{currentStep.title}</span>
+              {includeSecondFounder && (
+                <div className="mt-6 grid gap-6 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="secondFounderName">Co-founder full name</Label>
+                    <Input
+                      id="secondFounderName"
+                      placeholder="Riya Deshmukh"
+                      value={form.secondFounder.fullName}
+                      onChange={updateSecondFounder('fullName')}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="secondFounderEmail">Co-founder email</Label>
+                    <Input
+                      id="secondFounderEmail"
+                      type="email"
+                      placeholder="riya@example.com"
+                      value={form.secondFounder.email}
+                      onChange={updateSecondFounder('email')}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="secondFounderPhone">Co-founder phone</Label>
+                    <Input
+                      id="secondFounderPhone"
+                      type="tel"
+                      placeholder="+91 99876 54321"
+                      value={form.secondFounder.phoneNumber}
+                      onChange={updateSecondFounder('phoneNumber')}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="secondFounderLinkedIn">Co-founder LinkedIn URL</Label>
+                    <Input
+                      id="secondFounderLinkedIn"
+                      type="url"
+                      placeholder="https://www.linkedin.com/in/riyadeshmukh"
+                      value={form.secondFounder.linkedInUrl}
+                      onChange={updateSecondFounder('linkedInUrl')}
+                    />
+                  </div>
+                </div>
+              )}
             </div>
-            <div className="mt-4 h-1.5 w-full rounded-full bg-night/10">
-              <div
-                className="h-full rounded-full bg-gradient-to-r from-sunbeam via-blossom to-royal transition-all duration-300"
-                style={{ width: `${progress}%` }}
+          </section>
+
+          <section>
+            <h2 className="mb-6 text-lg font-semibold text-night">Company Details</h2>
+            <div className="grid gap-6 md:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="companyLegalName">Company's legal name</Label>
+                <Input
+                  id="companyLegalName"
+                  placeholder="LaunchAndLift Labs Inc."
+                  required
+                  value={form.companyLegalName}
+                  onChange={updateForm('companyLegalName')}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="brandName">Brand name</Label>
+                <Input
+                  id="brandName"
+                  placeholder="Launch &amp; Lift"
+                  required
+                  value={form.brandName}
+                  onChange={updateForm('brandName')}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="companyWebsite">Company's website</Label>
+                <Input
+                  id="companyWebsite"
+                  type="url"
+                  placeholder="https://launchandlift.com"
+                  required
+                  value={form.companyWebsite}
+                  onChange={updateForm('companyWebsite')}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="companyFoundingDate">Company founding date</Label>
+                <Input
+                  id="companyFoundingDate"
+                  type="date"
+                  value={form.companyFoundingDate}
+                  onChange={updateForm('companyFoundingDate')}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="sector">Sector's industry</Label>
+                <Input
+                  id="sector"
+                  placeholder="Climate logistics"
+                  required
+                  value={form.sector}
+                  onChange={updateForm('sector')}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="currentStage">Current stage</Label>
+                <select
+                  id="currentStage"
+                  className="h-11 w-full rounded-lg border border-night/20 bg-white px-3 text-sm text-night outline-none transition focus:border-night/50 focus:ring-2 focus:ring-night/10"
+                  required
+                  value={form.currentStage}
+                  onChange={updateForm('currentStage')}
+                >
+                  <option value="">Select stage</option>
+                  {stageOptions.map((stage) => (
+                    <option key={stage} value={stage}>
+                      {stage}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <div className="mt-6 space-y-2">
+              <Label htmlFor="brief">Brief about what you are building</Label>
+              <Textarea
+                id="brief"
+                placeholder="Tell us about the product, the problem you are solving, and the traction you have so far."
+                required
+                rows={6}
+                value={form.brief}
+                onChange={updateForm('brief')}
               />
             </div>
-
-            <div className="mt-6 min-h-[420px]">
-              <AnimatePresence mode="wait">
-                <Motion.div
-                  key={currentStep.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.2 }}
-                  className="space-y-6"
-                >
-                  {currentStep.id === 'profile' && (
-                    <div className="grid gap-6 md:grid-cols-2">
-                      <Field label="Full Name">
-                        <Input
-                          value={form.fullName}
-                          onChange={(event) => updateField('fullName', event.target.value)}
-                          placeholder="Amelia Hart"
-                          required
-                        />
-                      </Field>
-                      <Field label="Email">
-                        <Input
-                          type="email"
-                          value={form.email}
-                          onChange={(event) => updateField('email', event.target.value)}
-                          placeholder="amelia@orbitstack.io"
-                          required
-                        />
-                      </Field>
-                      <Field label="Startup Name">
-                        <Input
-                          value={form.startupName}
-                          onChange={(event) => updateField('startupName', event.target.value)}
-                          placeholder="OrbitStack"
-                          required
-                        />
-                      </Field>
-                      <Field label="Your Role & Headline">
-                        <Input
-                          value={form.headline}
-                          onChange={(event) => updateField('headline', event.target.value)}
-                          placeholder="AI observability stack for enterprise ML teams"
-                        />
-                      </Field>
-                      <Field label="Primary Sector">
-                        <Input
-                          value={form.sector}
-                          onChange={(event) => updateField('sector', event.target.value)}
-                          placeholder="AI Infrastructure"
-                          required
-                        />
-                      </Field>
-                      <Field label="Focus Tags (comma separated)">
-                        <Input
-                          value={form.subSectors.join(', ')}
-                          onChange={(event) =>
-                            updateField(
-                              'subSectors',
-                              event.target.value
-                                .split(',')
-                                .map((entry) => entry.trim())
-                                .filter(Boolean),
-                            )
-                          }
-                          placeholder="Developer Tools, Model Ops"
-                        />
-                      </Field>
-                      <Field label="Geography">
-                        <Input
-                          value={form.geography}
-                          onChange={(event) => updateField('geography', event.target.value)}
-                          placeholder="San Francisco, USA"
-                          required
-                        />
-                      </Field>
-                      <Field label="Fundraising Stage">
-                        <Input
-                          value={form.raiseStage}
-                          onChange={(event) => updateField('raiseStage', event.target.value)}
-                          placeholder="Seed"
-                        />
-                      </Field>
-                      <Field label="Raise Target (USD)">
-                        <Input
-                          type="number"
-                          value={form.raiseAmountUSD || ''}
-                          onChange={(event) =>
-                            updateField('raiseAmountUSD', Number(event.target.value) || 0)
-                          }
-                          placeholder="2500000"
-                        />
-                      </Field>
-                      <Field label="Team Size">
-                        <Input
-                          type="number"
-                          value={form.teamSize}
-                          onChange={(event) =>
-                            updateField('teamSize', Number(event.target.value) || 0)
-                          }
-                          placeholder="10"
-                        />
-                      </Field>
-                      <div className="md:col-span-2">
-                        <Field label="Traction Snapshot">
-                          <Textarea
-                            value={form.tractionSummary}
-                            onChange={(event) => updateField('tractionSummary', event.target.value)}
-                            placeholder="Highlight revenue traction, customer segments, and pipeline momentum."
-                          />
-                        </Field>
-                      </div>
-                      <Field label="Revenue Run Rate (USD)">
-                        <Input
-                          type="number"
-                          value={form.revenueRunRateUSD || ''}
-                          onChange={(event) =>
-                            updateField('revenueRunRateUSD', Number(event.target.value) || 0)
-                          }
-                          placeholder="720000"
-                        />
-                      </Field>
-                    </div>
-                  )}
-
-                  {currentStep.id === 'insights' && (
-                    <div className="grid gap-6 md:grid-cols-2">
-                      <Field label="MoM Growth">
-                        <Input
-                          value={form.metrics.growth}
-                          onChange={(event) => handleMetricsChange('growth', event.target.value)}
-                          placeholder="18%"
-                        />
-                      </Field>
-                      <Field label="Monthly Recurring Revenue">
-                        <Input
-                          value={form.metrics.mrr}
-                          onChange={(event) => handleMetricsChange('mrr', event.target.value)}
-                          placeholder="$62K"
-                        />
-                      </Field>
-                      <Field label="Customer Acquisition Cost">
-                        <Input
-                          value={form.metrics.cac}
-                          onChange={(event) => handleMetricsChange('cac', event.target.value)}
-                          placeholder="$640"
-                        />
-                      </Field>
-                      <Field label="Lifetime Value">
-                        <Input
-                          value={form.metrics.ltv}
-                          onChange={(event) => handleMetricsChange('ltv', event.target.value)}
-                          placeholder="$8.1K"
-                        />
-                      </Field>
-                      <Field label="Payback Period">
-                        <Input
-                          value={form.metrics.payback}
-                          onChange={(event) => handleMetricsChange('payback', event.target.value)}
-                          placeholder="9 months"
-                        />
-                      </Field>
-                      <div className="md:col-span-2 grid gap-6">
-                        <div className="rounded-2xl border border-white/60 bg-white/80 p-6 shadow-inner shadow-white/40">
-                          <p className="text-xs font-semibold uppercase tracking-[0.25em] text-blossom">
-                            AI generated summary
-                          </p>
-                          <p className="mt-3 text-sm text-night/75">{aiPreview.overview}</p>
-                        </div>
-                        <div className="space-y-3 rounded-2xl border border-white/60 bg-white/75 p-6 shadow-inner shadow-white/40">
-                          <p className="text-xs font-semibold uppercase tracking-[0.25em] text-blossom">
-                            Highlights
-                          </p>
-                          <ul className="space-y-2 text-sm text-night/75">
-                            {aiPreview.highlights.map((highlight) => (
-                              <li key={highlight} className="flex items-start gap-2">
-                                <span className="mt-1 h-2 w-2 rounded-full bg-blossom" />
-                                <span>{highlight}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                        <div className="rounded-2xl border border-white/60 bg-white/75 p-6 text-sm text-night/75 shadow-inner shadow-white/40">
-                          <p className="text-xs font-semibold uppercase tracking-[0.25em] text-blossom">
-                            Recommended focus
-                          </p>
-                          <p className="mt-2">{aiPreview.recommendedFocus}</p>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </Motion.div>
-              </AnimatePresence>
+            <div className="mt-6 space-y-2">
+              <Label htmlFor="pitchDeck">Pitch deck URL</Label>
+              <Input
+                id="pitchDeck"
+                type="url"
+                placeholder="https://drive.google.com/your-pitch-deck"
+                value={form.pitchDeck}
+                onChange={updateForm('pitchDeck')}
+              />
             </div>
+          </section>
 
-            <div className="mt-8 flex items-center justify-between gap-4">
-              <Button
-                type="button"
-                variant="ghost"
-                onClick={previousStep}
-                disabled={step === 0}
-                className="gap-2 text-night/70 hover:text-night"
-              >
-                <ChevronLeft className="h-4 w-4" />
-                Back
-              </Button>
-              <Button type="submit" className="gap-2" disabled={isSubmitting}>
-                {step === STEPS.length - 1 ? (
-                  <>
-                    {isSubmitting ? 'Submitting…' : 'Submit'}
-                    {!isSubmitting ? <CheckCircle2 className="h-4 w-4" /> : null}
-                  </>
-                ) : (
-                  <>
-                    Continue
-                    <ChevronRight className="h-4 w-4" />
-                  </>
-                )}
-              </Button>
-            </div>
-          </form>
-        </div>
+          <footer className="flex flex-col items-start justify-between gap-4 border-t border-night/10 pt-6 text-sm text-night/70 md:flex-row md:items-center">
+            <p>
+              Once you submit, we will direct you to the payment details page to confirm the next
+              steps for onboarding.
+            </p>
+            <Button className="px-8" disabled={isSubmitting} type="submit">
+              {isSubmitting ? 'Submitting…' : 'Submit & continue'}
+            </Button>
+          </footer>
+        </form>
       </div>
     </div>
   );
 };
-
-const Field = ({ label, children }) => (
-  <div className="space-y-2">
-    <Label className="text-xs font-semibold uppercase tracking-[0.25em] text-night/50">{label}</Label>
-    {children}
-  </div>
-);
 
 export default FounderSignup;

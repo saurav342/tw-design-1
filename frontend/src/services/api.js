@@ -22,7 +22,7 @@ const resolveApiBaseUrl = () => {
     return `${window.location.origin}/api`;
   }
 
-  return 'http://localhost:5000/api';
+  return 'http://localhost:3000/api';
 };
 
 const API_BASE_URL = resolveApiBaseUrl();

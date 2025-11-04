@@ -10,7 +10,7 @@ export default defineConfig(({ mode }) => {
   const rawProxyTarget = env.VITE_PROXY_TARGET ?? env.VITE_API_URL ?? ''
   const proxyTarget = rawProxyTarget
     ? trimApiSuffix(rawProxyTarget)
-    : 'http://localhost:5000'
+    : 'http://localhost:3000'
 
   return {
     plugins: [react()],

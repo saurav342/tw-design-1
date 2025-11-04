@@ -53,7 +53,7 @@ npm install
 npm run dev
 ```
 
-The dev server defaults to `http://localhost:5173`. By default, the SPA targets `/api` on the same origin. Override this by adding `VITE_API_URL` (for example `https://your-production-host/api`) in a `.env` file. **When the app runs over HTTPS, the client automatically falls back to same-origin `/api` if a plain `http://` API URL is supplied, so configure your hosting to proxy `/api` to the backend (or expose the backend via HTTPS) to avoid mixed-content blocks.** During local development, Vite proxies `/api` requests to `VITE_PROXY_TARGET` (falling back to `http://localhost:5000`), so set that value if your backend runs on a different host.
+The dev server defaults to `http://localhost:5173`. By default, the SPA targets `/api` on the same origin. Override this by adding `VITE_API_URL` (for example `https://your-production-host/api`) in a `.env` file. **When the app runs over HTTPS, the client automatically falls back to same-origin `/api` if a plain `http://` API URL is supplied, so configure your hosting to proxy `/api` to the backend (or expose the backend via HTTPS) to avoid mixed-content blocks.** During local development, Vite proxies `/api` requests to `VITE_PROXY_TARGET` (falling back to `http://localhost:3000`), so set that value if your backend runs on a different host.
 
 For Netlify deployments, `netlify.toml` (repo root) sets the base directory to `frontend/`, rewrites `/api/*` requests to the EC2 backend, and enables SPA routing (`/* → /index.html`). Update the `to` value to match your environment before deploying.
 
@@ -68,7 +68,7 @@ npm run dev
 Environment variables (set in `backend/.env`):
 
 ```
-PORT=5000
+PORT=3000
 APP_URL=http://localhost:5173
 JWT_SECRET=replace-with-strong-secret
 JWT_EXPIRES_IN=12h

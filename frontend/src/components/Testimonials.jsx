@@ -8,18 +8,18 @@ const Testimonials = ({ items }) => (
     {items.map((testimonial) => (
       <MotionCard
         key={testimonial.name}
-        className="flex h-full flex-col rounded-3xl border border-white/60 bg-white/85 p-6 shadow-lg shadow-[0_22px_58px_rgba(247,201,72,0.24)] backdrop-blur-sm transition-transform duration-300 hover:shadow-2xl hover:shadow-[0_32px_80px_rgba(255,79,154,0.3)]"
+        className="flex h-full flex-col rounded-3xl border border-white/50 bg-white/90 p-6 text-[#1a1030] shadow-[0_22px_60px_rgba(139,92,246,0.18)] backdrop-blur transition-transform duration-300 hover:-translate-y-2 hover:shadow-[0_32px_90px_rgba(255,79,163,0.28)]"
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, amount: 0.3 }}
         whileHover={{ y: -12, scale: 1.015 }}
         transition={{ type: 'spring', stiffness: 260, damping: 24 }}
       >
-        <span className="text-5xl text-blossom">&ldquo;</span>
-        <p className="mt-4 flex-1 text-sm text-night/75">{testimonial.quote}</p>
+        <span className="text-5xl text-[#ff4fa3]">&ldquo;</span>
+        <p className="mt-4 flex-1 text-sm text-[#3b2a57]">{testimonial.quote}</p>
         <div className="mt-6">
-          <p className="text-sm font-semibold text-night">{testimonial.name}</p>
-          <p className="text-xs uppercase tracking-wide text-night/50">{testimonial.role}</p>
+          <p className="text-sm font-semibold text-[#1a1030]">{testimonial.name}</p>
+          <p className="text-xs uppercase tracking-wide text-[#8b5cf6]">{testimonial.role}</p>
         </div>
       </MotionCard>
     ))}

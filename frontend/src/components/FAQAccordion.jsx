@@ -11,20 +11,20 @@ const FAQAccordion = ({ items }) => {
         return (
           <div
             key={item.question}
-            className="rounded-2xl border border-white/60 bg-white/85 shadow-lg shadow-[0_20px_55px_rgba(247,201,72,0.22)] transition-all duration-300 hover:-translate-y-[2px] hover:shadow-2xl hover:shadow-[0_30px_70px_rgba(255,79,154,0.26)]"
+            className="rounded-2xl border border-white/50 bg-white/90 shadow-[0_20px_60px_rgba(139,92,246,0.16)] transition-all duration-300 hover:-translate-y-[2px] hover:shadow-[0_28px_80px_rgba(255,79,163,0.24)]"
           >
             <button
               type="button"
               onClick={() => setExpandedIndex(expanded ? null : index)}
-              className="flex w-full items-center justify-between px-4 py-4 text-left text-night hover:text-blossom sm:px-6"
+              className="flex w-full items-center justify-between px-4 py-4 text-left text-[#1a1030] hover:text-[#ff4fa3] sm:px-6"
             >
-              <span className="text-sm font-semibold text-night">{item.question}</span>
-              <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-night/5 text-blossom">
+              <span className="text-sm font-semibold">{item.question}</span>
+              <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[#fce3f3] text-[#ff4fa3]">
                 {expanded ? '-' : '+'}
               </span>
             </button>
             {expanded && (
-              <div className="border-t border-white/60 px-4 py-4 text-sm text-night/70 sm:px-6">
+              <div className="border-t border-white/50 px-4 py-4 text-sm text-[#3b2a57] sm:px-6">
                 {item.answer}
               </div>
             )}

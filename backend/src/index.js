@@ -1,4 +1,6 @@
 require('dotenv').config();
+const fs = require('fs');
+const path = require('path');
 const express = require('express');
 const cors = require('cors');
 
@@ -23,6 +25,20 @@ app.use('/api/content', contentRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/intakes', intakeRoutes);
 app.use('/api/founder-extras', founderExtrasRoutes);
+
+const clientDistPath = path.resolve(__dirname, '../../frontend/dist');
+const clientIndexPath = path.join(clientDistPath, 'index.html');
+
+if (fs.existsSync(clientIndexPath)) {
+  app.use(express.static(clientDistPath));
+
+  app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api')) {
+      return next();
+    }
+    return res.sendFile(clientIndexPath);
+  });
+}
 
 app.use((req, res) => {
   res.status(404).json({ message: 'Endpoint not found' });

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion as Motion } from 'framer-motion';
-import { ArrowUpRight, Building2, Menu } from 'lucide-react';
+import { ArrowUpRight, BarChart3, Briefcase, Building2, Menu, Rocket, Users } from 'lucide-react';
 import { useAuth } from '../context/useAuth.js';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card.jsx';
 import { Button } from '../components/ui/button.jsx';
@@ -58,7 +58,6 @@ const DashboardLayout = () => {
 
   const founderName = user?.fullName ?? activeFounder.fullName ?? 'Founder';
 
-  const metrics = buildDashboardMetrics({ founder: activeFounder });
   const listing = extras?.marketplaceListing ?? null;
   const successRequest = extras?.successFeeRequest ?? null;
   const serviceRequests = Array.isArray(extras?.serviceRequests) ? extras.serviceRequests : [];
@@ -95,10 +94,15 @@ const DashboardLayout = () => {
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="space-y-8">
           {/* Page Title */}
-          <PageTitle founderName={founderName} />
+          <PageTitle />
 
           {/* Dashboard Tiles */}
-          <DashboardTiles metrics={metrics} />
+          <DashboardTiles
+            listing={listing}
+            successRequest={successRequest}
+            matches={matches}
+            serviceRequests={serviceRequests}
+          />
 
           {/* Dashboard Sections */}
           <MarketplacePresence listing={listing} />
@@ -114,38 +118,105 @@ const DashboardLayout = () => {
   );
 };
 
-const PageTitle = ({ founderName }) => (
+const PageTitle = () => (
   <div>
     <h1 className="text-3xl font-semibold text-slate-900">Founder Dashboard</h1>
-    <p className="mt-2 text-sm text-gray-600">
-      Manage your fundraising journey and access expert support from the Launch &amp; Lift team,
-      tailored to {founderName}.
+    <p className="mt-2 text-sm text-slate-600">
+      Manage your fundraising journey and access expert support to keep momentum across every part
+      of your raise.
     </p>
   </div>
 );
 
-const DashboardTiles = ({ metrics }) => (
-  <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-    {metrics.map((metric) => (
-      <MotionDiv
-        key={metric.id}
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
-        className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
-      >
-        <p className="text-xs uppercase tracking-[0.28em] text-slate-400">{metric.label}</p>
-        <p className="mt-3 text-2xl font-semibold text-slate-900">{metric.value}</p>
-        {metric.caption ? (
-          <p className="mt-2 text-xs text-slate-500">{metric.caption}</p>
-        ) : null}
-      </MotionDiv>
-    ))}
-  </div>
-);
+const DashboardTiles = ({ listing, successRequest, matches, serviceRequests }) => {
+  const tiles = [
+    {
+      id: 'marketplace',
+      title: 'Marketplace presence',
+      description: listing
+        ? 'Listing live and investor-ready.'
+        : 'Publish your raise details to go live.',
+      href: '/dashboard/founder/marketplace',
+      status: listing ? 'Active' : 'Draft',
+      bg: 'from-sky-500 to-blue-600',
+      icon: BarChart3,
+    },
+    {
+      id: 'success-fee',
+      title: 'Success-fee raise support',
+      description: successRequest
+        ? 'Brief submitted to the capital team.'
+        : 'Share your traction for hands-on support.',
+      href: '/dashboard/founder/success-fee',
+      status: successRequest ? 'In review' : 'Get started',
+      bg: 'from-violet-500 to-indigo-600',
+      icon: Rocket,
+    },
+    {
+      id: 'investor-intros',
+      title: 'Investor introductions',
+      description:
+        matches.length > 0
+          ? `Warm intros queued for ${matches.length} investors.`
+          : 'Line up curated intros matched to your round.',
+      href: '/dashboard/founder/investors',
+      status: matches.length > 0 ? 'Ready' : 'Pending',
+      bg: 'from-emerald-500 to-green-600',
+      icon: Users,
+    },
+    {
+      id: 'services',
+      title: 'Founder services studio',
+      description:
+        serviceRequests.length > 0
+          ? `${serviceRequests.length} request${serviceRequests.length > 1 ? 's' : ''} in motion.`
+          : 'Spin up support for pitch, diligence, and GTM.',
+      href: '/dashboard/founder/services',
+      status: 'Available',
+      bg: 'from-indigo-500 to-purple-600',
+      icon: Briefcase,
+    },
+  ];
+
+  return (
+    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      {tiles.map((tile, index) => {
+        const Icon = tile.icon;
+        return (
+          <MotionDiv
+            key={tile.id}
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: index * 0.05 }}
+            className={`relative overflow-hidden rounded-3xl bg-gradient-to-br ${tile.bg} p-6 text-white shadow-lg`}
+          >
+            <div className="flex items-center justify-between">
+              <div className="rounded-2xl bg-white/15 p-2">
+                <Icon className="h-6 w-6 text-white" />
+              </div>
+              <span className="rounded-full bg-white/20 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em]">
+                {tile.status}
+              </span>
+            </div>
+            <h2 className="mt-6 text-lg font-semibold">{tile.title}</h2>
+            <p className="mt-2 text-sm text-white/80">{tile.description}</p>
+            <Button asChild variant="secondary" className="mt-6 w-full bg-white text-slate-900 hover:bg-white/90">
+              <Link className="flex items-center justify-center gap-2" to={tile.href}>
+                View details
+                <ArrowUpRight className="h-4 w-4" />
+              </Link>
+            </Button>
+          </MotionDiv>
+        );
+      })}
+    </div>
+  );
+};
 
 const MarketplacePresence = ({ listing }) => {
   const hasListing = Boolean(listing);
+  const lastUpdated =
+    hasListing && listing?.lastUpdated ? formatDateDisplay(listing.lastUpdated) : 'Not updated';
 
   return (
     <MotionDiv
@@ -153,124 +224,194 @@ const MarketplacePresence = ({ listing }) => {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: 0.08 }}
     >
-      <Card className="border border-slate-200 bg-white text-slate-800 shadow-sm">
-        <CardHeader className="space-y-3">
-          <CardTitle className="text-xl text-slate-900">Marketplace presence</CardTitle>
-          <p className="text-sm text-slate-600">
-            Keep your raise profile polished before Launch &amp; Lift surfaces you to curated
-            investors.
-          </p>
+      <Card className="overflow-hidden border border-slate-200 bg-white shadow-sm">
+        <CardHeader className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div className="space-y-2">
+            <CardTitle className="text-2xl text-slate-900">Marketplace presence</CardTitle>
+            <p className="text-sm text-slate-600">
+              Keep your raise details polished before we surface you to Launch &amp; Lift investors.
+            </p>
+          </div>
+          <Button
+            asChild
+            variant="outline"
+            size="sm"
+            className="w-full text-slate-700 hover:text-slate-900 lg:w-auto"
+          >
+            <Link to="/dashboard/founder/marketplace">Edit listing</Link>
+          </Button>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div>
-            <p className={`text-sm font-semibold ${hasListing ? 'text-royal' : 'text-slate-500'}`}>
-              {hasListing ? 'Active listing' : 'No listing yet'}
-            </p>
-            <p className="mt-1 text-xs text-slate-500">
-              {hasListing
-                ? `Last updated ${formatDateDisplay(listing.lastUpdated)}`
-                : 'Publish your raise details to appear in the founder marketplace.'}
-            </p>
+          <div className="flex flex-col gap-3 rounded-3xl border border-slate-200 bg-slate-50/70 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-base font-semibold text-slate-900">
+                {hasListing ? 'Active listing' : 'No listing yet'}
+              </p>
+              <p className="text-xs text-slate-500">
+                {hasListing ? `Last updated: ${lastUpdated}` : 'Publish your raise profile to go live.'}
+              </p>
+            </div>
+            <span
+              className={`flex h-8 items-center rounded-full px-4 text-xs font-semibold uppercase tracking-[0.2em] ${
+                hasListing
+                  ? 'bg-emerald-100 text-emerald-600'
+                  : 'bg-slate-200 text-slate-600'
+              }`}
+            >
+              {hasListing ? 'Active' : 'Draft'}
+            </span>
           </div>
 
           {hasListing ? (
-            <div className="grid gap-3 rounded-2xl border border-slate-200 bg-slate-50/80 px-5 py-4 text-sm text-slate-600">
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-slate-500">Raise amount</span>
-                <span className="font-semibold text-slate-800">
+            <div className="grid gap-4 rounded-3xl border border-slate-200 bg-white px-6 py-5 text-sm text-slate-700 shadow-sm sm:grid-cols-2">
+              <div>
+                <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Raise amount</p>
+                <p className="mt-2 text-lg font-semibold text-slate-900">
                   {formatCurrencyInr(listing.raiseAmount)}
-                </span>
-              </div>
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-slate-500">Min. ticket</span>
-                <span className="font-semibold text-slate-800">
-                  {formatCurrencyInr(listing.minTicket)}
-                </span>
+                </p>
               </div>
               <div>
-                <p className="text-xs text-slate-500">Use of funds</p>
-                <p className="mt-1 text-sm text-slate-700">{listing.useOfFunds}</p>
+                <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Min. ticket</p>
+                <p className="mt-2 text-lg font-semibold text-slate-900">
+                  {formatCurrencyInr(listing.minTicket)}
+                </p>
               </div>
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-slate-500">Industry / category</span>
-                <span className="font-semibold text-slate-800">{listing.industry || 'Not set'}</span>
+              <div className="sm:col-span-2">
+                <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Use of funds</p>
+                <p className="mt-2 text-sm text-slate-700">{listing.useOfFunds}</p>
+              </div>
+              <div>
+                <p className="text-xs uppercase tracking-[0.18em] text-slate-500">
+                  Industry / category
+                </p>
+                <p className="mt-2 text-sm font-semibold text-slate-900">
+                  {listing.industry || 'Not set'}
+                </p>
               </div>
             </div>
           ) : (
-            <p className="text-sm text-slate-600">
+            <div className="rounded-3xl border border-dashed border-slate-300 bg-slate-50 px-6 py-5 text-sm text-slate-600">
               Share headline metrics, use of funds, and industry tags to go live in the marketplace.
-            </p>
+            </div>
           )}
 
-          <Button asChild className="w-full">
-            <Link
-              className="flex items-center justify-center gap-2"
-              to="/dashboard/founder/marketplace"
-            >
-              {hasListing ? 'View marketplace listing' : 'Create marketplace listing'}
-              <ArrowUpRight className="h-4 w-4" />
-            </Link>
-          </Button>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-xs text-slate-500">
+              You can maintain one live listing at a time. Drafts are saved on the dedicated page.
+            </p>
+            <Button asChild variant="secondary" className="w-full sm:w-auto">
+              <Link
+                className="flex items-center justify-center gap-2"
+                to="/dashboard/founder/marketplace"
+              >
+                View marketplace listing
+                <ArrowUpRight className="h-4 w-4" />
+              </Link>
+            </Button>
+          </div>
         </CardContent>
       </Card>
     </MotionDiv>
   );
 };
 
-const SuccessFeeSupport = ({ successRequest }) => (
-  <MotionDiv
-    initial={{ opacity: 0, y: 16 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.4, delay: 0.12 }}
-  >
-    <Card className="border border-slate-200 bg-white text-slate-800 shadow-sm">
-      <CardHeader className="space-y-3">
-        <CardTitle className="text-xl text-slate-900">Success-fee raise support</CardTitle>
-        <p className="text-sm text-slate-600">
-          Submit a brief so the Launch &amp; Lift capital team can champion your round.
-        </p>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="flex flex-wrap gap-2 text-xs text-slate-500">
-          {['Onboarding ₹2–3L', 'Success fee on final raise', 'Warm investor intros'].map((chip) => (
-            <span
-              key={chip}
-              className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 uppercase tracking-[0.2em]"
-            >
-              {chip}
-            </span>
-          ))}
-        </div>
-
-        {successRequest ? (
-          <div className="rounded-2xl border border-slate-200 bg-slate-50/80 px-5 py-4 text-sm text-slate-600">
-            <p className="font-semibold text-royal">Request submitted — our team is reviewing.</p>
-            <p className="mt-2 text-xs text-slate-500">
-              Round: {successRequest.round} • Target:{' '}
-              {successRequest.targetAmount
-                ? formatCurrencyInr(successRequest.targetAmount)
-                : 'Not shared'}
-            </p>
-            <p className="mt-2 text-xs text-slate-500">
-              Updated {formatDateDisplay(successRequest.createdAt)} • Edit details anytime.
-            </p>
-          </div>
-        ) : (
+const SuccessFeeSupport = ({ successRequest }) => {
+  const hasRequest = Boolean(successRequest);
+  return (
+    <MotionDiv
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, delay: 0.12 }}
+    >
+      <Card className="border border-slate-200 bg-white shadow-sm">
+        <CardHeader className="space-y-2">
+          <CardTitle className="text-2xl text-slate-900">Success-fee raise support</CardTitle>
           <p className="text-sm text-slate-600">
-            Walk through the guided brief to capture traction, committed capital, and round targets.
+            Walk through a guided brief so our capital team can champion your round.
           </p>
-        )}
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
+            <div className="space-y-4 rounded-3xl border border-indigo-200 bg-indigo-50/60 px-6 py-5 text-sm text-indigo-900">
+              <div>
+                <p className="flex items-center gap-2 text-base font-semibold">
+                  <Rocket className="h-4 w-4" />
+                  Onboarding: ₹2–3L
+                </p>
+                <p className="mt-1 text-sm text-indigo-800/80">
+                  Initial onboarding fee to get started with our capital team.
+                </p>
+              </div>
+              <div>
+                <p className="flex items-center gap-2 text-base font-semibold">
+                  <BarChart3 className="h-4 w-4" />
+                  Success fee on final raise
+                </p>
+                <p className="mt-1 text-sm text-indigo-800/80">
+                  Performance-based fee aligned with your fundraising success.
+                </p>
+              </div>
+            </div>
 
-        <Button asChild className="w-full">
-          <Link className="flex items-center justify-center gap-2" to="/dashboard/founder/success-fee">
-            {successRequest ? 'Update success-fee request' : 'Request success-fee plan'}
-            <ArrowUpRight className="h-4 w-4" />
-          </Link>
-        </Button>
-      </CardContent>
-    </Card>
-  </MotionDiv>
-);
+            <div className="flex flex-col justify-between gap-4 rounded-3xl border border-slate-200 bg-slate-50 px-6 py-5 text-sm text-slate-700">
+              {hasRequest ? (
+                <>
+                  <div>
+                    <p className="text-sm font-semibold text-slate-900">
+                      Request submitted — our team is reviewing.
+                    </p>
+                    <p className="mt-2 text-xs text-slate-500">
+                      Round: {successRequest.round || 'Not specified'} • Target:{' '}
+                      {successRequest.targetAmount
+                        ? formatCurrencyInr(successRequest.targetAmount)
+                        : 'Not shared'}
+                    </p>
+                    <p className="mt-2 text-xs text-slate-500">
+                      Updated {formatDateDisplay(successRequest.createdAt)} • Edit details anytime.
+                    </p>
+                  </div>
+                  <Button asChild className="w-full">
+                    <Link
+                      className="flex items-center justify-center gap-2"
+                      to="/dashboard/founder/success-fee"
+                    >
+                      Update success-fee request
+                      <ArrowUpRight className="h-4 w-4" />
+                    </Link>
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <div>
+                    <p className="text-sm font-semibold text-slate-900">
+                      Investor introductions
+                    </p>
+                    <p className="mt-2 text-sm text-slate-600">
+                      Share stage, traction, and committed capital so the success team can spin up
+                      outreach.
+                    </p>
+                  </div>
+                  <Button asChild className="w-full">
+                    <Link
+                      className="flex items-center justify-center gap-2"
+                      to="/dashboard/founder/success-fee"
+                    >
+                      Request success-fee plan
+                      <ArrowUpRight className="h-4 w-4" />
+                    </Link>
+                  </Button>
+                  <p className="text-xs text-slate-500">
+                    Requests surface instantly on the admin console for Launch &amp; Lift operators.
+                  </p>
+                </>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </MotionDiv>
+  );
+};
 
 const InvestorIntroductions = ({ matches, investors }) => {
   const introductions = matches
@@ -396,49 +537,6 @@ const FounderServices = ({ latestServiceRequest, totalRequests }) => (
     </Card>
   </MotionDiv>
 );
-
-const buildDashboardMetrics = ({ founder }) => {
-  const readinessScores = Array.isArray(founder.readiness)
-    ? founder.readiness.map((stat) => stat.score)
-    : [];
-  const averageReadiness = readinessScores.length
-    ? Math.round(readinessScores.reduce((acc, value) => acc + value, 0) / readinessScores.length)
-    : null;
-  const raiseTarget =
-    typeof founder.raiseAmountUSD === 'number' ? formatCurrency(founder.raiseAmountUSD) : '—';
-  const runRate =
-    typeof founder.revenueRunRateUSD === 'number'
-      ? formatCurrency(founder.revenueRunRateUSD, { maximumFractionDigits: 0 })
-      : '—';
-  const matchesCount = Array.isArray(founder.matches) ? founder.matches.length : 0;
-
-  return [
-    {
-      id: 'readiness',
-      label: 'Readiness score',
-      value: averageReadiness !== null ? `${averageReadiness}/100` : '—',
-      caption: 'Composite of traction, market, and product signals',
-    },
-    {
-      id: 'raise-target',
-      label: 'Raise target',
-      value: raiseTarget,
-      caption: founder.raiseStage ? `${founder.raiseStage} round` : 'Stage to confirm',
-    },
-    {
-      id: 'run-rate',
-      label: 'Revenue run rate',
-      value: runRate,
-      caption: 'Trailing 12 months',
-    },
-    {
-      id: 'warm-intros',
-      label: 'Warm introductions',
-      value: `${matchesCount} ready`,
-      caption: matchesCount > 0 ? 'Investors aligned with your round' : 'Awaiting intro approvals',
-    },
-  ];
-};
 
 export { DashboardLayout };
 export default DashboardLayout;

@@ -25,10 +25,10 @@ const Navbar = () => {
     <header className="sticky top-0 z-50 bg-white/90 shadow-sm backdrop-blur-md">
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 lg:px-8">
         <Link to="/" className="flex items-center gap-3">
-          <img src={logoImage} alt="LaunchAndLift logo" className="h-10 w-10" />
-          <span className="font-display text-2xl font-semibold text-sunbeam">
+          <img src={logoImage} alt="LaunchAndLift logo" className="h-20 w-60" />
+          {/* <span className="font-display text-2xl font-semibold text-sunbeam">
             Launch<span className="text-sprout">&</span>Lift
-          </span>
+          </span> */}
         </Link>
 
         <button

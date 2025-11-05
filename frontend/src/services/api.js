@@ -1,4 +1,8 @@
 const trimTrailingSlash = (value) => (value.endsWith('/') ? value.slice(0, -1) : value);
+const DEFAULT_API_BASE = 'https://backend.launchandlift.com/api';
+const LOCAL_API_BASE = 'http://localhost:3000/api';
+const isLocalHostname = (hostname = '') =>
+  ['localhost', '127.0.0.1', '::1'].includes(hostname.replace(/^\[|\]$/g, ''));
 
 const resolveApiBaseUrl = () => {
   const explicit = import.meta.env.VITE_API_URL;
@@ -9,20 +13,28 @@ const resolveApiBaseUrl = () => {
 
     if (hasWindow && window.location.protocol === 'https:' && normalized.startsWith('http://')) {
       console.warn(
-        '[LaunchAndLift] Detected insecure API base on HTTPS page. Falling back to same-origin /api. ' +
+        '[LaunchAndLift] Detected insecure API base on HTTPS page. Falling back to default backend. ' +
           'Set up a reverse proxy or provide an HTTPS API URL to avoid mixed-content blocks.',
       );
-      return `${window.location.origin}/api`;
+      return DEFAULT_API_BASE;
     }
 
     return normalized;
   }
 
   if (hasWindow) {
-    return `${window.location.origin}/api`;
+    const { origin, hostname } = window.location;
+
+    if (isLocalHostname(hostname)) {
+      return `${origin}/api`;
+    }
   }
 
-  return 'http://localhost:3000/api';
+  if (import.meta.env.DEV) {
+    return LOCAL_API_BASE;
+  }
+
+  return DEFAULT_API_BASE;
 };
 
 const API_BASE_URL = resolveApiBaseUrl();

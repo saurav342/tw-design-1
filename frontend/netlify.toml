@@ -5,7 +5,7 @@
 
 [[redirects]]
   from = "/api/*"
-  to = "http://ec2-3-25-171-207.ap-southeast-2.compute.amazonaws.com:5000/api/:splat"
+  to = "https://backend.launchandlift.com/api/:splat"
   status = 200
   force = true
 

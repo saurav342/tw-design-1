@@ -95,6 +95,15 @@ export const useAppStore = create((set, get) => ({
   founders: foundersMock,
   investors: investorsMock,
   founderExtras: buildInitialFounderExtras(),
+  investorInterests: [],
+  investorPortfolio: [
+    // Mock portfolio data for demo
+    {
+      founderId: 'founder-1',
+      amountInvested: 500000,
+      investedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 90).toISOString(),
+    },
+  ],
   addFounder: async (input) => {
     const id = `founder-${randomId()}`;
     const aiPayload = generateAISummary({
@@ -426,5 +435,37 @@ export const useAppStore = create((set, get) => ({
         return { ...founder, matches };
       }),
     }));
+  },
+  addInvestorInterest: (founderId) => {
+    set((state) => {
+      if (state.investorInterests.includes(founderId)) {
+        return {};
+      }
+      return {
+        investorInterests: [...state.investorInterests, founderId],
+      };
+    });
+  },
+  removeInvestorInterest: (founderId) => {
+    set((state) => ({
+      investorInterests: state.investorInterests.filter((id) => id !== founderId),
+    }));
+  },
+  addToPortfolio: (founderId, amountInvested) => {
+    set((state) => {
+      const exists = state.investorPortfolio.some((inv) => inv.founderId === founderId);
+      if (exists) return {};
+      
+      return {
+        investorPortfolio: [
+          ...state.investorPortfolio,
+          {
+            founderId,
+            amountInvested,
+            investedAt: new Date().toISOString(),
+          },
+        ],
+      };
+    });
   },
 }));

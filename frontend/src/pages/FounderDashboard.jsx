@@ -552,7 +552,7 @@ const FounderServices = ({ latestServiceRequest, totalRequests }) => (
                   className="flex-1 border-slate-200 text-slate-700 hover:text-slate-900"
                   asChild
                 >
-                  <Link to="/dashboard/founder/services">Learn more</Link>
+                  <Link to={`/services/${service.slug}`}>Learn more</Link>
                 </Button>
                 <Button size="sm" className="flex-1" asChild>
                   <Link to="/dashboard/founder/services">Request</Link>

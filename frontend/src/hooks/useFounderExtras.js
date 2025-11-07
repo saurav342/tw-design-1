@@ -29,7 +29,8 @@ export const useFounderExtras = (founderId) => {
     fetchFounderExtras(founderId, token).catch((error) => {
       console.error('Failed to load founder extras', error);
     });
-  }, [founderId, token, fetchFounderExtras]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [founderId, token]);
 
   const extras = useMemo(() => {
     if (!founderId) {

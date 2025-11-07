@@ -22,6 +22,13 @@ import FounderServices from './pages/FounderServices';
 import FounderServiceStory from './pages/FounderServiceStory';
 import AdminDashboard from './pages/AdminDashboard';
 import NotFound from './pages/NotFound';
+// Service landing pages
+import PitchDeckPreparation from './pages/services/PitchDeckPreparation';
+import MentorshipAdvisory from './pages/services/MentorshipAdvisory';
+import FinancialProjections from './pages/services/FinancialProjections';
+import LegalCompliance from './pages/services/LegalCompliance';
+import TechEnhancementSupport from './pages/services/TechEnhancementSupport';
+import GrowthMarketing from './pages/services/GrowthMarketing';
 
 const App = () => (
   <AuthProvider>
@@ -79,7 +86,22 @@ const App = () => (
               </ProtectedRoute>
             }
           />
+          {/* Public service landing pages - must come BEFORE dynamic route */}
+          <Route path="/services/pitch-deck-preparation" element={<PitchDeckPreparation />} />
+          <Route path="/services/mentorship-advisory" element={<MentorshipAdvisory />} />
+          <Route path="/services/financial-projections" element={<FinancialProjections />} />
+          <Route path="/services/legal-compliance" element={<LegalCompliance />} />
+          <Route path="/services/tech-enhancement-support" element={<TechEnhancementSupport />} />
+          <Route path="/services/growth-marketing" element={<GrowthMarketing />} />
+          {/* Dynamic route for old service story pages - must come AFTER specific routes */}
           <Route path="/services/:serviceId" element={<FounderServiceStory />} />
+          {/* Public service landing pages */}
+          <Route path="/services/pitch-deck-preparation" element={<PitchDeckPreparation />} />
+          <Route path="/services/mentorship-advisory" element={<MentorshipAdvisory />} />
+          <Route path="/services/financial-projections" element={<FinancialProjections />} />
+          <Route path="/services/legal-compliance" element={<LegalCompliance />} />
+          <Route path="/services/tech-enhancement-support" element={<TechEnhancementSupport />} />
+          <Route path="/services/growth-marketing" element={<GrowthMarketing />} />
           <Route
             path="/dashboard/admin"
             element={

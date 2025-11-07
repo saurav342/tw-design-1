@@ -1,153 +1,298 @@
-import { useEffect, useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/useAuth.js';
-
-const roles = [
-  { value: 'investor', label: 'Investor' },
-  { value: 'founder', label: 'Founder' },
-  { value: 'admin', label: 'Admin' },
-];
+import { ArrowRight, CheckCircle2, Eye, EyeOff, Loader2, AlertCircle } from 'lucide-react';
 
 const Login = () => {
   const navigate = useNavigate();
-  const location = useLocation();
-  const { login, loading, error, setError, user } = useAuth();
-  const [formState, setFormState] = useState({
-    email: '',
-    password: '',
-    role: 'investor',
-  });
+  const { login } = useAuth();
+  
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [role, setRole] = useState('founder');
+  const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState(false);
 
-  useEffect(() => {
-    if (user) {
-      navigate(`/dashboard/${user.role}`, { replace: true });
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    // Reset states
+    setError('');
+    setSuccess(false);
+    setIsLoading(true);
+
+    // Simple validation
+    if (!email.trim() || !password.trim()) {
+      setError('Please fill in all fields');
+      setIsLoading(false);
+      return;
     }
-  }, [user, navigate]);
 
-  useEffect(() => () => setError(null), [setError]);
-
-  const handleChange = (event) => {
-    const { name, value } = event.target;
-    setFormState((prev) => ({ ...prev, [name]: value }));
+    try {
+      console.log('🔐 Attempting login:', { email, role });
+      
+      const response = await login({ email: email.trim(), password, role });
+      
+      console.log('✅ Login successful:', response);
+      
+      // Show success state
+      setSuccess(true);
+      
+      // Navigate after a brief moment to show success
+      setTimeout(() => {
+        const destination = `/dashboard/${response.user.role}`;
+        console.log('🚀 Navigating to:', destination);
+        navigate(destination, { replace: true });
+      }, 600);
+      
+    } catch (err) {
+      console.error('❌ Login failed:', err);
+      setIsLoading(false);
+      setError(err.message || 'Invalid credentials. Please try again.');
+    }
   };
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    try {
-      const response = await login(formState);
-      const redirectTo = location.state?.from?.pathname ?? `/dashboard/${response.user.role}`;
-      navigate(redirectTo, { replace: true });
-    } catch (err) {
-      console.error('Login failed', err);
-    }
+  // Auto-fill demo credentials
+  const fillDemoCredentials = () => {
+    setEmail('fe@fe.com');
+    setPassword('123');
+    setRole('founder');
   };
 
   return (
-    <div className="flex min-h-[80vh] items-center justify-center bg-night-soft/60 px-4 py-16">
-      <div className="w-full max-w-3xl overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-2xl shadow-[0_40px_120px_-40px_rgba(91,33,209,0.42)] md:grid md:grid-cols-[1.1fr_0.9fr]">
-        <div className="hidden flex-col justify-between bg-gradient-to-br from-sunbeam via-blossom to-sprout p-10 text-white md:flex">
-          <div className="space-y-4">
-            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-white/80">
-              Welcome back
-            </p>
-            <h2 className="text-3xl font-semibold">Access LaunchAndLift Mission Control</h2>
-            <p className="text-sm text-white/80">
-              Review deal flow, track portfolio performance, and collaborate with LaunchAndLift operators.
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 flex items-center justify-center p-4">
+      <div className="w-full max-w-6xl grid lg:grid-cols-2 gap-0 bg-white rounded-3xl shadow-2xl overflow-hidden">
+        
+        {/* Left Side - Branding & Info */}
+        <div className="relative bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 p-12 text-white hidden lg:flex flex-col justify-between overflow-hidden">
+          <div className="absolute inset-0 bg-black/10"></div>
+          <div className="absolute -bottom-20 -right-20 w-80 h-80 bg-white/10 rounded-full blur-3xl"></div>
+          <div className="absolute -top-20 -left-20 w-80 h-80 bg-white/10 rounded-full blur-3xl"></div>
+          
+          <div className="relative z-10">
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-sm font-medium mb-6">
+              <CheckCircle2 className="w-4 h-4" />
+              Trusted by 500+ founders
+            </div>
+            <h1 className="text-4xl font-bold mb-4 leading-tight">
+              Welcome back to<br />LaunchAndLift
+            </h1>
+            <p className="text-white/90 text-lg leading-relaxed">
+              Your mission control for fundraising success. Track your raise, connect with investors, and access expert support—all in one place.
             </p>
           </div>
-          <div className="text-xs uppercase tracking-wide text-white/70">
-            Need an account?{' '}
-            <Link to="/signup" className="font-semibold text-white hover:text-mint">
-              Activate LaunchAndLift access
-            </Link>
+
+          <div className="relative z-10 space-y-4">
+            <div className="flex items-start gap-3">
+              <div className="mt-1 flex-shrink-0 w-8 h-8 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                <CheckCircle2 className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="font-semibold mb-1">Smart Investor Matching</h3>
+                <p className="text-sm text-white/80">Connect with investors perfectly aligned to your stage and sector</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <div className="mt-1 flex-shrink-0 w-8 h-8 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                <CheckCircle2 className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="font-semibold mb-1">Expert Guidance</h3>
+                <p className="text-sm text-white/80">Access pitch deck prep, financial modeling, and legal support</p>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="p-8 sm:p-10">
-          <h1 className="text-2xl font-semibold text-night">Sign in to LaunchAndLift</h1>
-          <p className="mt-2 text-sm text-slate-500">
-            Secure login for investors, founders, and LaunchAndLift administrators.
-          </p>
-
-          <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-            <div className="space-y-2">
-              <label htmlFor="email" className="text-sm font-semibold text-night">
-                Email address
-              </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                required
-                value={formState.email}
-                onChange={handleChange}
-                className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-night focus:border-sprout focus:outline-none focus:ring-2 focus:ring-sprout"
-                placeholder="you@launchandlift.com"
-              />
+        {/* Right Side - Login Form */}
+        <div className="p-8 sm:p-12 flex flex-col justify-center">
+          <div className="w-full max-w-md mx-auto">
+            
+            {/* Header */}
+            <div className="text-center lg:text-left mb-8">
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">Sign in</h2>
+              <p className="text-gray-600">Access your LaunchAndLift dashboard</p>
             </div>
 
-            <div className="space-y-2">
-              <label htmlFor="password" className="text-sm font-semibold text-night">
-                Password
-              </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                required
-                value={formState.password}
-                onChange={handleChange}
-                className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-night focus:border-sprout focus:outline-none focus:ring-2 focus:ring-sprout"
-                placeholder="Enter your password"
-              />
+            {/* Demo Credentials Banner */}
+            <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-xl">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-blue-900 mb-1">🎯 Quick Demo</p>
+                  <p className="text-xs text-blue-700">fe@fe.com • Password: 123</p>
+                </div>
+                <button
+                  onClick={fillDemoCredentials}
+                  className="text-xs font-medium text-blue-600 hover:text-blue-700 underline"
+                  type="button"
+                >
+                  Auto-fill
+                </button>
+              </div>
             </div>
 
-            <div className="space-y-2">
-              <label htmlFor="role" className="text-sm font-semibold text-night">
-                Sign in as
-              </label>
-              <select
-                id="role"
-                name="role"
-                value={formState.role}
-                onChange={handleChange}
-                className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-night focus:border-sprout focus:outline-none focus:ring-2 focus:ring-sprout"
+            {/* Error Alert */}
+            {error && (
+              <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3 animate-in fade-in slide-in-from-top-2 duration-300">
+                <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-red-900 mb-1">Login Failed</p>
+                  <p className="text-sm text-red-700">{error}</p>
+                </div>
+              </div>
+            )}
+
+            {/* Success State */}
+            {success && (
+              <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl flex items-center gap-3 animate-in fade-in slide-in-from-top-2 duration-300">
+                <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0" />
+                <p className="text-sm font-medium text-green-900">Login successful! Redirecting...</p>
+              </div>
+            )}
+
+            {/* Login Form */}
+            <form onSubmit={handleSubmit} className="space-y-5">
+              
+              {/* Email Input */}
+              <div>
+                <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-2">
+                  Email address
+                </label>
+                <input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="you@company.com"
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                  disabled={isLoading || success}
+                  autoComplete="email"
+                />
+              </div>
+
+              {/* Password Input */}
+              <div>
+                <label htmlFor="password" className="block text-sm font-semibold text-gray-700 mb-2">
+                  Password
+                </label>
+                <div className="relative">
+                  <input
+                    id="password"
+                    type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Enter your password"
+                    className="w-full px-4 py-3 pr-12 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                    disabled={isLoading || success}
+                    autoComplete="current-password"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600 transition-colors"
+                    disabled={isLoading || success}
+                    tabIndex={-1}
+                  >
+                    {showPassword ? (
+                      <EyeOff className="w-5 h-5" />
+                    ) : (
+                      <Eye className="w-5 h-5" />
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              {/* Role Selection */}
+              <div>
+                <label htmlFor="role" className="block text-sm font-semibold text-gray-700 mb-2">
+                  Sign in as
+                </label>
+                <select
+                  id="role"
+                  value={role}
+                  onChange={(e) => setRole(e.target.value)}
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all cursor-pointer"
+                  disabled={isLoading || success}
+                >
+                  <option value="founder">Founder</option>
+                  <option value="investor">Investor</option>
+                  <option value="admin">Admin</option>
+                </select>
+              </div>
+
+              {/* Forgot Password Link */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <input
+                    id="remember"
+                    type="checkbox"
+                    className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                    disabled={isLoading || success}
+                  />
+                  <label htmlFor="remember" className="ml-2 text-sm text-gray-600">
+                    Remember me
+                  </label>
+                </div>
+                <button
+                  type="button"
+                  className="text-sm font-medium text-indigo-600 hover:text-indigo-700 transition-colors"
+                  disabled={isLoading || success}
+                >
+                  Forgot password?
+                </button>
+              </div>
+
+              {/* Submit Button */}
+              <button
+                type="submit"
+                disabled={isLoading || success}
+                className="w-full py-3.5 px-6 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg shadow-indigo-500/30 hover:shadow-xl hover:shadow-indigo-500/40 disabled:opacity-70 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center gap-2 group"
               >
-                {roles.map((role) => (
-                  <option key={role.value} value={role.value}>
-                    {role.label}
-                  </option>
-                ))}
-              </select>
+                {isLoading ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    <span>Signing in...</span>
+                  </>
+                ) : success ? (
+                  <>
+                    <CheckCircle2 className="w-5 h-5" />
+                    <span>Success!</span>
+                  </>
+                ) : (
+                  <>
+                    <span>Sign in</span>
+                    <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                  </>
+                )}
+              </button>
+            </form>
+
+            {/* Sign Up Links */}
+            <div className="mt-8 pt-6 border-t border-gray-200">
+              <p className="text-center text-sm text-gray-600 mb-3">
+                Don't have an account?
+              </p>
+              <div className="flex gap-3">
+                <Link
+                  to="/signup/founder"
+                  className="flex-1 py-2.5 px-4 bg-white border-2 border-gray-200 hover:border-indigo-300 hover:bg-indigo-50 text-gray-700 hover:text-indigo-700 font-medium rounded-xl transition-all text-center text-sm"
+                >
+                  Join as Founder
+                </Link>
+                <Link
+                  to="/signup/investor"
+                  className="flex-1 py-2.5 px-4 bg-white border-2 border-gray-200 hover:border-purple-300 hover:bg-purple-50 text-gray-700 hover:text-purple-700 font-medium rounded-xl transition-all text-center text-sm"
+                >
+                  Join as Investor
+                </Link>
+              </div>
             </div>
 
-            {error && <div className="rounded-xl bg-sunbeam/10 px-4 py-3 text-sm text-sunbeam">{error}</div>}
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full rounded-full bg-blossom px-6 py-3 text-sm font-semibold uppercase tracking-wide text-white shadow-lg shadow-[0_28px_75px_rgba(255,79,154,0.35)] transition hover:bg-royal disabled:cursor-not-allowed disabled:opacity-70"
-            >
-              {loading ? 'Signing in…' : 'Sign in'}
-            </button>
-          </form>
-
-          <div className="mt-6 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-500">
-            <button type="button" className="font-semibold text-sprout hover:text-mint">
-              Forgot password?
-            </button>
-            <div className="flex items-center gap-2">
-              <span>Need access?</span>
-              <Link to="/signup/investor" className="font-semibold text-sunbeam hover:text-blossom">
-                Investor
-              </Link>
-              <span className="text-slate-400">/</span>
-              <Link to="/signup/founder" className="font-semibold text-sunbeam hover:text-blossom">
-                Founder
-              </Link>
-            </div>
           </div>
         </div>
+
       </div>
     </div>
   );

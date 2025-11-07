@@ -52,19 +52,6 @@ const sanitizeFilePayload = (file) => {
   };
 };
 
-const inferAccountHolderType = (descriptor) => {
-  if (!descriptor || typeof descriptor !== 'string') {
-    return 'individual';
-  }
-
-  const normalized = descriptor.toLowerCase();
-  if (normalized.includes('company') || normalized.includes('corporate') || normalized.includes('family office')) {
-    return 'corporate';
-  }
-
-  return 'individual';
-};
-
 const normalizePhone = (value) => (typeof value === 'string' ? value.replace(/\D/g, '') : '');
 
 const sendOtp = (req, res) => {
@@ -151,23 +138,13 @@ const signup = async (req, res) => {
     if (role === 'investor') {
       const {
         phone,
-        phoneVerified,
         linkedinUrl,
-        investorType,
-        accountHolderType,
-        assetsOverThreshold,
-        experience = [],
-        countryOfCitizenship,
-        panNumber = null,
         location,
-        profilePhoto = null,
       } = req.body;
 
       const missing = [
         ['phone', phone],
         ['linkedinUrl', linkedinUrl],
-        ['investorType', investorType],
-        ['countryOfCitizenship', countryOfCitizenship],
         ['location', location],
       ]
         .filter(([, value]) => !value)
@@ -179,22 +156,10 @@ const signup = async (req, res) => {
         });
       }
 
-      if (!Array.isArray(experience)) {
-        return res.status(400).json({ message: 'Experience selections must be an array.' });
-      }
-
       investorDetails = {
         phone,
-        phoneVerified: toBoolean(phoneVerified),
         linkedinUrl,
-        investorType,
-        accountHolderType: accountHolderType ?? inferAccountHolderType(investorType),
-        assetsOverThreshold: toBoolean(assetsOverThreshold),
-        experience,
-        countryOfCitizenship,
-        panNumber,
         location,
-        profilePhoto: sanitizeFilePayload(profilePhoto),
       };
     } else if (role === 'founder') {
       const {

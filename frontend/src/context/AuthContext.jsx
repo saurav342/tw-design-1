@@ -40,15 +40,27 @@ export const AuthProvider = ({ children }) => {
 
     try {
       const response = await action(payload);
+      console.log('[AuthContext] ✅ API Response received');
+      
       if (!response || typeof response !== 'object' || !response.token || !response.user) {
-        throw new Error('Received an unexpected response from the server. Please try again later.');
+        console.error('[AuthContext] ❌ Invalid response structure:', response);
+        throw new Error('Invalid server response. Please try again.');
       }
-      setAuthState({ token: response.token, user: response.user });
+      
+      const { token, user } = response;
+      console.log('[AuthContext] 📝 Setting auth state for:', user.email, 'Role:', user.role);
+      
+      // Update state synchronously
+      setAuthState({ token, user });
       setStatus({ loading: false, error: null });
+      
+      console.log('[AuthContext] ✅ Authentication complete');
       return response;
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Unexpected error';
+      console.error('[AuthContext] ❌ Authentication error:', error);
+      const message = error instanceof Error ? error.message : 'Authentication failed';
       setStatus({ loading: false, error: message });
+      setAuthState({ token: null, user: null });
       throw error;
     }
   };

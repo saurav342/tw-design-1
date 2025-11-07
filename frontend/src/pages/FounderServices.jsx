@@ -221,7 +221,7 @@ const FounderServices = () => {
                     </div>
                     <div className="flex flex-wrap items-center gap-3 pt-2">
                       <Link
-                        to={`/services/${service.id}`}
+                        to={`/services/${service.slug}`}
                         className="inline-flex items-center justify-center rounded-full border border-night/10 bg-white/90 px-4 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-night/70 transition hover:border-royal/60 hover:text-royal"
                       >
                         Learn more

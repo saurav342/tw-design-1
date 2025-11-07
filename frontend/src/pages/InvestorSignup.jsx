@@ -6,56 +6,64 @@ import { Input } from '../components/ui/input.jsx';
 import { Label } from '../components/ui/label.jsx';
 import { Textarea } from '../components/ui/textarea.jsx';
 import { showGenericSuccess } from '../lib/emailClientMock.js';
-import { useAppStore } from '../store/useAppStore.js';
 import { useAuth } from '../context/useAuth.js';
 
 const defaultForm = {
-  fundName: '',
-  contactName: '',
+  fullName: '',
   email: '',
-  thesis: '',
-  stageFocus: ['Seed'],
-  sectorFocus: [],
-  geoFocus: [],
-  ticketRangeLabel: '',
-  ticketMinUSD: 250_000,
-  ticketMaxUSD: 1_000_000,
-  website: '',
+  password: '',
+  phone: '',
+  linkedinUrl: '',
+  location: '',
+  notes: '',
 };
 
 const InvestorSignup = () => {
   const navigate = useNavigate();
   const { establishSession } = useAuth();
-  const addInvestor = useAppStore((state) => state.addInvestor);
   const [form, setForm] = useState(defaultForm);
+
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const updateField = (key, value) => {
     setForm((prev) => ({ ...prev, [key]: value }));
   };
 
-  const handleMulti = (key, value) => {
-    updateField(
-      key,
-      value
-        .split(',')
-        .map((entry) => entry.trim())
-        .filter(Boolean),
-    );
-  };
-
-  const onSubmit = (event) => {
+  const onSubmit = async (event) => {
     event.preventDefault();
-    const investor = addInvestor(form);
-    establishSession({
-      user: {
-        id: investor.id,
-        role: 'investor',
-        email: investor.email,
-        fullName: investor.contactName,
-      },
-    });
-    showGenericSuccess('Investor profile submitted (mock)');
-    navigate('/dashboard/investor', { replace: true });
+    setError('');
+    setLoading(true);
+
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/signup`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...form,
+          role: 'investor',
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Signup failed');
+      }
+
+      // Store token and user data
+      localStorage.setItem('token', data.token);
+      establishSession({
+        user: data.user,
+      });
+
+      showGenericSuccess('Investor account created successfully!');
+      navigate('/dashboard/investor', { replace: true });
+    } catch (err) {
+      setError(err.message || 'Failed to create account');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -70,105 +78,86 @@ const InvestorSignup = () => {
         <div className="pointer-events-none absolute -left-14 top-20 h-72 w-72 rounded-full bg-white/70 blur-[150px]" />
         <div className="pointer-events-none absolute -right-16 bottom-10 h-80 w-80 rounded-full bg-honey/85 blur-[170px]" />
         <div className="relative space-y-3">
-          <p className="text-xs font-semibold uppercase tracking-[0.35em] text-night/60">Investor intake</p>
-          <h1 className="font-display text-3xl font-semibold text-night md:text-4xl">Signal your deployment focus</h1>
+          <p className="text-xs font-semibold uppercase tracking-[0.35em] text-night/60">Investor Signup</p>
+          <h1 className="font-display text-3xl font-semibold text-night md:text-4xl">Join Launch &amp; Lift</h1>
           <p className="text-sm text-night/70">
-            Share your investment parameters so Launch &amp; Lift can surface qualified founders.
+            Create your investor account to connect with promising startups.
           </p>
         </div>
 
+        {error && (
+          <div className="relative rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800">
+            {error}
+          </div>
+        )}
+
         <div className="relative grid gap-6 md:grid-cols-2">
-          <Field label="Fund Name">
+          <Field label="Full Name">
             <Input
-              value={form.fundName}
-              onChange={(event) => updateField('fundName', event.target.value)}
-              placeholder='Orbital Ventures'
+              value={form.fullName}
+              onChange={(event) => updateField('fullName', event.target.value)}
+              placeholder="John Doe"
               required
             />
           </Field>
-          <Field label="Partner Name">
-            <Input
-              value={form.contactName}
-              onChange={(event) => updateField('contactName', event.target.value)}
-              placeholder="Leah Chen"
-              required
-            />
-          </Field>
-          <Field label="Email">
+          <Field label="Email Address">
             <Input
               type="email"
               value={form.email}
               onChange={(event) => updateField('email', event.target.value)}
-              placeholder="leah@orbital.vc"
+              placeholder="john@example.com"
               required
             />
           </Field>
-          <Field label="Website">
+          <Field label="Password">
             <Input
-              value={form.website}
-              onChange={(event) => updateField('website', event.target.value)}
-              placeholder="https://orbital.vc"
+              type="password"
+              value={form.password}
+              onChange={(event) => updateField('password', event.target.value)}
+              placeholder="••••••••"
+              required
             />
           </Field>
-          <Field label="Stage Focus (comma separated)">
+          <Field label="Phone Number">
             <Input
-              value={form.stageFocus.join(', ')}
-              onChange={(event) => handleMulti('stageFocus', event.target.value)}
-              placeholder="Seed, Series A"
+              type="tel"
+              value={form.phone}
+              onChange={(event) => updateField('phone', event.target.value)}
+              placeholder="+1 (555) 123-4567"
+              required
             />
           </Field>
-          <Field label="Sector Focus">
+          <Field label="LinkedIn Profile URL">
             <Input
-              value={form.sectorFocus.join(', ')}
-              onChange={(event) => handleMulti('sectorFocus', event.target.value)}
-              placeholder="AI Infrastructure, Logistics"
+              type="url"
+              value={form.linkedinUrl}
+              onChange={(event) => updateField('linkedinUrl', event.target.value)}
+              placeholder="https://linkedin.com/in/johndoe"
+              required
             />
           </Field>
-          <Field label="Geography">
+          <Field label="Current City">
             <Input
-              value={form.geoFocus.join(', ')}
-              onChange={(event) => handleMulti('geoFocus', event.target.value)}
-              placeholder="North America, Europe"
-            />
-          </Field>
-          <div className="grid grid-cols-2 gap-4">
-            <Field label="Ticket Min (USD)">
-              <Input
-                type="number"
-                value={form.ticketMinUSD}
-                onChange={(event) => updateField('ticketMinUSD', Number(event.target.value) || 0)}
-              />
-            </Field>
-            <Field label="Ticket Max (USD)">
-              <Input
-                type="number"
-                value={form.ticketMaxUSD}
-                onChange={(event) => updateField('ticketMaxUSD', Number(event.target.value) || 0)}
-              />
-            </Field>
-          </div>
-          <Field label="Ticket Range Label">
-            <Input
-              value={form.ticketRangeLabel}
-              onChange={(event) => updateField('ticketRangeLabel', event.target.value)}
-              placeholder="$500K - $1.5M"
+              value={form.location}
+              onChange={(event) => updateField('location', event.target.value)}
+              placeholder="San Francisco, CA"
+              required
             />
           </Field>
         </div>
 
-        <Field label="Investment Thesis">
+        <Field label="Message (Optional)">
           <Textarea
-            value={form.thesis}
-            onChange={(event) => updateField('thesis', event.target.value)}
-            placeholder="Backing B2B infrastructure and AI automation that compress deployment cycles."
+            value={form.notes}
+            onChange={(event) => updateField('notes', event.target.value)}
+            placeholder="Tell us a bit about yourself and your investment interests..."
             rows={4}
-            required
           />
         </Field>
 
         <div className="flex justify-end">
-          <Button type="submit" className="gap-2">
-            Submit &amp; View Matching Dashboard
+          <Button type="submit" className="gap-2" disabled={loading}>
+            {loading ? 'Creating Account...' : 'Create Investor Account'}
           </Button>
         </div>
       </Motion.form>

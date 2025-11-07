@@ -25,6 +25,7 @@ export const FOUNDER_SERVICE_URGENCY = ['Low', 'Normal', 'High'];
 export const FOUNDER_SERVICE_DETAILS = [
   {
     id: 'pitch-deck',
+    slug: 'pitch-deck-preparation',
     title: 'Pitch deck preparation',
     tagline: 'Narrative, visuals, and data story in one deck that earns second meetings.',
     description:
@@ -33,6 +34,7 @@ export const FOUNDER_SERVICE_DETAILS = [
   },
   {
     id: 'mentorship',
+    slug: 'mentorship-advisory',
     title: 'Mentorship / advisory',
     tagline: 'Strategic advisory from founders and investors who have scaled at your stage.',
     description:
@@ -41,6 +43,7 @@ export const FOUNDER_SERVICE_DETAILS = [
   },
   {
     id: 'financials',
+    slug: 'financial-projections',
     title: 'Financial projections',
     tagline: 'Investor-grade operating model with scenario planning and KPI dashboards.',
     description:
@@ -49,6 +52,7 @@ export const FOUNDER_SERVICE_DETAILS = [
   },
   {
     id: 'legal',
+    slug: 'legal-compliance',
     title: 'Legal & compliance',
     tagline: 'Term sheet, data room, and compliance guardrails handled by specialists.',
     description:
@@ -57,6 +61,7 @@ export const FOUNDER_SERVICE_DETAILS = [
   },
   {
     id: 'tech',
+    slug: 'tech-enhancement-support',
     title: 'Tech enhancement support',
     tagline: 'Ship product polish and proof-points investors want to see.',
     description:
@@ -65,6 +70,7 @@ export const FOUNDER_SERVICE_DETAILS = [
   },
   {
     id: 'growth',
+    slug: 'growth-marketing',
     title: 'Growth marketing',
     tagline: 'Programs that convert investor demand into customer traction.',
     description:

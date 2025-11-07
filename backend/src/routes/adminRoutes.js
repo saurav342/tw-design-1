@@ -1,6 +1,9 @@
 const express = require('express');
 const {
   deleteUserController,
+  getActivityLog,
+  getAnalytics,
+  getDashboardSummary,
   getSiteMetrics,
   getUsers,
   updateUserController,
@@ -15,5 +18,8 @@ router.get('/users', getUsers);
 router.patch('/users/:id', updateUserController);
 router.delete('/users/:id', deleteUserController);
 router.get('/metrics', getSiteMetrics);
+router.get('/analytics', getAnalytics);
+router.get('/activity-log', getActivityLog);
+router.get('/dashboard-summary', getDashboardSummary);
 
 module.exports = router;

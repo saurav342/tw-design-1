@@ -152,3 +152,13 @@ export const founderExtrasApi = {
   createServiceRequest: (founderId, data, token) =>
     apiClient.post(`/founder-extras/${founderId}/service-requests`, data, token),
 };
+
+export const adminApi = {
+  getUsers: (token) => apiClient.get('/admin/users', token),
+  updateUser: (userId, data, token) => apiClient.patch(`/admin/users/${userId}`, data, token),
+  deleteUser: (userId, token) => apiClient.delete(`/admin/users/${userId}`, token),
+  getMetrics: (token) => apiClient.get('/admin/metrics', token),
+  getAnalytics: (token) => apiClient.get('/admin/analytics', token),
+  getActivityLog: (token, limit) => apiClient.get(`/admin/activity-log${limit ? `?limit=${limit}` : ''}`, token),
+  getDashboardSummary: (token) => apiClient.get('/admin/dashboard-summary', token),
+};

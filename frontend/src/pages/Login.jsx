@@ -62,11 +62,11 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-6xl grid lg:grid-cols-2 gap-0 bg-white rounded-3xl shadow-2xl overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 flex items-center justify-center p-4 sm:p-6">
+      <div className="w-full max-w-6xl grid lg:grid-cols-2 gap-0 bg-white rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden">
         
         {/* Left Side - Branding & Info */}
-        <div className="relative bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 p-12 text-white hidden lg:flex flex-col justify-between overflow-hidden">
+        <div className="relative bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 p-8 sm:p-10 lg:p-12 text-white hidden lg:flex flex-col justify-between overflow-hidden">
           <div className="absolute inset-0 bg-black/10"></div>
           <div className="absolute -bottom-20 -right-20 w-80 h-80 bg-white/10 rounded-full blur-3xl"></div>
           <div className="absolute -top-20 -left-20 w-80 h-80 bg-white/10 rounded-full blur-3xl"></div>
@@ -107,13 +107,13 @@ const Login = () => {
         </div>
 
         {/* Right Side - Login Form */}
-        <div className="p-8 sm:p-12 flex flex-col justify-center">
+        <div className="p-6 sm:p-8 lg:p-12 flex flex-col justify-center">
           <div className="w-full max-w-md mx-auto">
             
             {/* Header */}
-            <div className="text-center lg:text-left mb-8">
-              <h2 className="text-3xl font-bold text-gray-900 mb-2">Sign in</h2>
-              <p className="text-gray-600">Access your LaunchAndLift dashboard</p>
+            <div className="text-center lg:text-left mb-6 sm:mb-8">
+              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Sign in</h2>
+              <p className="text-sm sm:text-base text-gray-600">Access your LaunchAndLift dashboard</p>
             </div>
 
             {/* Demo Credentials Banner */}
@@ -153,7 +153,7 @@ const Login = () => {
             )}
 
             {/* Login Form */}
-            <form onSubmit={handleSubmit} className="space-y-5">
+            <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
               
               {/* Email Input */}
               <div>
@@ -166,7 +166,7 @@ const Login = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@company.com"
-                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                  className="w-full px-4 py-3 sm:py-3.5 text-base bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
                   disabled={isLoading || success}
                   autoComplete="email"
                 />
@@ -184,16 +184,17 @@ const Login = () => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Enter your password"
-                    className="w-full px-4 py-3 pr-12 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                    className="w-full px-4 py-3 sm:py-3.5 pr-12 text-base bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
                     disabled={isLoading || success}
                     autoComplete="current-password"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600 transition-colors"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors"
                     disabled={isLoading || success}
                     tabIndex={-1}
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
                   >
                     {showPassword ? (
                       <EyeOff className="w-5 h-5" />
@@ -248,7 +249,7 @@ const Login = () => {
               <button
                 type="submit"
                 disabled={isLoading || success}
-                className="w-full py-3.5 px-6 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg shadow-indigo-500/30 hover:shadow-xl hover:shadow-indigo-500/40 disabled:opacity-70 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center gap-2 group"
+                className="w-full py-3.5 sm:py-4 px-6 min-h-[44px] text-base bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg shadow-indigo-500/30 hover:shadow-xl hover:shadow-indigo-500/40 disabled:opacity-70 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center gap-2 group"
               >
                 {isLoading ? (
                   <>
@@ -270,20 +271,20 @@ const Login = () => {
             </form>
 
             {/* Sign Up Links */}
-            <div className="mt-8 pt-6 border-t border-gray-200">
+            <div className="mt-6 sm:mt-8 pt-6 border-t border-gray-200">
               <p className="text-center text-sm text-gray-600 mb-3">
                 Don't have an account?
               </p>
-              <div className="flex gap-3">
+              <div className="flex flex-col sm:flex-row gap-3">
                 <Link
                   to="/signup/founder"
-                  className="flex-1 py-2.5 px-4 bg-white border-2 border-gray-200 hover:border-indigo-300 hover:bg-indigo-50 text-gray-700 hover:text-indigo-700 font-medium rounded-xl transition-all text-center text-sm"
+                  className="flex-1 py-3 px-4 min-h-[44px] flex items-center justify-center bg-white border-2 border-gray-200 hover:border-indigo-300 hover:bg-indigo-50 text-gray-700 hover:text-indigo-700 font-medium rounded-xl transition-all text-center text-sm sm:text-base"
                 >
                   Join as Founder
                 </Link>
                 <Link
                   to="/signup/investor"
-                  className="flex-1 py-2.5 px-4 bg-white border-2 border-gray-200 hover:border-purple-300 hover:bg-purple-50 text-gray-700 hover:text-purple-700 font-medium rounded-xl transition-all text-center text-sm"
+                  className="flex-1 py-3 px-4 min-h-[44px] flex items-center justify-center bg-white border-2 border-gray-200 hover:border-purple-300 hover:bg-purple-50 text-gray-700 hover:text-purple-700 font-medium rounded-xl transition-all text-center text-sm sm:text-base"
                 >
                   Join as Investor
                 </Link>

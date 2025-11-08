@@ -237,7 +237,8 @@ const Home = () => {
                 Fast-track alignment by answering the essentials we cover during our first call.
               </p>
             </div>
-            <div className="overflow-hidden rounded-3xl border border-white/50 bg-white/80">
+            {/* Desktop Table View */}
+            <div className="hidden md:block overflow-hidden rounded-3xl border border-white/50 bg-white/80">
               <table className="w-full table-auto border-collapse text-left text-sm text-[#1a1030]">
                 <tbody>
                   {questionnaireRows.map((item) => (
@@ -253,6 +254,21 @@ const Home = () => {
                   ))}
                 </tbody>
               </table>
+            </div>
+
+            {/* Mobile Card View */}
+            <div className="md:hidden space-y-4">
+              {questionnaireRows.map((item) => (
+                <div
+                  key={item.question}
+                  className="rounded-2xl border border-white/50 bg-white/80 p-4 sm:p-5 space-y-2"
+                >
+                  <div className="text-xs font-semibold uppercase tracking-[0.25em] text-[#8b5cf6] mb-2">
+                    {item.question}
+                  </div>
+                  <div className="text-sm text-[#2e1d48] leading-relaxed">{item.answer}</div>
+                </div>
+              ))}
             </div>
           </div>
         </MotionSection>
@@ -322,7 +338,7 @@ const Home = () => {
               Partnerships rooted in HSR Layout with a global investor network and relentless operator support.
             </p>
           </div>
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {differentiators.map((item) => (
               <MotionDiv
                 key={item.title}
@@ -357,7 +373,7 @@ const Home = () => {
                 Build momentum with integrated pods that combine strategy, execution, and founder care.
               </p>
             </div>
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {serviceStacks.map((stack) => (
                 <MotionDiv
                   key={stack.title}
@@ -395,7 +411,7 @@ const Home = () => {
             </span>
             <h2 className="text-3xl font-semibold text-[#1a1030] md:text-4xl">A guided arc from first sync to signed wires</h2>
           </div>
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {workflowSteps.map((step) => (
               <MotionDiv
                 key={step.title}
@@ -431,7 +447,7 @@ const Home = () => {
                   Outcomes measured across the founders and investors partnering with us from Bengaluru and beyond.
                 </p>
               </div>
-              <div className="grid gap-6 sm:grid-cols-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 {impactStats.map((stat) => (
                   <MotionDiv
                     key={stat.value}

@@ -434,7 +434,7 @@ const Investors = () => {
             title="Everything You Need for Better Deal Sourcing"
             description="Intelligent matching, comprehensive founder intelligence, and market insights—all designed to help you make better investment decisions faster."
           />
-          <div className="grid gap-6 md:grid-cols-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {platformFeatures.map((feature, idx) => (
               <MotionDiv
                 key={feature.label}
@@ -475,7 +475,7 @@ const Investors = () => {
             title="Better Deal Flow, Better Outcomes"
             description="Join 200+ investors using Launch and Lift to source 30-40% of their annual deal flow with improved quality and conversion rates."
           />
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {investorBenefits.map((benefit, idx) => (
               <BenefitCard
                 key={benefit.title}
@@ -501,7 +501,7 @@ const Investors = () => {
             title="Curated Access with Institutional Rigor"
             description="A proven four-step model aligning Launch and Lift with your investment goals from day one."
           />
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {howItWorks.map((step, idx) => (
               <ProcessStep
                 key={step.step}
@@ -532,7 +532,7 @@ const Investors = () => {
             <p className="mt-4 text-lg text-white/90">
               Despite the venture capital market exceeding $412 billion annually, investors are overwhelmed with deal flow, lack standardized founder quality assessment, and struggle with information asymmetry.
             </p>
-            <div className="mt-10 grid grid-cols-2 gap-6 md:grid-cols-4">
+            <div className="mt-10 grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6">
               {[
                 { value: '$412B+', label: 'Global VC Market (2025)' },
                 { value: '$11.3B', label: 'India VC Funding (2024)' },
@@ -557,7 +557,7 @@ const Investors = () => {
             title="Why Launch and Lift Wins"
             description="Proprietary data, network effects, and integrated intelligence create defensible competitive moats."
           />
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[
               {
                 title: 'Proprietary Data & Intelligence',

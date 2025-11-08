@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { motion as Motion } from 'framer-motion';
-import { Filter, Building2, Heart, Briefcase, TrendingUp, DollarSign } from 'lucide-react';
+import { Filter, Building2, Heart, Briefcase, TrendingUp, DollarSign, X, Menu } from 'lucide-react';
 import { StartupCard } from '../components/StartupCard.jsx';
 import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/card.jsx';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../components/ui/tabs.jsx';
@@ -23,6 +23,7 @@ const InvestorDashboard = () => {
   const addInvestorInterest = useAppStore((state) => state.addInvestorInterest);
   const [filters, setFilters] = useState(initialFilters);
   const [activeTab, setActiveTab] = useState('all');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const approvedFounders = founders.filter((founder) => founder.status === 'approved');
 
@@ -136,15 +137,41 @@ const InvestorDashboard = () => {
         })}
       </Motion.div>
 
+      {/* Mobile Filter Toggle Button */}
+      <div className="lg:hidden mb-4">
+        <button
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+          className="flex items-center gap-2 px-4 py-2 rounded-xl border border-white/20 bg-white/10 backdrop-blur-xl text-white hover:bg-white/15 transition-colors"
+          aria-label="Toggle filters"
+        >
+          <Filter className="h-4 w-4" />
+          <span className="font-semibold">Filters</span>
+          {sidebarOpen ? <X className="h-4 w-4 ml-auto" /> : <Menu className="h-4 w-4 ml-auto" />}
+        </button>
+      </div>
+
       <div className="grid gap-8 lg:grid-cols-[280px_1fr]">
         {/* Filters Sidebar */}
         <Motion.aside
           initial={{ opacity: 0, x: -16 }}
           animate={{ opacity: 1, x: 0 }}
-          className="space-y-6 rounded-3xl border border-white/20 bg-white/10 p-6 backdrop-blur-xl"
+          className={cn(
+            "space-y-6 rounded-3xl border border-white/20 bg-white/10 p-6 backdrop-blur-xl",
+            "lg:block",
+            sidebarOpen ? "block" : "hidden"
+          )}
         >
-          <div className="flex items-center gap-2 text-sm font-semibold text-white">
-            <Filter className="h-4 w-4" /> Filters
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 text-sm font-semibold text-white">
+              <Filter className="h-4 w-4" /> Filters
+            </div>
+            <button
+              onClick={() => setSidebarOpen(false)}
+              className="lg:hidden p-1 text-white/70 hover:text-white transition-colors"
+              aria-label="Close filters"
+            >
+              <X className="h-5 w-5" />
+            </button>
           </div>
           <FilterGroup
             label="Stage"

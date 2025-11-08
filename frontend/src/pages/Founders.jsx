@@ -415,7 +415,7 @@ const Founders = () => {
             title="The Complete Solution for Founders"
             description="Four powerful capabilities working together to accelerate your fundraising and growth journey."
       />
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {platformCapabilities.map((capability, idx) => (
               <MotionDiv
                 key={capability.label}
@@ -456,7 +456,7 @@ const Founders = () => {
             title="Everything You Need to Scale"
             description="Access enterprise-grade expertise without enterprise overhead. All critical startup support services available through one platform."
           />
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {services.map((service, idx) => (
               <ServiceCard
                 key={service.title}
@@ -481,7 +481,7 @@ const Founders = () => {
             title="Your Path to Fundraising Success"
             description="From profile creation to investor meetings—we guide you through every step."
           />
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             <ProcessStep
               number="1"
               title="Create Your Profile"
@@ -526,7 +526,7 @@ const Founders = () => {
             <p className="mt-4 text-lg text-white/90">
               Despite the venture capital market exceeding $412 billion annually, founders continue to struggle with inefficient investor discovery, fragmented support services, and information asymmetry.
             </p>
-            <div className="mt-10 grid grid-cols-2 gap-6 md:grid-cols-4">
+            <div className="mt-10 grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6">
               {[
                 { value: '$412B+', label: 'Global VC Market (2025)' },
                 { value: '43%', label: 'India VC Growth (YoY)' },

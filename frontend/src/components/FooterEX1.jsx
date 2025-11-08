@@ -15,6 +15,7 @@ const FooterEX1 = () => {
           <p>&copy; 2025 Launch and Lift. All rights reserved.</p>
         </div>
       </div>
+      <div className="footer-gradient"></div>
     </footer>
   );
 };

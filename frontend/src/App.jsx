@@ -1,4 +1,4 @@
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, useLocation } from 'react-router-dom';
 import Footer from './components/Footer';
 import Navbar from './components/Navbar';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -30,10 +30,13 @@ import LegalCompliance from './pages/services/LegalCompliance';
 import TechEnhancementSupport from './pages/services/TechEnhancementSupport';
 import GrowthMarketing from './pages/services/GrowthMarketing';
 
-const App = () => (
-  <AuthProvider>
+const AppContent = () => {
+  const location = useLocation();
+  const isHomePage = location.pathname === '/';
+
+  return (
     <div className="flex min-h-screen flex-col bg-white">
-      <Navbar />
+      {!isHomePage && <Navbar />}
       <main className="flex-1">
         <Routes>
           <Route path="/" element={<Home />} />
@@ -113,9 +116,15 @@ const App = () => (
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
-      <Footer />
+      {!isHomePage && <Footer />}
       <Toaster />
     </div>
+  );
+};
+
+const App = () => (
+  <AuthProvider>
+    <AppContent />
   </AuthProvider>
 );
 

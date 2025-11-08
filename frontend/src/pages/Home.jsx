@@ -1,6 +1,9 @@
 import { Link } from 'react-router-dom';
 import { motion, useScroll, useSpring, useTransform } from 'framer-motion';
-import HeroSection from '../components/HeroSection';
+import Header from '../components/Header';
+import Hero from '../components/Hero';
+import CTASection from '../components/CTASection';
+import FooterEX1 from '../components/FooterEX1';
 import FAQAccordion from '../components/FAQAccordion';
 import Testimonials from '../components/Testimonials';
 import { faqItems, homeTestimonials } from '../data/content';
@@ -204,13 +207,14 @@ const Home = () => {
 
   return (
     <>
+      <Header />
       <motion.div
         aria-hidden="true"
         style={{ scaleX: readingProgress, opacity: progressOpacity }}
         className="pointer-events-none fixed left-0 top-0 z-40 h-1 origin-left bg-gradient-to-r from-[#ff4fa3] via-[#8b5cf6] to-[#34d399]"
       />
       <div className="space-y-24 bg-gradient-to-br from-[#fef6ff] via-[#f5f3ff] to-[#f0fff4] pb-24">
-        <HeroSection />
+        <Hero />
 
         <MotionSection
           initial="hidden"
@@ -254,6 +258,7 @@ const Home = () => {
         </MotionSection>
 
         <MotionSection
+          id="founders"
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, amount: 0.3 }}
@@ -301,6 +306,7 @@ const Home = () => {
         </MotionSection>
 
         <MotionSection
+          id="investors"
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, amount: 0.3 }}
@@ -376,6 +382,7 @@ const Home = () => {
         </MotionSection>
 
         <MotionSection
+          id="how"
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, amount: 0.3 }}
@@ -477,42 +484,9 @@ const Home = () => {
           <FAQAccordion items={faqItems} />
         </MotionSection>
 
-        <MotionSection
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.3 }}
-          variants={scaleIn}
-          className="mx-auto max-w-6xl px-4 lg:px-0"
-        >
-          <div className="relative overflow-hidden rounded-[3rem] bg-[#110720] px-6 py-14 text-white shadow-[0_32px_90px_rgba(17,7,32,0.6)] md:px-12">
-            <div className="pointer-events-none absolute -top-20 right-16 h-56 w-56 rounded-full bg-[#ff4fa3]/35 blur-[120px]" />
-            <div className="pointer-events-none absolute -bottom-16 left-16 h-64 w-64 rounded-full bg-[#34d399]/30 blur-[140px]" />
-            <div className="relative flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-              <div className="max-w-xl space-y-4">
-                <span className="inline-flex items-center justify-center rounded-full bg-white/10 px-4 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.35em] text-white/70">
-                  Call to action
-                </span>
-                <h2 className="text-3xl font-semibold md:text-4xl">{finalCtaContent.heading}</h2>
-                <p className="text-sm text-white/80">{finalCtaContent.body}</p>
-              </div>
-              <div className="flex flex-wrap gap-4">
-                <Link
-                  to={finalCtaContent.primary.to}
-                  className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-[#ff4fa3] via-[#8b5cf6] to-[#34d399] px-6 py-3 text-sm font-semibold uppercase tracking-[0.25em] text-white shadow-[0_20px_60px_rgba(255,79,163,0.3)] transition hover:brightness-110"
-                >
-                  {finalCtaContent.primary.label}
-                </Link>
-                <Link
-                  to={finalCtaContent.secondary.to}
-                  className="inline-flex items-center justify-center rounded-full border border-white/40 px-6 py-3 text-sm font-semibold uppercase tracking-[0.25em] text-white transition hover:bg-white/10"
-                >
-                  {finalCtaContent.secondary.label}
-                </Link>
-              </div>
-            </div>
-          </div>
-        </MotionSection>
+        <CTASection />
       </div>
+      <FooterEX1 />
     </>
   );
 };

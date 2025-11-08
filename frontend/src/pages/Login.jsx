@@ -50,7 +50,8 @@ const Login = () => {
     } catch (err) {
       console.error('❌ Login failed:', err);
       setIsLoading(false);
-      setError(err.message || 'Invalid credentials. Please try again.');
+      const errorMessage = err.message || 'Invalid credentials. Please try again.';
+      setError(errorMessage);
     }
   };
 
@@ -277,13 +278,13 @@ const Login = () => {
               </p>
               <div className="flex flex-col sm:flex-row gap-3">
                 <Link
-                  to="/signup/founder"
+                  to="/signup/email?role=founder"
                   className="flex-1 py-3 px-4 min-h-[44px] flex items-center justify-center bg-white border-2 border-gray-200 hover:border-indigo-300 hover:bg-indigo-50 text-gray-700 hover:text-indigo-700 font-medium rounded-xl transition-all text-center text-sm sm:text-base"
                 >
                   Join as Founder
                 </Link>
                 <Link
-                  to="/signup/investor"
+                  to="/signup/email?role=investor"
                   className="flex-1 py-3 px-4 min-h-[44px] flex items-center justify-center bg-white border-2 border-gray-200 hover:border-purple-300 hover:bg-purple-50 text-gray-700 hover:text-purple-700 font-medium rounded-xl transition-all text-center text-sm sm:text-base"
                 >
                   Join as Investor

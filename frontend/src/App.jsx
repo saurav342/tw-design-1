@@ -1,4 +1,4 @@
-import { Routes, Route, useLocation } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import Footer from './components/Footer';
 import Navbar from './components/Navbar';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -11,6 +11,8 @@ import Portfolio from './pages/Portfolio';
 import Resources from './pages/Resources';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
+import EmailEntry from './pages/EmailEntry';
+import OTPVerification from './pages/OTPVerification';
 import InvestorSignup from './pages/InvestorSignup';
 import FounderSignup from './pages/FounderSignup';
 import PaymentDetails from './pages/PaymentDetails';
@@ -31,12 +33,9 @@ import TechEnhancementSupport from './pages/services/TechEnhancementSupport';
 import GrowthMarketing from './pages/services/GrowthMarketing';
 
 const AppContent = () => {
-  const location = useLocation();
-  const isHomePage = location.pathname === '/';
-
   return (
     <div className="flex min-h-screen flex-col bg-white">
-      {!isHomePage && <Navbar />}
+      <Navbar />
       <main className="flex-1">
         <Routes>
           <Route path="/" element={<Home />} />
@@ -46,6 +45,8 @@ const AppContent = () => {
           <Route path="/resources" element={<Resources />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
+          <Route path="/signup/email" element={<EmailEntry />} />
+          <Route path="/signup/:role/otp" element={<OTPVerification />} />
           <Route path="/signup/investor" element={<InvestorSignup />} />
           <Route path="/signup/founder" element={<FounderSignup />} />
           <Route path="/payment-details" element={<PaymentDetails />} />
@@ -116,7 +117,7 @@ const AppContent = () => {
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
-      {!isHomePage && <Footer />}
+      <Footer />
       <Toaster />
     </div>
   );

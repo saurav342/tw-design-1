@@ -1,9 +1,10 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '../components/ui/button.jsx';
 import { Input } from '../components/ui/input.jsx';
 import { Label } from '../components/ui/label.jsx';
 import { Textarea } from '../components/ui/textarea.jsx';
+import { CheckCircle2 } from 'lucide-react';
 import { showInfo, showSuccess } from '../lib/notifications.js';
 import { useAppStore } from '../store/useAppStore.js';
 import { useAuth } from '../context/useAuth.js';
@@ -34,11 +35,27 @@ const initialForm = {
 
 const FounderSignup = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { establishSession } = useAuth();
   const addFounder = useAppStore((state) => state.addFounder);
-  const [form, setForm] = useState(initialForm);
+  
+  // Get email and OTP verification status from location state or sessionStorage
+  const verifiedEmail = location.state?.email || sessionStorage.getItem('signup.email') || '';
+  const isOtpVerified = location.state?.otpVerified || sessionStorage.getItem('signup.otpVerified') === 'true';
+  
+  const [form, setForm] = useState({
+    ...initialForm,
+    email: verifiedEmail,
+  });
   const [includeSecondFounder, setIncludeSecondFounder] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Redirect to email entry if OTP not verified
+  useEffect(() => {
+    if (!isOtpVerified || !verifiedEmail) {
+      navigate('/signup/email?role=founder', { replace: true });
+    }
+  }, [isOtpVerified, verifiedEmail, navigate]);
 
   const updateForm = (field) => (event) => {
     const value = event.target.value;
@@ -163,6 +180,12 @@ const FounderSignup = () => {
       });
 
       showSuccess('Founder application submitted successfully.');
+      
+      // Clear signup flow sessionStorage
+      sessionStorage.removeItem('signup.email');
+      sessionStorage.removeItem('signup.role');
+      sessionStorage.removeItem('signup.otpVerified');
+      
       navigate('/payment-details', { replace: true });
     } catch (error) {
       // eslint-disable-next-line no-console
@@ -212,7 +235,14 @@ const FounderSignup = () => {
                   required
                   value={form.email}
                   onChange={updateForm('email')}
+                  disabled={!!verifiedEmail}
                 />
+                {verifiedEmail && (
+                  <p className="text-xs text-purple-600 mt-1 flex items-center gap-1">
+                    <CheckCircle2 className="w-3 h-3" />
+                    Email verified
+                  </p>
+                )}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="phoneNumber">Phone number</Label>

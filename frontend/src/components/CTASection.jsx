@@ -8,8 +8,8 @@ const CTASection = () => {
           <h2>Ready to Transform Your Fundraising?</h2>
           <p>Join thousands of founders and investors building the future</p>
           <div className="cta-buttons">
-            <Link to="/signup/founder" className="btn btn-primary btn-large">For Founders - Start Free</Link>
-            <Link to="/signup/investor" className="btn btn-outline btn-large">For Investors - Request Access</Link>
+            <Link to="/signup/email?role=founder" className="btn btn-primary btn-large">For Founders - Start Free</Link>
+            <Link to="/signup/email?role=investor" className="btn btn-outline btn-large">For Investors - Request Access</Link>
           </div>
         </div>
       </div>

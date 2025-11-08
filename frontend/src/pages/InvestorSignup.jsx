@@ -1,15 +1,20 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/useAuth.js';
 import { ArrowRight, CheckCircle2, Eye, EyeOff, Loader2, AlertCircle, Sparkles, TrendingUp, Users } from 'lucide-react';
 
 const InvestorSignup = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { signup } = useAuth();
+  
+  // Get email and OTP verification status from location state or sessionStorage
+  const verifiedEmail = location.state?.email || sessionStorage.getItem('signup.email') || '';
+  const isOtpVerified = location.state?.otpVerified || sessionStorage.getItem('signup.otpVerified') === 'true';
   
   const [formData, setFormData] = useState({
     fullName: '',
-    email: '',
+    email: verifiedEmail,
     password: '',
     phone: '',
     linkedinUrl: '',
@@ -21,6 +26,13 @@ const InvestorSignup = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+
+  // Redirect to email entry if OTP not verified
+  useEffect(() => {
+    if (!isOtpVerified || !verifiedEmail) {
+      navigate('/signup/email?role=investor', { replace: true });
+    }
+  }, [isOtpVerified, verifiedEmail, navigate]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -64,6 +76,11 @@ const InvestorSignup = () => {
       
       // Show success state
       setSuccess(true);
+      
+      // Clear signup flow sessionStorage
+      sessionStorage.removeItem('signup.email');
+      sessionStorage.removeItem('signup.role');
+      sessionStorage.removeItem('signup.otpVerified');
       
       // Navigate after a brief moment
       setTimeout(() => {
@@ -194,9 +211,15 @@ const InvestorSignup = () => {
                   onChange={handleChange}
                   placeholder="john@investmentfirm.com"
                   className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
-                  disabled={isLoading || success}
+                  disabled={isLoading || success || !!verifiedEmail}
                   required
                 />
+                {verifiedEmail && (
+                  <p className="text-xs text-purple-600 mt-1 flex items-center gap-1">
+                    <CheckCircle2 className="w-3 h-3" />
+                    Email verified
+                  </p>
+                )}
               </div>
 
               {/* Password */}

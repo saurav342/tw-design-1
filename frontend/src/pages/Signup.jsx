@@ -14,7 +14,7 @@ const signupFlows = [
       'Direct access to LaunchAndLift deal teams and co-investment pipeline.',
       'Secure document vault with compliance-ready exports.',
     ],
-    to: '/signup/investor',
+    to: '/signup/email?role=investor',
     cta: 'Start investor access',
   },
   {
@@ -28,7 +28,7 @@ const signupFlows = [
       'Dedicated operator pod across GTM, product, and finance.',
       'Mission Control workspace for updates, data rooms, and sprints.',
     ],
-    to: '/signup/founder',
+    to: '/signup/email?role=founder',
     cta: 'Apply as a founder',
   },
 ];

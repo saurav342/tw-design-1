@@ -4,11 +4,11 @@ import { useAuth } from '../context/useAuth.js';
 import logoImage from '../assets/image.png';
 
 const navLinks = [
-  { label: 'Home', to: '/' },
+  { label: 'HOME', to: '/' },
   { label: 'FOR INVESTORS', to: '/investors' },
   { label: 'FOR FOUNDERS', to: '/founders' },
-  { label: 'Portfolio', to: '/portfolio' },
-  { label: 'Resources', to: '/resources' },
+  { label: 'PORTFOLIO', to: '/portfolio' },
+  { label: 'RESOURCES', to: '/resources' },
 ];
 
 const Navbar = () => {

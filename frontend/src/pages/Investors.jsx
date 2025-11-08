@@ -363,7 +363,7 @@ const Investors = () => {
             </div>
             <div className="flex flex-wrap gap-4">
               <Link
-                to="/signup/investor"
+                to="/signup/email?role=investor"
                 className="group relative overflow-hidden rounded-full bg-gradient-to-r from-royal to-blossom px-8 py-4 text-sm font-semibold uppercase tracking-wide text-white shadow-xl shadow-royal/40 transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-royal/50"
               >
                 <span className="relative z-10 flex items-center gap-2">
@@ -635,7 +635,7 @@ const Investors = () => {
               </p>
             </div>
             <Link
-              to="/signup/investor"
+              to="/signup/email?role=investor"
               className="group relative overflow-hidden rounded-full bg-night px-8 py-4 text-sm font-semibold uppercase tracking-wide text-white shadow-xl transition-all duration-300 hover:scale-105 hover:shadow-2xl"
             >
               <span className="relative z-10 flex items-center gap-2">

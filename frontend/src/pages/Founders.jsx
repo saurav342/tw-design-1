@@ -326,7 +326,7 @@ const Founders = () => {
         </div>
               <div className="mt-8 flex flex-wrap gap-4">
                 <Link
-                  to="/signup/founder"
+                  to="/signup/email?role=founder"
                   className="group relative overflow-hidden rounded-full bg-gradient-to-r from-blossom to-royal px-8 py-4 text-sm font-semibold uppercase tracking-wide text-white shadow-xl shadow-blossom/40 transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-blossom/50"
                 >
                   <span className="relative z-10 flex items-center gap-2">
@@ -574,7 +574,7 @@ const Founders = () => {
           </p>
         </div>
             <Link
-              to="/signup/founder"
+              to="/signup/email?role=founder"
               className="group relative overflow-hidden rounded-full bg-night px-8 py-4 text-sm font-semibold uppercase tracking-wide text-white shadow-xl transition-all duration-300 hover:scale-105 hover:shadow-2xl"
             >
               <span className="relative z-10 flex items-center gap-2">

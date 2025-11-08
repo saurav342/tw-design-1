@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom';
 import { motion, useScroll, useSpring, useTransform } from 'framer-motion';
-import Header from '../components/Header';
 import Hero from '../components/Hero';
 import CTASection from '../components/CTASection';
 import FooterEX1 from '../components/FooterEX1';
@@ -207,7 +206,6 @@ const Home = () => {
 
   return (
     <>
-      <Header />
       <motion.div
         aria-hidden="true"
         style={{ scaleX: readingProgress, opacity: progressOpacity }}

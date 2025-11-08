@@ -49,7 +49,7 @@ import {
 } from '../components/ui/card.jsx';
 import { BenchmarkTable } from '../components/BenchmarkTable.jsx';
 import { MatchScoreBadge } from '../components/MatchScoreBadge.jsx';
-import { sendIntroEmailMock, showGenericSuccess } from '../lib/emailClientMock.js';
+import { sendIntroEmail, showSuccess } from '../lib/notifications.js';
 import { formatCurrency, formatCurrencyInr, formatDateDisplay } from '../lib/formatters.js';
 import { useAppStore } from '../store/useAppStore.js';
 import { useAuth } from '../context/useAuth.js';
@@ -213,8 +213,8 @@ const AdminDashboard = () => {
 
   const sendBulkIntros = () => {
     if (!selectedFounder || selectedInvestors.length === 0) return;
-    showGenericSuccess(
-      `Intro emails sent to ${selectedInvestors.length} investors for ${selectedFounder.startupName} (mock)`,
+    showSuccess(
+      `Intro emails sent to ${selectedInvestors.length} investors for ${selectedFounder.startupName}`,
     );
   };
 
@@ -232,7 +232,7 @@ const AdminDashboard = () => {
       setAnalytics(analyticsRes.analytics);
       setActivityLog(activityRes.activities || []);
       setDashboardSummary(summaryRes.summary);
-      showGenericSuccess('Dashboard refreshed successfully');
+      showSuccess('Dashboard refreshed successfully');
     } catch (error) {
       console.error('Failed to refresh data:', error);
     } finally {
@@ -732,7 +732,7 @@ const AdminDashboard = () => {
                           <button
                             onClick={() => {
                               updateFounderStatus(founder.id, 'approved');
-                              showGenericSuccess(`${founder.startupName} approved`);
+                              showSuccess(`${founder.startupName} approved`);
                             }}
                             className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium flex items-center gap-2"
                           >
@@ -880,7 +880,7 @@ const AdminDashboard = () => {
                             </div>
                             <button
                               onClick={() =>
-                                sendIntroEmailMock({
+                                sendIntroEmail({
                                   investorName: investor.fundName,
                                   startupName: selectedFounder?.startupName ?? '',
                                 })

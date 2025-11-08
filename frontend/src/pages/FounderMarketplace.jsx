@@ -12,7 +12,7 @@ import { useActiveFounder } from '../hooks/useActiveFounder.js';
 import { useFounderExtras } from '../hooks/useFounderExtras.js';
 import { formatCurrencyInr, formatDateDisplay } from '../lib/formatters.js';
 import { toNumberOrNull } from '../lib/utils.js';
-import { showGenericInfo, showGenericSuccess } from '../lib/emailClientMock.js';
+import { showInfo, showSuccess } from '../lib/notifications.js';
 
 const createFormState = (listing, founder) => ({
   startupName: founder?.startupName ?? '',
@@ -74,11 +74,11 @@ const FounderMarketplace = () => {
 
     try {
       await setMarketplaceListing(listing);
-      showGenericSuccess('Marketplace listing saved');
+      showSuccess('Marketplace listing saved');
       setIsDirty(false);
     } catch (error) {
       console.error('Failed to save marketplace listing', error);
-      showGenericInfo('We could not update your listing. Please try again in a moment.');
+      showInfo('We could not update your listing. Please try again in a moment.');
     }
   };
 

@@ -68,7 +68,10 @@ export const AuthProvider = ({ children }) => {
   const login = (credentials) => authenticate(authApi.login, credentials);
   const signup = (payload) => authenticate(authApi.signup, payload);
 
-  const establishSession = ({ user: nextUser, token: nextToken = 'mock-session-token' }) => {
+  const establishSession = ({ user: nextUser, token: nextToken }) => {
+    if (!nextToken) {
+      throw new Error('Token is required to establish a session');
+    }
     setAuthState({ token: nextToken, user: nextUser });
     setStatus({ loading: false, error: null });
   };

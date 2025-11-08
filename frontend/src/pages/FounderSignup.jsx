@@ -4,7 +4,7 @@ import { Button } from '../components/ui/button.jsx';
 import { Input } from '../components/ui/input.jsx';
 import { Label } from '../components/ui/label.jsx';
 import { Textarea } from '../components/ui/textarea.jsx';
-import { showGenericInfo, showGenericSuccess } from '../lib/emailClientMock.js';
+import { showInfo, showSuccess } from '../lib/notifications.js';
 import { useAppStore } from '../store/useAppStore.js';
 import { useAuth } from '../context/useAuth.js';
 
@@ -87,12 +87,12 @@ const FounderSignup = () => {
     const missing = requiredFields.filter((item) => !form[item.key]?.trim());
     if (missing.length) {
       const fieldsList = missing.map((item) => item.label).join(', ');
-      showGenericInfo(`Please complete the following before submitting: ${fieldsList}.`);
+      showInfo(`Please complete the following before submitting: ${fieldsList}.`);
       return;
     }
 
     if (!form.numberOfFounders || form.numberOfFounders < 1) {
-      showGenericInfo('Number of founders must be at least 1.');
+      showInfo('Number of founders must be at least 1.');
       return;
     }
 
@@ -162,12 +162,12 @@ const FounderSignup = () => {
         },
       });
 
-      showGenericSuccess('Founder application submitted successfully.');
+      showSuccess('Founder application submitted successfully.');
       navigate('/payment-details', { replace: true });
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error('Founder submission failed', error);
-      showGenericInfo('We could not submit your information. Please try again.');
+      showInfo('We could not submit your information. Please try again.');
     } finally {
       setIsSubmitting(false);
     }

@@ -5,7 +5,7 @@ import { StartupCard } from '../components/StartupCard.jsx';
 import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/card.jsx';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../components/ui/tabs.jsx';
 import { cn } from '../lib/utils.js';
-import { showGenericInfo } from '../lib/emailClientMock.js';
+import { showInfo } from '../lib/notifications.js';
 import { useAppStore } from '../store/useAppStore.js';
 import { formatCurrency } from '../lib/formatters.js';
 
@@ -66,7 +66,7 @@ const InvestorDashboard = () => {
 
   const handleRequestIntro = (founder) => {
     addInvestorInterest(founder.id);
-    showGenericInfo(`Intro requested for ${founder.startupName}. Added to your interested list.`);
+    showInfo(`Intro requested for ${founder.startupName}. Added to your interested list.`);
   };
 
   const totalInvestment = portfolioFounders.reduce((sum, founder) => {

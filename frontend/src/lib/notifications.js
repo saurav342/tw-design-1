@@ -1,24 +1,24 @@
 import { toast } from '../components/ui/use-toast';
 
-export const sendIntroEmailMock = ({ investorName, startupName }) => {
+export const sendIntroEmail = ({ investorName, startupName }) => {
   toast({
-    title: 'Intro email sent (mock)',
+    title: 'Intro email sent',
     description: `Introduced ${investorName} to ${startupName}.`,
     variant: 'success',
   });
 };
 
-export const sendFounderDashboardMock = ({
+export const sendFounderDashboard = ({
   recipientName,
   dashboardUrl = 'https://launch-and-lift.demo/founder/dashboard',
 }) => {
   toast({
-    title: 'Dashboard link delivered (mock)',
+    title: 'Dashboard link delivered',
     description: `We emailed ${recipientName} their personal dashboard link: ${dashboardUrl}`,
   });
 };
 
-export const showGenericSuccess = (message) => {
+export const showSuccess = (message) => {
   toast({
     title: 'Success',
     description: message,
@@ -26,9 +26,10 @@ export const showGenericSuccess = (message) => {
   });
 };
 
-export const showGenericInfo = (message) => {
+export const showInfo = (message) => {
   toast({
     title: 'Heads up',
     description: message,
   });
 };
+

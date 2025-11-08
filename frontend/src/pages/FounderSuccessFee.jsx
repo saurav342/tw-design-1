@@ -13,7 +13,7 @@ import { useFounderExtras } from '../hooks/useFounderExtras.js';
 import { SUCCESS_FEE_ROUNDS } from '../data/founderExtras.js';
 import { formatCurrencyInr, formatDateDisplay } from '../lib/formatters.js';
 import { toNumberOrNull } from '../lib/utils.js';
-import { showGenericInfo, showGenericSuccess } from '../lib/emailClientMock.js';
+import { showInfo, showSuccess } from '../lib/notifications.js';
 
 const createFormState = (request, founder) => ({
   round: request?.round ?? founder?.raiseStage ?? 'Seed',
@@ -66,11 +66,11 @@ const FounderSuccessFee = () => {
 
     try {
       await recordSuccessFeeRequest(payload);
-      showGenericSuccess('Success-fee request saved');
+      showSuccess('Success-fee request saved');
       setIsDirty(false);
     } catch (error) {
       console.error('Failed to record success-fee request', error);
-      showGenericInfo('Unable to update the success team right now. Please try again shortly.');
+      showInfo('Unable to update the success team right now. Please try again shortly.');
     }
   };
 

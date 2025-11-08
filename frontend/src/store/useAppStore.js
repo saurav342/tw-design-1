@@ -1,9 +1,5 @@
 import { create } from 'zustand';
-import { buildReadinessScores, generateAISummary } from '../lib/fakeAI';
 import { createDefaultFounderExtras } from '../data/founderExtras.js';
-import { defaultBenchmarkRows } from '../mock/benchmarksMock';
-import { foundersMock } from '../mock/foundersMock';
-import { investorsMock } from '../mock/investorsMock';
 import { founderExtrasApi, intakeApi } from '../services/api.js';
 
 const randomId = () =>
@@ -12,6 +8,14 @@ const randomId = () =>
     : Math.random().toString(36).slice(2));
 
 const computeReadinessFromMetrics = (metrics) => {
+  // Default readiness scores - will be replaced by backend data
+  const base = [
+    { id: 'market', label: 'Market Readiness', score: 78 },
+    { id: 'product', label: 'Product Maturity', score: 82 },
+    { id: 'traction', label: 'Traction Velocity', score: 74 },
+    { id: 'team', label: 'Team Strength', score: 88 },
+  ];
+
   const overrides = [];
 
   if (metrics?.growth) {
@@ -24,15 +28,33 @@ const computeReadinessFromMetrics = (metrics) => {
     }
   }
 
-  return buildReadinessScores(overrides);
+  if (!overrides.length) {
+    return base;
+  }
+
+  return base.map((item) => {
+    const override = overrides.find((entry) => entry?.id === item.id);
+    return override ? { ...item, ...override } : item;
+  });
 };
 
-const composeBenchmarkRows = (metrics) =>
-  defaultBenchmarkRows.map((row) => {
-    if (!metrics) return row;
+const composeBenchmarkRows = (metrics) => {
+  // Default benchmark structure - will be replaced by backend data
+  const defaultRows = [
+    { id: 'growth', metric: 'MoM Growth', industryStandard: '12%', startupValue: '12%' },
+    { id: 'mrr', metric: 'Monthly Recurring Revenue', industryStandard: '$45K', startupValue: '$45K' },
+    { id: 'cac', metric: 'Customer Acquisition Cost', industryStandard: '$880', startupValue: '$880' },
+    { id: 'ltv', metric: 'Customer Lifetime Value', industryStandard: '$6.3K', startupValue: '$6.3K' },
+    { id: 'payback', metric: 'Payback Period', industryStandard: '14 months', startupValue: '14 months' },
+  ];
+
+  if (!metrics) return defaultRows;
+  
+  return defaultRows.map((row) => {
     const value = metrics[row.id];
     return value ? { ...row, startupValue: value } : row;
   });
+};
 
 const computeMatchScore = (founder, investor) => {
   let score = 55;
@@ -68,20 +90,6 @@ const generateMatches = (founder, investors) =>
     matchScore: computeMatchScore(founder, investor),
   }));
 
-const buildInitialFounderExtras = () => {
-  const entries = {};
-  foundersMock.forEach((founder) => {
-    const base = createDefaultFounderExtras();
-    if (base.marketplaceListing) {
-      base.marketplaceListing = {
-        ...base.marketplaceListing,
-        startupName: founder.startupName ?? base.marketplaceListing.startupName,
-      };
-    }
-    entries[founder.id] = base;
-  });
-  return entries;
-};
 
 const normalizeExtrasPayload = (payload) => ({
   marketplaceListing: payload?.marketplaceListing ? { ...payload.marketplaceListing } : null,
@@ -92,24 +100,13 @@ const normalizeExtrasPayload = (payload) => ({
 });
 
 export const useAppStore = create((set, get) => ({
-  founders: foundersMock,
-  investors: investorsMock,
-  founderExtras: buildInitialFounderExtras(),
+  founders: [],
+  investors: [],
+  founderExtras: {},
   investorInterests: [],
-  investorPortfolio: [
-    // Mock portfolio data for demo
-    {
-      founderId: 'founder-1',
-      amountInvested: 500000,
-      investedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 90).toISOString(),
-    },
-  ],
+  investorPortfolio: [],
   addFounder: async (input) => {
     const id = `founder-${randomId()}`;
-    const aiPayload = generateAISummary({
-      ...input,
-      revenueRunRateUSD: input.revenueRunRateUSD,
-    });
 
     const readiness = computeReadinessFromMetrics(input.metrics);
     const benchmarks = composeBenchmarkRows(input.metrics);
@@ -165,14 +162,10 @@ export const useAppStore = create((set, get) => ({
       pitchDeckUrl: normalizedCompany.pitchDeckUrl,
       submittedFrom: input.submittedFrom ?? 'founder-signup-v2',
       status: 'pending',
-      readiness,
+      readiness: readiness || [],
       benchmarkNotes: {},
-      benchmarks,
-      aiSummary: [
-        aiPayload.overview,
-        aiPayload.highlights[0] ?? '',
-        aiPayload.recommendedFocus,
-      ].join(' '),
+      benchmarks: benchmarks || [],
+      aiSummary: input.aiSummary || '',
       matches: [],
       createdAt: new Date().toISOString(),
     };

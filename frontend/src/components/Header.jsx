@@ -40,7 +40,7 @@ const Header = () => {
         </div>
         <div className="nav-cta">
           <Link to="/login" className="btn btn-primary">Login</Link>
-          <Link to="/signup" className="btn btn-primary">Sign Up</Link>
+          <Link to="/signup" className="btn btn-outline">Sign Up</Link>
         </div>
       </div>
     </nav>

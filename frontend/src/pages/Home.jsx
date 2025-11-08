@@ -213,7 +213,7 @@ const Home = () => {
         style={{ scaleX: readingProgress, opacity: progressOpacity }}
         className="pointer-events-none fixed left-0 top-0 z-40 h-1 origin-left bg-gradient-to-r from-[#ff4fa3] via-[#8b5cf6] to-[#34d399]"
       />
-      <div className="space-y-24 bg-gradient-to-br from-[#fef6ff] via-[#f5f3ff] to-[#f0fff4] pb-24">
+      <div className="space-y-24 bg-gradient-to-br from-[#fef6ff] via-[#f5f3ff] to-[#f0fff4]">
         <Hero />
 
         <MotionSection

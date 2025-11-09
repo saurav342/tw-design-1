@@ -36,7 +36,7 @@ const initialForm = {
 const FounderSignup = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { establishSession } = useAuth();
+  const { logout } = useAuth();
   const addFounder = useAppStore((state) => state.addFounder);
   
   // Get email and OTP verification status from location state or sessionStorage
@@ -166,33 +166,26 @@ const FounderSignup = () => {
     try {
       const added = await addFounder(payload);
 
-      if (typeof window !== 'undefined') {
-        window.sessionStorage.setItem('launch.activeFounderId', added.id);
-      }
-
-      establishSession({
-        user: {
-          id: added.id,
-          role: 'founder',
-          email: added.email,
-          fullName: added.fullName,
-        },
-      });
-
-      showSuccess('Founder application submitted successfully.');
-      
       // Clear signup flow sessionStorage
       sessionStorage.removeItem('signup.email');
       sessionStorage.removeItem('signup.role');
       sessionStorage.removeItem('signup.otpVerified');
       
-      navigate('/payment-details', { replace: true });
+      // Ensure user is logged out (no auto-login)
+      logout();
+
+      setIsSubmitting(false);
+      showSuccess('Founder application submitted successfully! Please log in to continue.');
+      
+      // Redirect to login after a brief delay to show success message
+      setTimeout(() => {
+        navigate('/login', { replace: true });
+      }, 1500);
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error('Founder submission failed', error);
-      showInfo('We could not submit your information. Please try again.');
-    } finally {
       setIsSubmitting(false);
+      showInfo('We could not submit your information. Please try again.');
     }
   };
 

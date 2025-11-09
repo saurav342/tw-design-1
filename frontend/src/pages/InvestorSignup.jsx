@@ -6,7 +6,7 @@ import { ArrowRight, CheckCircle2, Eye, EyeOff, Loader2, AlertCircle, Sparkles, 
 const InvestorSignup = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { signup } = useAuth();
+  const { signup, logout } = useAuth();
   
   // Get email and OTP verification status from location state or sessionStorage
   const verifiedEmail = location.state?.email || sessionStorage.getItem('signup.email') || '';
@@ -74,18 +74,22 @@ const InvestorSignup = () => {
       
       console.log('✅ Signup successful:', response);
       
-      // Show success state
-      setSuccess(true);
-      
       // Clear signup flow sessionStorage
       sessionStorage.removeItem('signup.email');
       sessionStorage.removeItem('signup.role');
       sessionStorage.removeItem('signup.otpVerified');
       
-      // Navigate after a brief moment
+      // Logout to clear auto-authentication (user should log in manually)
+      logout();
+      
+      // Clear loading state and show success
+      setIsLoading(false);
+      setSuccess(true);
+      
+      // Navigate to login after showing success message
       setTimeout(() => {
-        navigate('/dashboard/investor', { replace: true });
-      }, 800);
+        navigate('/login', { replace: true });
+      }, 1500);
       
     } catch (err) {
       console.error('❌ Signup failed:', err);
@@ -173,7 +177,7 @@ const InvestorSignup = () => {
             {success && (
               <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl flex items-center gap-3 animate-in fade-in slide-in-from-top-2 duration-300">
                 <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0" />
-                <p className="text-sm font-medium text-green-900">Account created! Redirecting to your dashboard...</p>
+                <p className="text-sm font-medium text-green-900">Account created successfully! Redirecting to login...</p>
               </div>
             )}
 

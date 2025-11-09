@@ -1,4 +1,5 @@
 const { createFounderIntake, listFounderIntakes } = require('../models/founderIntakeModel');
+const { addPortfolioItem } = require('../models/portfolioModel');
 
 const REQUIRED_FIELDS = ['fullName', 'email', 'startupName'];
 
@@ -46,13 +47,23 @@ const submitFounderIntake = (req, res) => {
       legalName: sanitizeString(companyInput.legalName ?? payload.companyLegalName),
       brandName: sanitizeString(companyInput.brandName ?? payload.brandName ?? payload.startupName),
       website: sanitizeString(companyInput.website ?? payload.companyWebsite),
-      foundingDate: sanitizeString(companyInput.foundingDate ?? payload.companyFoundingDate),
+      foundingDate: sanitizeString(
+        companyInput.foundingDate ?? 
+        payload.companyFoundingDate ?? 
+        payload.foundedOn ?? 
+        ''
+      ),
       sector: sanitizeString(companyInput.sector ?? payload.sector),
       currentStage: sanitizeString(
         companyInput.currentStage ?? payload.currentStage ?? payload.raiseStage,
       ),
       brief: sanitizeString(companyInput.brief ?? payload.brief ?? payload.tractionSummary),
-      pitchDeckUrl: sanitizeString(companyInput.pitchDeckUrl ?? payload.pitchDeck),
+      pitchDeckUrl: sanitizeString(
+        companyInput.pitchDeckUrl ?? 
+        payload.pitchDeckUrl ?? 
+        payload.pitchDeck ?? 
+        ''
+      ),
     };
 
     const normalized = {
@@ -76,12 +87,43 @@ const submitFounderIntake = (req, res) => {
       tractionSummary: companyDetails.brief,
       raiseStage: companyDetails.currentStage || payload.raiseStage,
       teamSize: numberOfFounders ?? payload.teamSize,
-      pitchDeckUrl: companyDetails.pitchDeckUrl,
+      foundedOn: companyDetails.foundingDate || payload.foundedOn || '',
+      pitchDeckUrl: companyDetails.pitchDeckUrl || payload.pitchDeckUrl || '',
       matches: Array.isArray(payload.matches) ? payload.matches : [],
       submittedFrom: payload.submittedFrom ?? 'founder-signup-v2',
+      readiness: Array.isArray(payload.readiness) ? payload.readiness : [],
+      benchmarkNotes: payload.benchmarkNotes || {},
+      benchmarks: Array.isArray(payload.benchmarks) ? payload.benchmarks : [],
+      aiSummary: payload.aiSummary || '',
     };
 
     const created = createFounderIntake(normalized);
+
+    // Automatically create portfolio item from founder intake
+    try {
+      const foundersList = [normalized.fullName];
+      if (secondFounder && secondFounder.fullName) {
+        foundersList.push(secondFounder.fullName);
+      }
+
+      const portfolioItem = {
+        name: companyDetails.brandName || companyDetails.legalName || normalized.startupName || 'New Company',
+        sector: companyDetails.sector || normalized.sector || 'Not Specified',
+        founders: foundersList,
+        milestone: companyDetails.currentStage 
+          ? `Currently at ${companyDetails.currentStage} stage` 
+          : 'Early stage startup',
+        summary: companyDetails.brief || normalized.tractionSummary || normalized.brief || 'Building innovative solutions',
+        link: companyDetails.website || normalized.companyWebsite || '#',
+        status: 'Active',
+      };
+
+      addPortfolioItem(portfolioItem);
+    } catch (portfolioError) {
+      // Log error but don't fail the founder intake submission
+      console.error('Failed to create portfolio item:', portfolioError);
+    }
+
     return res.status(201).json({ item: created });
   } catch (error) {
     return res.status(400).json({ message: error.message || 'Unable to submit founder intake.' });

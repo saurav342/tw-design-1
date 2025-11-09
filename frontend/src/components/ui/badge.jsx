@@ -2,14 +2,14 @@ import { cva } from 'class-variance-authority';
 import { cn } from '../../lib/utils';
 
 const badgeVariants = cva(
-  'inline-flex items-center rounded-full border border-white/20 px-3 py-1 text-xs font-medium uppercase tracking-wide shadow-sm backdrop-blur',
+  'inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium tracking-wide shadow-sm',
   {
     variants: {
       variant: {
-        default: 'bg-white/10 text-slate-100',
+        default: 'bg-gray-100 text-gray-700 border-gray-200',
         success:
-          'border-transparent bg-gradient-to-r from-emerald-400/80 to-cyan-500/80 text-emerald-950',
-        warning: 'border-amber-300/40 bg-amber-400/20 text-amber-200 backdrop-blur',
+          'bg-emerald-100 text-emerald-700 border-emerald-200',
+        warning: 'bg-amber-100 text-amber-700 border-amber-200',
       },
     },
     defaultVariants: { variant: 'default' },

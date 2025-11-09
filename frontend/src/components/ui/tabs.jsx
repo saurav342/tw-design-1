@@ -8,7 +8,7 @@ const TabsList = forwardRef(({ className, ...props }, ref) => (
   <TabsPrimitive.List
     ref={ref}
     className={cn(
-      'inline-flex h-12 items-center justify-center gap-2 rounded-2xl border border-white/60 bg-white/80 p-1 text-night/60 backdrop-blur',
+      'inline-flex h-12 items-center justify-center gap-2 rounded-xl border-2 border-gray-200 bg-white p-1 text-gray-600 shadow-sm',
       className,
     )}
     {...props}
@@ -20,7 +20,7 @@ const TabsTrigger = forwardRef(({ className, ...props }, ref) => (
   <TabsPrimitive.Trigger
     ref={ref}
     className={cn(
-      'inline-flex min-w-[120px] items-center justify-center rounded-xl px-4 py-2 text-sm font-semibold text-night/60 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blossom focus-visible:ring-offset-2 focus-visible:ring-offset-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-royal/85 data-[state=active]:via-blossom/80 data-[state=active]:to-sunbeam/80 data-[state=active]:text-white data-[state=active]:shadow-[0_20px_55px_-25px_rgba(91,33,209,0.55)]',
+      'inline-flex min-w-[120px] items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold text-gray-600 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-cyan-500 data-[state=active]:text-white data-[state=active]:shadow-md',
       className,
     )}
     {...props}
@@ -32,7 +32,7 @@ const TabsContent = forwardRef(({ className, ...props }, ref) => (
   <TabsPrimitive.Content
     ref={ref}
     className={cn(
-      'rounded-2xl border border-white/60 bg-white/85 p-6 text-night shadow-lg shadow-white/40 backdrop-blur',
+      'rounded-2xl bg-transparent p-0 text-gray-900',
       className,
     )}
     {...props}

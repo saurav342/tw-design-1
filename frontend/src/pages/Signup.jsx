@@ -93,7 +93,7 @@ const Signup = () => {
                 </div>
               </div>
             ))}
-            <div className="rounded-3xl border border-dashed border-slate-200 bg-slate-50 p-6 text-sm text-slate-500">
+            {/* <div className="rounded-3xl border border-dashed border-slate-200 bg-slate-50 p-6 text-sm text-slate-500">
               <p className="font-semibold text-night">LaunchAndLift team member?</p>
               <p className="mt-2 mb-3">
                 Admin access uses a separate authentication portal.
@@ -104,7 +104,7 @@ const Signup = () => {
               >
                 Go to Admin Portal
               </Link>
-            </div>
+            </div> */}
 
             <div className="text-xs text-slate-500">
               Already have credentials?{' '}

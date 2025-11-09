@@ -127,8 +127,12 @@ const signup = async (req, res) => {
       return res.status(400).json({ message: 'Missing required fields.' });
     }
 
-    if (!['investor', 'founder', 'admin'].includes(role)) {
-      return res.status(400).json({ message: 'Invalid role selection.' });
+    // Restrict public signup to only investor and founder roles
+    // Admin signup must use the separate admin auth endpoint
+    if (!['investor', 'founder'].includes(role)) {
+      return res.status(403).json({ 
+        message: 'Admin accounts cannot be created through this endpoint. Please use the admin authentication portal.' 
+      });
     }
 
     let investorDetails = null;
@@ -272,9 +276,8 @@ const signup = async (req, res) => {
           pitchDeck: sanitizeFilePayload(pitchDeck),
         },
       };
-    } else if (role === 'admin') {
-      adminDetails = req.body.adminDetails ?? {};
     }
+    // Admin role is removed from public signup - use admin auth endpoint instead
 
     const user = await createUser({
       fullName,
@@ -285,7 +288,7 @@ const signup = async (req, res) => {
       notes,
       investorDetails,
       founderDetails,
-      adminDetails,
+      adminDetails: null, // Admin details not available in public signup
     });
     return res.status(201).json(buildAuthResponse(user));
   } catch (error) {
@@ -300,7 +303,23 @@ const login = async (req, res) => {
       return res.status(400).json({ message: 'Email and password are required.' });
     }
 
-    const user = await verifyUser({ email, password, role });
+    // If role is admin, reject - admins must use admin auth endpoint
+    if (role === 'admin') {
+      return res.status(403).json({ 
+        message: 'Admin login is not available through this endpoint. Please use the admin authentication portal.' 
+      });
+    }
+
+    // Allow login without role specification, or with investor/founder role
+    const user = await verifyUser({ email, password, role: role || undefined });
+    
+    // Double-check: if user is admin, reject even if they didn't specify role
+    if (user.role === 'admin') {
+      return res.status(403).json({ 
+        message: 'Admin accounts must use the admin authentication portal.' 
+      });
+    }
+
     return res.status(200).json(buildAuthResponse(user));
   } catch (error) {
     return res.status(401).json({ message: error.message });

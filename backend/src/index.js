@@ -5,6 +5,7 @@ const express = require('express');
 const cors = require('cors');
 
 const authRoutes = require('./routes/authRoutes');
+const adminAuthRoutes = require('./routes/adminAuthRoutes');
 const portfolioRoutes = require('./routes/portfolioRoutes');
 const contentRoutes = require('./routes/contentRoutes');
 const adminRoutes = require('./routes/adminRoutes');
@@ -20,6 +21,7 @@ app.use(express.urlencoded({ extended: true }));
 app.get('/health', (req, res) => res.status(200).json({ status: 'ok', brand: 'LaunchAndLift' }));
 
 app.use('/api/auth', authRoutes);
+app.use('/api/admin/auth', adminAuthRoutes);
 app.use('/api/portfolio', portfolioRoutes);
 app.use('/api/content', contentRoutes);
 app.use('/api/admin', adminRoutes);

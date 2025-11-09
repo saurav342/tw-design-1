@@ -5,7 +5,7 @@ import { Input } from '../components/ui/input.jsx';
 import { Label } from '../components/ui/label.jsx';
 import { Textarea } from '../components/ui/textarea.jsx';
 import { CheckCircle2 } from 'lucide-react';
-import { showInfo, showSuccess } from '../lib/notifications.js';
+import { useNotification } from '../context/NotificationContext';
 import { useAppStore } from '../store/useAppStore.js';
 
 const stageOptions = ['Pre-seed', 'Seed', 'Series A', 'Series B', 'Series C+'];
@@ -35,6 +35,7 @@ const initialForm = {
 const FounderSignup = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { showSuccess, showInfo } = useNotification();
   const addFounder = useAppStore((state) => state.addFounder);
   
   // Get email and OTP verification status from location state or sessionStorage

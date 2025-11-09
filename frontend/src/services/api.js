@@ -121,6 +121,11 @@ export const authApi = {
   fetchProfile: (token) => apiClient.get('/auth/profile', token),
 };
 
+export const adminAuthApi = {
+  login: (credentials) => apiClient.post('/admin/auth/login', credentials),
+  signup: (payload) => apiClient.post('/admin/auth/signup', payload),
+};
+
 export const contentApi = {
   stats: (token) => apiClient.get('/content/stats', token),
   updateStats: (data, token) => apiClient.put('/content/stats', data, token),

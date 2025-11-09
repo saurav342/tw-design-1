@@ -13,7 +13,7 @@ import { useFounderExtras } from '../hooks/useFounderExtras.js';
 import { SUCCESS_FEE_ROUNDS } from '../data/founderExtras.js';
 import { formatCurrencyInr, formatDateDisplay } from '../lib/formatters.js';
 import { toNumberOrNull } from '../lib/utils.js';
-import { showInfo, showSuccess } from '../lib/notifications.js';
+import { useNotification } from '../context/NotificationContext';
 
 const createFormState = (request, founder) => ({
   round: request?.round ?? founder?.raiseStage ?? 'Seed',
@@ -27,6 +27,7 @@ const createFormState = (request, founder) => ({
 
 const FounderSuccessFee = () => {
   const navigate = useNavigate();
+  const { showSuccess, showInfo } = useNotification();
   const { activeFounder, founderId } = useActiveFounder();
   const { extras, recordSuccessFeeRequest } = useFounderExtras(founderId);
 

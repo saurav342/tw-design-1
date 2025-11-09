@@ -49,7 +49,7 @@ import {
 } from '../components/ui/card.jsx';
 import { BenchmarkTable } from '../components/BenchmarkTable.jsx';
 import { MatchScoreBadge } from '../components/MatchScoreBadge.jsx';
-import { sendIntroEmail, showSuccess } from '../lib/notifications.js';
+import { useNotification } from '../context/NotificationContext';
 import { formatCurrency, formatCurrencyInr, formatDateDisplay } from '../lib/formatters.js';
 import { useAppStore } from '../store/useAppStore.js';
 import { useAuth } from '../context/useAuth.js';
@@ -58,6 +58,7 @@ import { adminApi } from '../services/api.js';
 
 const AdminDashboard = () => {
   const { token, user } = useAuth();
+  const { showSuccess } = useNotification();
   const founders = useAppStore((state) => state.founders);
   const investors = useAppStore((state) => state.investors);
   const updateFounderStatus = useAppStore((state) => state.updateFounderStatus);
@@ -879,12 +880,12 @@ const AdminDashboard = () => {
                               </div>
                             </div>
                             <button
-                              onClick={() =>
-                                sendIntroEmail({
-                                  investorName: investor.fundName,
-                                  startupName: selectedFounder?.startupName ?? '',
-                                })
-                              }
+                              onClick={() => {
+                                showSuccess(
+                                  `Introduced ${investor.fundName} to ${selectedFounder?.startupName ?? ''}.`,
+                                  'Intro email sent'
+                                );
+                              }}
                               className="px-4 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 text-sm font-medium"
                             >
                               Send Intro

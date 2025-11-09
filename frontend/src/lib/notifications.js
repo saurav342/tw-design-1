@@ -1,35 +1,55 @@
-import { toast } from '../components/ui/use-toast';
+// This file is kept for backward compatibility
+// All functions now use the NotificationContext directly
+// Import useNotification hook in components instead
+
+let notificationMethods = null;
+
+export const setNotificationMethods = (methods) => {
+  notificationMethods = methods;
+};
 
 export const sendIntroEmail = ({ investorName, startupName }) => {
-  toast({
-    title: 'Intro email sent',
-    description: `Introduced ${investorName} to ${startupName}.`,
-    variant: 'success',
-  });
+  if (notificationMethods) {
+    notificationMethods.showSuccess(
+      `Introduced ${investorName} to ${startupName}.`,
+      'Intro email sent'
+    );
+  }
 };
 
 export const sendFounderDashboard = ({
   recipientName,
   dashboardUrl = 'https://launch-and-lift.demo/founder/dashboard',
 }) => {
-  toast({
-    title: 'Dashboard link delivered',
-    description: `We emailed ${recipientName} their personal dashboard link: ${dashboardUrl}`,
-  });
+  if (notificationMethods) {
+    notificationMethods.showInfo(
+      `We emailed ${recipientName} their personal dashboard link: ${dashboardUrl}`,
+      'Dashboard link delivered'
+    );
+  }
 };
 
 export const showSuccess = (message) => {
-  toast({
-    title: 'Success',
-    description: message,
-    variant: 'success',
-  });
+  if (notificationMethods) {
+    notificationMethods.showSuccess(message, 'Success');
+  }
 };
 
 export const showInfo = (message) => {
-  toast({
-    title: 'Heads up',
-    description: message,
-  });
+  if (notificationMethods) {
+    notificationMethods.showInfo(message, 'Info');
+  }
+};
+
+export const showError = (message) => {
+  if (notificationMethods) {
+    notificationMethods.showError(message, 'Error');
+  }
+};
+
+export const showWarning = (message) => {
+  if (notificationMethods) {
+    notificationMethods.showWarning(message, 'Warning');
+  }
 };
 

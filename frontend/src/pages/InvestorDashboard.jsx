@@ -5,7 +5,7 @@ import { StartupCard } from '../components/StartupCard.jsx';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../components/ui/tabs.jsx';
 import { Input } from '../components/ui/input.jsx';
 import { cn } from '../lib/utils.js';
-import { showInfo } from '../lib/notifications.js';
+import { useNotification } from '../context/NotificationContext';
 import { useAppStore } from '../store/useAppStore.js';
 import { formatCurrency } from '../lib/formatters.js';
 
@@ -16,6 +16,7 @@ const initialFilters = {
 };
 
 const InvestorDashboard = () => {
+  const { showInfo } = useNotification();
   const founders = useAppStore((state) => state.founders);
   const investors = useAppStore((state) => state.investors);
   const investorInterests = useAppStore((state) => state.investorInterests);

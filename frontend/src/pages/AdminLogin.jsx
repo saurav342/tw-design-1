@@ -1,15 +1,15 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/useAuth.js';
-import { ArrowRight, CheckCircle2, Eye, EyeOff, Loader2, AlertCircle } from 'lucide-react';
+import { ArrowRight, CheckCircle2, Eye, EyeOff, Loader2, AlertCircle, Shield } from 'lucide-react';
+import { adminAuthApi } from '../services/api';
 
-const Login = () => {
+const AdminLogin = () => {
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { establishSession } = useAuth();
   
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState('founder');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -31,35 +31,41 @@ const Login = () => {
     }
 
     try {
-      console.log('🔐 Attempting login:', { email, role });
+      console.log('🔐 Attempting admin login:', { email });
       
-      const response = await login({ email: email.trim(), password, role });
+      // Use admin auth API directly
+      const response = await adminAuthApi.login({ 
+        email: email.trim(), 
+        password 
+      });
       
-      console.log('✅ Login successful:', response);
+      console.log('✅ Admin login successful:', response);
+      
+      // Establish session using the auth context
+      establishSession(response);
       
       // Show success state
       setSuccess(true);
       
-      // Navigate after a brief moment to show success
+      // Navigate to admin dashboard
       setTimeout(() => {
-        const destination = `/dashboard/${response.user.role}`;
+        const destination = '/dashboard/admin';
         console.log('🚀 Navigating to:', destination);
         navigate(destination, { replace: true });
       }, 600);
       
     } catch (err) {
-      console.error('❌ Login failed:', err);
+      console.error('❌ Admin login failed:', err);
       setIsLoading(false);
       const errorMessage = err.message || 'Invalid credentials. Please try again.';
       setError(errorMessage);
     }
   };
 
-  // Auto-fill demo credentials
+  // Auto-fill demo credentials (if available)
   const fillDemoCredentials = () => {
-    setEmail('fe@fe.com');
-    setPassword('123');
-    setRole('founder');
+    setEmail('admin@launchandlift.com');
+    setPassword('LaunchAndLiftAdmin!23');
   };
 
   return (
@@ -67,32 +73,32 @@ const Login = () => {
       <div className="w-full max-w-6xl grid lg:grid-cols-2 gap-0 bg-white rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden">
         
         {/* Left Side - Branding & Info */}
-        <div className="relative bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 p-8 sm:p-10 lg:p-12 text-white hidden lg:flex flex-col justify-between overflow-hidden">
+        <div className="relative bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 p-8 sm:p-10 lg:p-12 text-white hidden lg:flex flex-col justify-between overflow-hidden">
           <div className="absolute inset-0 bg-black/10"></div>
-          <div className="absolute -bottom-20 -right-20 w-80 h-80 bg-white/10 rounded-full blur-3xl"></div>
-          <div className="absolute -top-20 -left-20 w-80 h-80 bg-white/10 rounded-full blur-3xl"></div>
+          <div className="absolute -bottom-20 -right-20 w-80 h-80 bg-white/5 rounded-full blur-3xl"></div>
+          <div className="absolute -top-20 -left-20 w-80 h-80 bg-white/5 rounded-full blur-3xl"></div>
           
           <div className="relative z-10">
             <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-sm font-medium mb-6">
-              <CheckCircle2 className="w-4 h-4" />
-              Trusted by 500+ founders
+              <Shield className="w-4 h-4" />
+              Admin Portal
             </div>
             <h1 className="text-4xl font-bold mb-4 leading-tight">
-              Welcome back to<br />LaunchAndLift
+              LaunchAndLift<br />Administration
             </h1>
             <p className="text-white/90 text-lg leading-relaxed">
-              Your mission control for fundraising success. Track your raise, connect with investors, and access expert support—all in one place.
+              Secure access to the LaunchAndLift admin dashboard. Manage users, content, and platform operations.
             </p>
           </div>
 
           <div className="relative z-10 space-y-4">
             <div className="flex items-start gap-3">
               <div className="mt-1 flex-shrink-0 w-8 h-8 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                <CheckCircle2 className="w-5 h-5" />
+                <Shield className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="font-semibold mb-1">Smart Investor Matching</h3>
-                <p className="text-sm text-white/80">Connect with investors perfectly aligned to your stage and sector</p>
+                <h3 className="font-semibold mb-1">Secure Access</h3>
+                <p className="text-sm text-white/80">Administrative accounts are managed separately from public user accounts</p>
               </div>
             </div>
             <div className="flex items-start gap-3">
@@ -100,8 +106,8 @@ const Login = () => {
                 <CheckCircle2 className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="font-semibold mb-1">Expert Guidance</h3>
-                <p className="text-sm text-white/80">Access pitch deck prep, financial modeling, and legal support</p>
+                <h3 className="font-semibold mb-1">Platform Management</h3>
+                <p className="text-sm text-white/80">Manage users, content, analytics, and system configuration</p>
               </div>
             </div>
           </div>
@@ -113,20 +119,23 @@ const Login = () => {
             
             {/* Header */}
             <div className="text-center lg:text-left mb-6 sm:mb-8">
-              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Sign in</h2>
-              <p className="text-sm sm:text-base text-gray-600">Access your LaunchAndLift dashboard</p>
+              <div className="inline-flex items-center gap-2 mb-4">
+                <Shield className="w-6 h-6 text-gray-900" />
+                <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">Admin Sign In</h2>
+              </div>
+              <p className="text-sm sm:text-base text-gray-600">Access the LaunchAndLift administration portal</p>
             </div>
 
             {/* Demo Credentials Banner */}
-            <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-xl">
+            <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-xl">
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1">
-                  <p className="text-sm font-medium text-blue-900 mb-1">🎯 Quick Demo</p>
-                  <p className="text-xs text-blue-700">fe@fe.com • Password: 123</p>
+                  <p className="text-sm font-medium text-amber-900 mb-1">🔑 Admin Credentials</p>
+                  <p className="text-xs text-amber-700">admin@launchandlift.com • Password: LaunchAndLiftAdmin!23</p>
                 </div>
                 <button
                   onClick={fillDemoCredentials}
-                  className="text-xs font-medium text-blue-600 hover:text-blue-700 underline"
+                  className="text-xs font-medium text-amber-600 hover:text-amber-700 underline"
                   type="button"
                 >
                   Auto-fill
@@ -166,8 +175,8 @@ const Login = () => {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@company.com"
-                  className="w-full px-4 py-3 sm:py-3.5 text-base bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                  placeholder="admin@launchandlift.com"
+                  className="w-full px-4 py-3 sm:py-3.5 text-base bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all"
                   disabled={isLoading || success}
                   autoComplete="email"
                 />
@@ -185,7 +194,7 @@ const Login = () => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Enter your password"
-                    className="w-full px-4 py-3 sm:py-3.5 pr-12 text-base bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                    className="w-full px-4 py-3 sm:py-3.5 pr-12 text-base bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all"
                     disabled={isLoading || success}
                     autoComplete="current-password"
                   />
@@ -206,33 +215,13 @@ const Login = () => {
                 </div>
               </div>
 
-              {/* Role Selection */}
-              <div>
-                <label htmlFor="role" className="block text-sm font-semibold text-gray-700 mb-2">
-                  Sign in as
-                </label>
-                <select
-                  id="role"
-                  value={role}
-                  onChange={(e) => setRole(e.target.value)}
-                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all cursor-pointer"
-                  disabled={isLoading || success}
-                >
-                  <option value="founder">Founder</option>
-                  <option value="investor">Investor</option>
-                </select>
-                <p className="mt-2 text-xs text-gray-500">
-                  Admin access? <Link to="/admin/login" className="text-indigo-600 hover:text-indigo-700 font-medium">Use admin portal</Link>
-                </p>
-              </div>
-
               {/* Forgot Password Link */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center">
                   <input
                     id="remember"
                     type="checkbox"
-                    className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                    className="w-4 h-4 text-gray-900 border-gray-300 rounded focus:ring-gray-500"
                     disabled={isLoading || success}
                   />
                   <label htmlFor="remember" className="ml-2 text-sm text-gray-600">
@@ -241,7 +230,7 @@ const Login = () => {
                 </div>
                 <button
                   type="button"
-                  className="text-sm font-medium text-indigo-600 hover:text-indigo-700 transition-colors"
+                  className="text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
                   disabled={isLoading || success}
                 >
                   Forgot password?
@@ -252,7 +241,7 @@ const Login = () => {
               <button
                 type="submit"
                 disabled={isLoading || success}
-                className="w-full py-3.5 sm:py-4 px-6 min-h-[44px] text-base bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg shadow-indigo-500/30 hover:shadow-xl hover:shadow-indigo-500/40 disabled:opacity-70 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center gap-2 group"
+                className="w-full py-3.5 sm:py-4 px-6 min-h-[44px] text-base bg-gradient-to-r from-gray-900 to-gray-800 hover:from-gray-800 hover:to-gray-700 text-white font-semibold rounded-xl shadow-lg shadow-gray-900/30 hover:shadow-xl hover:shadow-gray-900/40 disabled:opacity-70 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center gap-2 group"
               >
                 {isLoading ? (
                   <>
@@ -266,32 +255,24 @@ const Login = () => {
                   </>
                 ) : (
                   <>
-                    <span>Sign in</span>
+                    <span>Sign in to Admin Portal</span>
                     <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                   </>
                 )}
               </button>
             </form>
 
-            {/* Sign Up Links */}
+            {/* Back to Public Login */}
             <div className="mt-6 sm:mt-8 pt-6 border-t border-gray-200">
               <p className="text-center text-sm text-gray-600 mb-3">
-                Don't have an account?
+                Looking for investor or founder access?
               </p>
-              <div className="flex flex-col sm:flex-row gap-3">
-                <Link
-                  to="/signup/email?role=founder"
-                  className="flex-1 py-3 px-4 min-h-[44px] flex items-center justify-center bg-white border-2 border-gray-200 hover:border-indigo-300 hover:bg-indigo-50 text-gray-700 hover:text-indigo-700 font-medium rounded-xl transition-all text-center text-sm sm:text-base"
-                >
-                  Join as Founder
-                </Link>
-                <Link
-                  to="/signup/email?role=investor"
-                  className="flex-1 py-3 px-4 min-h-[44px] flex items-center justify-center bg-white border-2 border-gray-200 hover:border-purple-300 hover:bg-purple-50 text-gray-700 hover:text-purple-700 font-medium rounded-xl transition-all text-center text-sm sm:text-base"
-                >
-                  Join as Investor
-                </Link>
-              </div>
+              <Link
+                to="/login"
+                className="block w-full py-3 px-4 min-h-[44px] flex items-center justify-center bg-white border-2 border-gray-200 hover:border-gray-300 hover:bg-gray-50 text-gray-700 hover:text-gray-900 font-medium rounded-xl transition-all text-center text-sm sm:text-base"
+              >
+                Go to Public Login
+              </Link>
             </div>
 
           </div>
@@ -302,4 +283,5 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default AdminLogin;
+

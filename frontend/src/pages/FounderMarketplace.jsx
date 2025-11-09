@@ -12,7 +12,7 @@ import { useActiveFounder } from '../hooks/useActiveFounder.js';
 import { useFounderExtras } from '../hooks/useFounderExtras.js';
 import { formatCurrencyInr, formatDateDisplay } from '../lib/formatters.js';
 import { toNumberOrNull } from '../lib/utils.js';
-import { showInfo, showSuccess } from '../lib/notifications.js';
+import { useNotification } from '../context/NotificationContext';
 
 const createFormState = (listing, founder) => ({
   startupName: founder?.startupName ?? '',
@@ -26,6 +26,7 @@ const createFormState = (listing, founder) => ({
 
 const FounderMarketplace = () => {
   const navigate = useNavigate();
+  const { showSuccess, showInfo } = useNotification();
   const { activeFounder, founderId } = useActiveFounder();
   const { extras, setMarketplaceListing } = useFounderExtras(founderId);
 

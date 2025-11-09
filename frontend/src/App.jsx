@@ -3,13 +3,14 @@ import Footer from './components/Footer';
 import Navbar from './components/Navbar';
 import ProtectedRoute from './components/ProtectedRoute';
 import { AuthProvider } from './context/AuthContext';
-import { Toaster } from './components/ui/toaster.jsx';
+import NotificationProvider from './context/NotificationContext';
 import Home from './pages/Home';
 import Investors from './pages/Investors';
 import Founders from './pages/Founders';
 import Portfolio from './pages/Portfolio';
 import Resources from './pages/Resources';
 import Login from './pages/Login';
+import AdminLogin from './pages/AdminLogin';
 import Signup from './pages/Signup';
 import EmailEntry from './pages/EmailEntry';
 import OTPVerification from './pages/OTPVerification';
@@ -36,15 +37,24 @@ import GrowthMarketing from './pages/services/GrowthMarketing';
 const AppContent = () => {
   return (
     <div className="flex min-h-screen flex-col bg-white">
-      <Navbar />
-      <main className="flex-1">
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/investors" element={<Investors />} />
-          <Route path="/founders" element={<Founders />} />
-          <Route path="/portfolio" element={<Portfolio />} />
-          <Route path="/resources" element={<Resources />} />
-          <Route path="/login" element={<Login />} />
+      <Routes>
+        {/* Admin login route without navbar */}
+        <Route path="/admin/login" element={<AdminLogin />} />
+        
+        {/* All other routes with navbar */}
+        <Route
+          path="*"
+          element={
+            <>
+              <Navbar />
+              <main className="flex-1">
+                <Routes>
+                  <Route path="/" element={<Home />} />
+                  <Route path="/investors" element={<Investors />} />
+                  <Route path="/founders" element={<Founders />} />
+                  <Route path="/portfolio" element={<Portfolio />} />
+                  <Route path="/resources" element={<Resources />} />
+                  <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/signup/email" element={<EmailEntry />} />
           <Route path="/signup/:role/otp" element={<OTPVerification />} />
@@ -120,14 +130,15 @@ const AppContent = () => {
         </Routes>
       </main>
       <Footer />
-      <Toaster />
     </div>
   );
 };
 
 const App = () => (
   <AuthProvider>
-    <AppContent />
+    <NotificationProvider>
+      <AppContent />
+    </NotificationProvider>
   </AuthProvider>
 );
 

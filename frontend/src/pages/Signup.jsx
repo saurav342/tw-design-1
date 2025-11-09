@@ -95,10 +95,15 @@ const Signup = () => {
             ))}
             <div className="rounded-3xl border border-dashed border-slate-200 bg-slate-50 p-6 text-sm text-slate-500">
               <p className="font-semibold text-night">LaunchAndLift team member?</p>
-              <p className="mt-2">
-                Admin access is provisioned directly by the LaunchAndLift operations team. Reach out internally to request
-                credentials.
+              <p className="mt-2 mb-3">
+                Admin access uses a separate authentication portal.
               </p>
+              <Link
+                to="/admin/login"
+                className="inline-flex items-center justify-center rounded-full bg-slate-200 hover:bg-slate-300 px-4 py-2 text-xs font-semibold text-slate-700 transition"
+              >
+                Go to Admin Portal
+              </Link>
             </div>
 
             <div className="text-xs text-slate-500">

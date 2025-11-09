@@ -7,7 +7,6 @@ import { Textarea } from '../components/ui/textarea.jsx';
 import { CheckCircle2 } from 'lucide-react';
 import { showInfo, showSuccess } from '../lib/notifications.js';
 import { useAppStore } from '../store/useAppStore.js';
-import { useAuth } from '../context/useAuth.js';
 
 const stageOptions = ['Pre-seed', 'Seed', 'Series A', 'Series B', 'Series C+'];
 
@@ -36,7 +35,6 @@ const initialForm = {
 const FounderSignup = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { logout } = useAuth();
   const addFounder = useAppStore((state) => state.addFounder);
   
   // Get email and OTP verification status from location state or sessionStorage
@@ -171,15 +169,12 @@ const FounderSignup = () => {
       sessionStorage.removeItem('signup.role');
       sessionStorage.removeItem('signup.otpVerified');
       
-      // Ensure user is logged out (no auto-login)
-      logout();
-
       setIsSubmitting(false);
-      showSuccess('Founder application submitted successfully! Please log in to continue.');
+      showSuccess('Founder application submitted successfully! Redirecting to payment...');
       
-      // Redirect to login after a brief delay to show success message
+      // Redirect to payment details page after successful submission
       setTimeout(() => {
-        navigate('/login', { replace: true });
+        navigate('/payment-details', { replace: true });
       }, 1500);
     } catch (error) {
       // eslint-disable-next-line no-console

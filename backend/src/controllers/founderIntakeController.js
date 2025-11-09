@@ -12,11 +12,16 @@ const coercePositiveInteger = (value, fallback = null) => {
   return parsed;
 };
 
-const buildSecondFounder = (input = {}) => {
+const buildSecondFounder = (input) => {
+  // Handle null, undefined, or empty input
+  if (!input || typeof input !== 'object') {
+    return null;
+  }
+
   const details = {
-    fullName: sanitizeString(input.fullName),
-    email: sanitizeString(input.email),
-    phoneNumber: sanitizeString(input.phoneNumber),
+    fullName: sanitizeString(input.fullName ?? ''),
+    email: sanitizeString(input.email ?? ''),
+    phoneNumber: sanitizeString(input.phoneNumber ?? ''),
     linkedInUrl: sanitizeString(input.linkedInUrl ?? input.linkedin ?? ''),
   };
 
@@ -101,8 +106,8 @@ const submitFounderIntake = (req, res) => {
 
     // Automatically create portfolio item from founder intake
     try {
-      const foundersList = [normalized.fullName];
-      if (secondFounder && secondFounder.fullName) {
+      const foundersList = [normalized.fullName || 'Unknown Founder'];
+      if (secondFounder && typeof secondFounder === 'object' && secondFounder.fullName) {
         foundersList.push(secondFounder.fullName);
       }
 

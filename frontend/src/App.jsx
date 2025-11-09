@@ -16,6 +16,7 @@ import OTPVerification from './pages/OTPVerification';
 import InvestorSignup from './pages/InvestorSignup';
 import FounderSignup from './pages/FounderSignup';
 import PaymentDetails from './pages/PaymentDetails';
+import Checkout from './pages/Checkout';
 import InvestorDashboard from './pages/InvestorDashboard';
 import FounderDashboard from './pages/FounderDashboard';
 import FounderMarketplace from './pages/FounderMarketplace';
@@ -50,6 +51,7 @@ const AppContent = () => {
           <Route path="/signup/investor" element={<InvestorSignup />} />
           <Route path="/signup/founder" element={<FounderSignup />} />
           <Route path="/payment-details" element={<PaymentDetails />} />
+          <Route path="/checkout" element={<Checkout />} />
           <Route
             path="/dashboard/investor"
             element={

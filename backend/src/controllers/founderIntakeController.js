@@ -1,5 +1,6 @@
 const { createFounderIntake, listFounderIntakes } = require('../models/founderIntakeModel');
 const { addPortfolioItem } = require('../models/portfolioModel');
+const { sendFounderIntakeNotification, sendFounderWelcomeEmail } = require('../utils/email');
 
 const REQUIRED_FIELDS = ['fullName', 'email', 'startupName'];
 
@@ -127,6 +128,22 @@ const submitFounderIntake = (req, res) => {
     } catch (portfolioError) {
       // Log error but don't fail the founder intake submission
       console.error('Failed to create portfolio item:', portfolioError);
+    }
+
+    // Send emails (non-blocking)
+    try {
+      // Send welcome email to founder
+      sendFounderWelcomeEmail(normalized.fullName, normalized.email).catch((err) => {
+        console.error('Failed to send founder welcome email:', err);
+      });
+
+      // Send notification email to admin
+      sendFounderIntakeNotification(created).catch((err) => {
+        console.error('Failed to send admin notification email:', err);
+      });
+    } catch (emailError) {
+      // Log error but don't fail the submission
+      console.error('Error sending emails:', emailError);
     }
 
     return res.status(201).json({ item: created });

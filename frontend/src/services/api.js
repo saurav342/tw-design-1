@@ -167,3 +167,22 @@ export const adminApi = {
   getActivityLog: (token, limit) => apiClient.get(`/admin/activity-log${limit ? `?limit=${limit}` : ''}`, token),
   getDashboardSummary: (token) => apiClient.get('/admin/dashboard-summary', token),
 };
+
+export const uploadApi = {
+  uploadPitchDeck: async (file) => {
+    const formData = new FormData();
+    formData.append('pitchDeck', file);
+
+    const response = await fetch(`${API_BASE_URL}/upload/pitch-deck`, {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ message: 'Upload failed' }));
+      throw new Error(error.message || 'Failed to upload file');
+    }
+
+    return response.json();
+  },
+};

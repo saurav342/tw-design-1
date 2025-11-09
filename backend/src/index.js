@@ -11,12 +11,13 @@ const contentRoutes = require('./routes/contentRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const intakeRoutes = require('./routes/intakeRoutes');
 const founderExtrasRoutes = require('./routes/founderExtrasRoutes');
+const uploadRoutes = require('./routes/uploadRoutes');
 
 const app = express();
 
 app.use(cors({ origin: process.env.APP_URL?.split(',') ?? '*', credentials: true }));
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
 app.get('/health', (req, res) => res.status(200).json({ status: 'ok', brand: 'LaunchAndLift' }));
 
@@ -27,6 +28,7 @@ app.use('/api/content', contentRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/intakes', intakeRoutes);
 app.use('/api/founder-extras', founderExtrasRoutes);
+app.use('/api/upload', uploadRoutes);
 
 const clientDistPath = path.resolve(__dirname, '../../frontend/dist');
 const clientIndexPath = path.join(clientDistPath, 'index.html');

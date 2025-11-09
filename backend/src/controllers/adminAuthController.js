@@ -5,6 +5,7 @@ const {
   verifyUser,
 } = require('../models/userModel');
 const { signToken } = require('../utils/jwt');
+const { sendAdminWelcomeEmail } = require('../utils/email');
 
 const buildAuthResponse = (user) => ({
   token: signToken({ sub: user.id, role: user.role }),
@@ -57,6 +58,16 @@ const adminSignup = async (req, res) => {
       founderDetails: null,
       adminDetails,
     });
+
+    // Send welcome email (non-blocking)
+    try {
+      sendAdminWelcomeEmail(fullName, email).catch((err) => {
+        console.error('Failed to send admin welcome email:', err);
+      });
+    } catch (emailError) {
+      // Log error but don't fail the signup
+      console.error('Error sending admin welcome email:', emailError);
+    }
 
     return res.status(201).json(buildAuthResponse(user));
   } catch (error) {

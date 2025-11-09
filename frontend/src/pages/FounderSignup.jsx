@@ -4,9 +4,10 @@ import { Button } from '../components/ui/button.jsx';
 import { Input } from '../components/ui/input.jsx';
 import { Label } from '../components/ui/label.jsx';
 import { Textarea } from '../components/ui/textarea.jsx';
-import { CheckCircle2 } from 'lucide-react';
+import { CheckCircle2, Upload, X } from 'lucide-react';
 import { useNotification } from '../context/NotificationContext';
 import { useAppStore } from '../store/useAppStore.js';
+import { uploadApi } from '../services/api.js';
 
 const stageOptions = ['Pre-seed', 'Seed', 'Series A', 'Series B', 'Series C+'];
 
@@ -48,6 +49,9 @@ const FounderSignup = () => {
   });
   const [includeSecondFounder, setIncludeSecondFounder] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [pitchDeckFile, setPitchDeckFile] = useState(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState('');
 
   // Redirect to email entry if OTP not verified
   useEffect(() => {
@@ -87,6 +91,56 @@ const FounderSignup = () => {
     }));
   };
 
+  const handleFileChange = (event) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      // Validate file type
+      const allowedTypes = [
+        'application/pdf',
+        'application/vnd.ms-powerpoint',
+        'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+        'application/msword',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      ];
+
+      if (!allowedTypes.includes(file.type)) {
+        showInfo('Invalid file type. Please upload a PDF, PPT, PPTX, DOC, or DOCX file.');
+        return;
+      }
+
+      // Validate file size (50MB)
+      if (file.size > 50 * 1024 * 1024) {
+        showInfo('File size too large. Please upload a file smaller than 50MB.');
+        return;
+      }
+
+      setPitchDeckFile(file);
+      setForm((prev) => ({ ...prev, pitchDeck: '' })); // Clear URL if file is selected
+    }
+  };
+
+  const handleRemoveFile = () => {
+    setPitchDeckFile(null);
+  };
+
+  const handleUploadPitchDeck = async () => {
+    if (!pitchDeckFile) return null;
+
+    setIsUploading(true);
+    setUploadProgress('Uploading pitch deck...');
+    try {
+      const response = await uploadApi.uploadPitchDeck(pitchDeckFile);
+      setUploadProgress('Upload successful!');
+      setIsUploading(false);
+      return response.fileUrl;
+    } catch (error) {
+      setIsUploading(false);
+      setUploadProgress('');
+      showInfo(error.message || 'Failed to upload pitch deck. Please try again.');
+      throw error;
+    }
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     const requiredFields = [
@@ -112,6 +166,17 @@ const FounderSignup = () => {
       return;
     }
 
+    // Validate pitch deck: either file or URL must be provided (optional but recommended)
+    let pitchDeckUrl = form.pitchDeck.trim();
+    if (pitchDeckFile && !pitchDeckUrl) {
+      try {
+        pitchDeckUrl = await handleUploadPitchDeck();
+      } catch (error) {
+        // Upload failed, user can try again
+        return;
+      }
+    }
+
     const shouldAttachSecondFounder =
       includeSecondFounder &&
       Object.values(form.secondFounder).some((value) => typeof value === 'string' && value.trim());
@@ -129,7 +194,7 @@ const FounderSignup = () => {
       sector: form.sector.trim(),
       currentStage: form.currentStage.trim(),
       brief: form.brief.trim(),
-      pitchDeck: form.pitchDeck.trim(),
+      pitchDeck: pitchDeckUrl,
       startupName: form.brandName.trim() || form.companyLegalName.trim(),
       raiseStage: form.currentStage.trim(),
       teamSize: Number.parseInt(form.numberOfFounders, 10) || 1,
@@ -148,7 +213,7 @@ const FounderSignup = () => {
         sector: form.sector.trim(),
         currentStage: form.currentStage.trim(),
         brief: form.brief.trim(),
-        pitchDeckUrl: form.pitchDeck.trim(),
+        pitchDeckUrl: pitchDeckUrl,
       },
     };
 
@@ -419,14 +484,71 @@ const FounderSignup = () => {
               />
             </div>
             <div className="mt-6 space-y-2">
-              <Label htmlFor="pitchDeck">Pitch deck URL</Label>
-              <Input
-                id="pitchDeck"
-                type="url"
-                placeholder="https://drive.google.com/your-pitch-deck"
-                value={form.pitchDeck}
-                onChange={updateForm('pitchDeck')}
-              />
+              <Label htmlFor="pitchDeck">Pitch deck</Label>
+              <p className="text-xs text-slate-500 mb-3">
+                Upload your pitch deck (PDF, PPT, PPTX, DOC, DOCX) or provide a URL. Max file size: 50MB.
+              </p>
+              
+              {/* File Upload */}
+              <div className="space-y-3">
+                <div className="flex items-center gap-4">
+                  <label
+                    htmlFor="pitchDeckFile"
+                    className="flex items-center justify-center gap-2 px-4 py-2 border border-night/20 rounded-lg cursor-pointer hover:bg-night/5 transition text-sm font-medium text-night"
+                  >
+                    <Upload className="w-4 h-4" />
+                    {pitchDeckFile ? 'Change File' : 'Upload File'}
+                    <input
+                      id="pitchDeckFile"
+                      type="file"
+                      accept=".pdf,.ppt,.pptx,.doc,.docx,application/pdf,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                      className="hidden"
+                      onChange={handleFileChange}
+                      disabled={isUploading || isSubmitting}
+                    />
+                  </label>
+                  
+                  {pitchDeckFile && (
+                    <div className="flex items-center gap-2 px-3 py-2 bg-slate-50 rounded-lg border border-slate-200">
+                      <span className="text-sm text-slate-700 truncate max-w-[200px]">{pitchDeckFile.name}</span>
+                      <button
+                        type="button"
+                        onClick={handleRemoveFile}
+                        className="text-slate-400 hover:text-slate-600 transition"
+                        disabled={isUploading || isSubmitting}
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  )}
+                </div>
+                
+                {uploadProgress && (
+                  <p className="text-sm text-sprout">{uploadProgress}</p>
+                )}
+                
+                {/* Or Divider */}
+                <div className="flex items-center gap-3">
+                  <div className="flex-1 border-t border-slate-200"></div>
+                  <span className="text-xs text-slate-500 uppercase">or</span>
+                  <div className="flex-1 border-t border-slate-200"></div>
+                </div>
+                
+                {/* URL Input */}
+                <Input
+                  id="pitchDeck"
+                  type="url"
+                  placeholder="https://drive.google.com/your-pitch-deck"
+                  value={form.pitchDeck}
+                  onChange={updateForm('pitchDeck')}
+                  disabled={!!pitchDeckFile || isUploading || isSubmitting}
+                />
+                {pitchDeckFile && (
+                  <p className="text-xs text-slate-500">
+                    Remove the file above to enter a URL instead.
+                  </p>
+                )}
+              </div>
             </div>
           </section>
 
@@ -435,8 +557,8 @@ const FounderSignup = () => {
               Once you submit, we will direct you to the payment details page to confirm the next
               steps for onboarding.
             </p>
-            <Button className="px-8" disabled={isSubmitting} type="submit">
-              {isSubmitting ? 'Submitting…' : 'Submit & continue'}
+            <Button className="px-8" disabled={isSubmitting || isUploading} type="submit">
+              {isUploading ? 'Uploading…' : isSubmitting ? 'Submitting…' : 'Submit & continue'}
             </Button>
           </footer>
         </form>

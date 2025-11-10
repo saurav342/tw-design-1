@@ -16,7 +16,80 @@ const uploadRoutes = require('./routes/uploadRoutes');
 
 const app = express();
 
-app.use(cors({ origin: process.env.APP_URL?.split(',') ?? '*', credentials: true }));
+// Configure CORS with proper origin handling
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:3000',
+  'http://127.0.0.1:5173',
+  'https://launchnlift.netlify.app',
+  'https://www.launchnlift.netlify.app',
+  'https://launchandlift.com',
+  'https://www.launchandlift.com',
+];
+
+// Add any additional origins from environment variable
+if (process.env.APP_URL) {
+  const envOrigins = process.env.APP_URL.split(',')
+    .map(url => url.trim())
+    .filter(url => url.length > 0);
+  allowedOrigins.push(...envOrigins);
+}
+
+// Helper function to check if origin matches allowed patterns
+function isOriginAllowed(origin) {
+  if (!origin) return true; // Allow requests with no origin
+  
+  // Normalize origin by removing trailing slash
+  const normalizedOrigin = origin.replace(/\/$/, '').toLowerCase();
+  
+  // Check exact match
+  if (allowedOrigins.some(allowed => normalizedOrigin === allowed.replace(/\/$/, '').toLowerCase())) {
+    return true;
+  }
+  
+  // Check Netlify app subdomains (*.netlify.app)
+  if (/^https:\/\/[\w-]+\.netlify\.app$/.test(normalizedOrigin)) {
+    return true;
+  }
+  
+  // Check www variations
+  const withoutWww = normalizedOrigin.replace(/^https?:\/\/(www\.)?/, 'https://');
+  const withWww = normalizedOrigin.replace(/^https?:\/\//, 'https://www.');
+  
+  if (allowedOrigins.some(allowed => {
+    const normalizedAllowed = allowed.replace(/\/$/, '').toLowerCase();
+    return withoutWww === normalizedAllowed || withWww === normalizedAllowed;
+  })) {
+    return true;
+  }
+  
+  return false;
+}
+
+const corsOptions = {
+  origin: function (origin, callback) {
+    if (isOriginAllowed(origin)) {
+      callback(null, true);
+    } else {
+      // For development, allow all origins
+      if (process.env.NODE_ENV !== 'production') {
+        console.log(`[CORS] Allowing origin in development: ${origin}`);
+        callback(null, true);
+      } else {
+        console.warn(`[CORS] Blocked origin: ${origin}. Allowed origins: ${allowedOrigins.join(', ')}`);
+        callback(null, false); // Return false instead of error for better compatibility
+      }
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
+  exposedHeaders: ['Content-Range', 'X-Content-Range'],
+  maxAge: 86400, // 24 hours - cache preflight requests for 24 hours
+  optionsSuccessStatus: 200, // Some legacy browsers choke on 204
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 

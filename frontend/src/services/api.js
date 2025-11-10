@@ -60,7 +60,12 @@ const handleResponse = async (response) => {
 
   if (!response.ok) {
     const message = typeof payload === 'string' ? payload : payload?.message;
-    throw new Error(message || 'Request failed');
+    const error = new Error(message || 'Request failed');
+    // Attach full payload for error handling
+    if (typeof payload === 'object' && payload !== null) {
+      error.data = payload;
+    }
+    throw error;
   }
 
   return payload;

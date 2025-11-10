@@ -73,9 +73,24 @@ const sendEmailVerification = async (req, res) => {
     }
 
     // Check if email already exists
-    const existingUser = findByEmail(email);
+    const existingUser = await findByEmail(email);
     if (existingUser) {
-      return res.status(400).json({ message: 'An account with this email already exists.' });
+      // Email is unique in the database, so if it exists, suggest they log in instead
+      // Provide helpful message based on whether the role matches
+      if (existingUser.role === role) {
+        return res.status(400).json({ 
+          message: 'An account with this email already exists. Please log in instead.',
+          existingRole: existingUser.role,
+          shouldLogin: true
+        });
+      } else {
+        return res.status(400).json({ 
+          message: `An account with this email already exists with the ${existingUser.role} role. Please log in to access your account.`,
+          existingRole: existingUser.role,
+          requestedRole: role,
+          shouldLogin: true
+        });
+      }
     }
 
     // Create verification token

@@ -15,6 +15,7 @@ const EmailEntry = () => {
   
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
+  const [shouldLogin, setShouldLogin] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const validateEmail = (email) => {
@@ -58,7 +59,12 @@ const EmailEntry = () => {
         state: { email: email.trim(), role: roleFromUrl }
       });
     } catch (err) {
+      // Check if error response indicates user should log in
+      const errorData = err.data || {};
+      const shouldLoginFlag = errorData.shouldLogin || false;
+      
       setError(err.message || 'Failed to send verification email. Please try again.');
+      setShouldLogin(shouldLoginFlag);
     } finally {
       setIsSubmitting(false);
     }
@@ -89,9 +95,23 @@ const EmailEntry = () => {
 
           {/* Error Alert */}
           {error && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3 animate-in fade-in slide-in-from-top-2 duration-300">
-              <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
-              <p className="text-sm text-red-700">{error}</p>
+            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl animate-in fade-in slide-in-from-top-2 duration-300">
+              <div className="flex items-start gap-3">
+                <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  <p className="text-sm text-red-700">{error}</p>
+                  {shouldLogin && (
+                    <Button
+                      type="button"
+                      variant="link"
+                      onClick={() => navigate('/login', { state: { email: email.trim(), role: roleFromUrl } })}
+                      className="mt-2 p-0 h-auto text-sm text-red-700 hover:text-red-800 underline font-semibold"
+                    >
+                      Go to Login →
+                    </Button>
+                  )}
+                </div>
+              </div>
             </div>
           )}
 
@@ -109,6 +129,7 @@ const EmailEntry = () => {
                 onChange={(e) => {
                   setEmail(e.target.value);
                   setError('');
+                  setShouldLogin(false);
                 }}
                 className="w-full h-12 text-base"
                 disabled={isSubmitting}

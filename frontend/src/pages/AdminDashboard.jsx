@@ -365,18 +365,23 @@ const AdminDashboard = () => {
             return (
               <button
                 key={item.id}
-                onClick={() => setActiveView(item.id)}
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setActiveView(item.id);
+                }}
                 className={`${
                   isActive
                     ? 'bg-[#2c3a4f] text-white border-l-4 border-blue-400'
                     : 'text-white/70 hover:bg-[#2c3a4f] hover:text-white'
-                } w-full flex items-center gap-3 px-4 py-3 transition-colors relative`}
+                } w-full flex items-center gap-3 px-4 py-3 transition-colors relative cursor-pointer`}
               >
                 <Icon className="h-5 w-5 flex-shrink-0" />
                 {sidebarOpen && (
                   <>
                     <span className="text-sm font-medium">{item.label}</span>
-                    {item.badge > 0 && (
+                    {item.badge && item.badge > 0 && (
                       <span className="ml-auto bg-red-500 text-white text-xs rounded-full px-2 py-0.5">
                         {item.badge}
                       </span>
@@ -390,8 +395,13 @@ const AdminDashboard = () => {
 
         {/* Sidebar Toggle */}
         <button
-          onClick={() => setSidebarOpen(!sidebarOpen)}
-          className="h-12 flex items-center justify-center border-t border-white/10 hover:bg-[#2c3a4f] transition-colors"
+          type="button"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setSidebarOpen(!sidebarOpen);
+          }}
+          className="h-12 flex items-center justify-center border-t border-white/10 hover:bg-[#2c3a4f] transition-colors cursor-pointer"
         >
           {sidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </button>

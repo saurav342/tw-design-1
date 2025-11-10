@@ -274,10 +274,12 @@ const FounderSignup = () => {
 
         await authApi.signup(signupPayload);
       } catch (signupError) {
-        // If user account creation fails but intake succeeded, log it but don't fail the whole flow
-        // The user can still log in with OTP if password wasn't set
+        // If user account creation fails, show the error and stop the flow
         console.error('Failed to create user account:', signupError);
-        // Don't show error to user - they can use OTP login if needed
+        setIsSubmitting(false);
+        const errorMessage = signupError.message || signupError.data?.message || 'Failed to create account. Please try again.';
+        showInfo(errorMessage);
+        return; // Stop here, don't redirect
       }
 
       // Clear signup flow sessionStorage

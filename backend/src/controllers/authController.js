@@ -284,14 +284,13 @@ const signup = async (req, res) => {
         pitchDeck = null,
       } = startupDetails;
 
+      // Required fields - cityOfOperation and companyType are optional
       const startupMissing = [
         ['brandName', brandName],
         ['legalName', legalName],
         ['websiteUrl', websiteUrl],
         ['sector', sector],
         ['stage', stage],
-        ['cityOfOperation', cityOfOperation],
-        ['companyType', companyType],
         ['incorporationDate', incorporationDate],
         ['description', description],
       ]

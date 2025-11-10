@@ -330,7 +330,7 @@ const Founders = () => {
                   className="group relative overflow-hidden rounded-full bg-gradient-to-r from-blossom to-royal px-8 py-4 text-sm font-semibold uppercase tracking-wide text-white shadow-xl shadow-blossom/40 transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-blossom/50"
                 >
                   <span className="relative z-10 flex items-center gap-2">
-                    Get Started Free
+                    Get Started
                     <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                   </span>
           </Link>

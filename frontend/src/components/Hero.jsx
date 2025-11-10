@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { Link } from 'react-router-dom';
 
 const Hero = () => {
   const statsRef = useRef(null);
@@ -64,17 +65,6 @@ const Hero = () => {
     };
   }, []);
 
-  const handleSmoothScroll = (e, targetId) => {
-    e.preventDefault();
-    const target = document.querySelector(targetId);
-    if (target) {
-      target.scrollIntoView({
-        behavior: 'smooth',
-        block: 'start'
-      });
-    }
-  };
-
   return (
     <section className="hero">
       <div className="hero-background">
@@ -101,8 +91,8 @@ const Hero = () => {
             comprehensive profiling, and integrated growth support.
           </p>
           <div className="hero-cta">
-            <a href="#founders" className="btn btn-primary btn-large" onClick={(e) => handleSmoothScroll(e, '#founders')}>For Founders</a>
-            <a href="#investors" className="btn btn-outline btn-large" onClick={(e) => handleSmoothScroll(e, '#investors')}>For Investors</a>
+            <Link to="/founder" className="btn btn-primary btn-large">For Founders</Link>
+            <Link to="/investor" className="btn btn-outline btn-large">For Investors</Link>
           </div>
           <div className="hero-stats" ref={statsRef}>
             <div className="stat-item">

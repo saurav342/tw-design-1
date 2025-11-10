@@ -500,7 +500,7 @@ const Home = () => {
 
         <CTASection />
       </div>
-      <Footer />
+      {/* <Footer /> */}
     </>
   );
 };

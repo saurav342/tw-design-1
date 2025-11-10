@@ -1,88 +1,208 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '../components/ui/button.jsx';
 import { Input } from '../components/ui/input.jsx';
 import { Label } from '../components/ui/label.jsx';
-import { CreditCard, Lock, CheckCircle2 } from 'lucide-react';
+import { CheckCircle2, Loader2, Tag } from 'lucide-react';
 import { useNotification } from '../context/NotificationContext';
+import { paymentApi } from '../services/api.js';
+import { useAuth } from '../context/useAuth.js';
+
+const loadRazorpay = () => {
+  return new Promise((resolve) => {
+    const script = document.createElement('script');
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    script.onload = () => resolve(window.Razorpay);
+    script.onerror = () => resolve(null);
+    document.body.appendChild(script);
+  });
+};
 
 const Checkout = () => {
   const navigate = useNavigate();
-  const { showSuccess, showInfo } = useNotification();
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [formData, setFormData] = useState({
-    cardNumber: '',
-    expiryDate: '',
-    cvv: '',
-    cardholderName: '',
-    email: '',
-  });
+  const location = useLocation();
+  const { showSuccess, showInfo, showError } = useNotification();
+  const { user } = useAuth();
+  const [amount, setAmount] = useState(4999);
+  const [loading, setLoading] = useState(true);
+  const [processing, setProcessing] = useState(false);
+  const [couponCode, setCouponCode] = useState('');
+  const [appliedCoupon, setAppliedCoupon] = useState(null);
+  const [discountAmount, setDiscountAmount] = useState(0);
+  const [finalAmount, setFinalAmount] = useState(4999);
+  const [validatingCoupon, setValidatingCoupon] = useState(false);
+  const [couponEnabled, setCouponEnabled] = useState(true);
 
-  const handleInputChange = (field) => (e) => {
-    let value = e.target.value;
-    
-    // Format card number with spaces
-    if (field === 'cardNumber') {
-      value = value.replace(/\s/g, '').replace(/(.{4})/g, '$1 ').trim();
-      if (value.length > 19) value = value.slice(0, 19);
-    }
-    
-    // Format expiry date as MM/YY
-    if (field === 'expiryDate') {
-      value = value.replace(/\D/g, '');
-      if (value.length >= 2) {
-        value = value.slice(0, 2) + '/' + value.slice(2, 4);
+  // Get email from location state, sessionStorage, or auth context
+  const getEmail = () => {
+    if (location.state?.email) return location.state.email;
+    if (sessionStorage.getItem('signup.email')) return sessionStorage.getItem('signup.email');
+    if (user?.email) return user.email;
+    return null;
+  };
+
+  useEffect(() => {
+    const initializeCheckout = async () => {
+      const email = getEmail();
+      if (!email) {
+        showInfo('Please complete signup first');
+        navigate('/signup/founder');
+        return;
       }
-      if (value.length > 5) value = value.slice(0, 5);
-    }
-    
-    // Limit CVV to 3-4 digits
-    if (field === 'cvv') {
-      value = value.replace(/\D/g, '').slice(0, 4);
-    }
 
-    setFormData((prev) => ({ ...prev, [field]: value }));
+      try {
+        // Fetch payment amount and coupon settings
+        const [amountResponse, couponSettingsResponse] = await Promise.all([
+          paymentApi.getPaymentAmount(email),
+          paymentApi.getCouponSettings().catch(() => ({ couponEnabled: true })), // Default to enabled if fetch fails
+        ]);
+        setAmount(amountResponse.amount);
+        setFinalAmount(amountResponse.amount);
+        setCouponEnabled(couponSettingsResponse.couponEnabled !== false); // Default to enabled
+      } catch (error) {
+        console.error('Error initializing checkout:', error);
+        showError('Failed to load payment details. Please try again.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    initializeCheckout();
+  }, []);
+
+  const formatAmount = (amt) => {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      minimumFractionDigits: 0,
+    }).format(amt);
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
-    // Validate form
-    if (!formData.cardNumber || formData.cardNumber.replace(/\s/g, '').length < 16) {
-      showInfo('Please enter a valid card number');
-      return;
-    }
-    if (!formData.expiryDate || formData.expiryDate.length < 5) {
-      showInfo('Please enter a valid expiry date');
-      return;
-    }
-    if (!formData.cvv || formData.cvv.length < 3) {
-      showInfo('Please enter a valid CVV');
-      return;
-    }
-    if (!formData.cardholderName) {
-      showInfo('Please enter the cardholder name');
-      return;
-    }
-    if (!formData.email) {
-      showInfo('Please enter your email address');
+  const handleApplyCoupon = async () => {
+    if (!couponCode.trim()) {
+      showInfo('Please enter a coupon code');
       return;
     }
 
-    setIsProcessing(true);
-    showSuccess('Processing payment...');
+    setValidatingCoupon(true);
+    try {
+      const response = await paymentApi.validateCoupon({
+        code: couponCode.trim(),
+        amount: amount,
+      });
 
-    // Simulate payment processing
-    setTimeout(() => {
-      setIsProcessing(false);
-      showSuccess('Payment successful! Redirecting to login...');
-      
-      // Redirect to login after successful payment
-      setTimeout(() => {
-        navigate('/login', { replace: true });
-      }, 2000);
-    }, 2000);
+      if (response.valid) {
+        setAppliedCoupon(response.coupon);
+        setDiscountAmount(response.discountAmount);
+        setFinalAmount(response.finalAmount);
+        showSuccess(`Coupon "${response.coupon.code}" applied successfully!`);
+      }
+    } catch (error) {
+      showError(error.message || 'Invalid or expired coupon code');
+      setAppliedCoupon(null);
+      setDiscountAmount(0);
+      setFinalAmount(amount);
+    } finally {
+      setValidatingCoupon(false);
+    }
   };
+
+  const handleRemoveCoupon = () => {
+    setAppliedCoupon(null);
+    setDiscountAmount(0);
+    setFinalAmount(amount);
+    setCouponCode('');
+    showInfo('Coupon removed');
+  };
+
+  const handlePayment = async () => {
+    const email = getEmail();
+    if (!email) {
+      showError('Email not found. Please complete signup first.');
+      return;
+    }
+
+    setProcessing(true);
+    try {
+      // Load Razorpay
+      const Razorpay = await loadRazorpay();
+      if (!Razorpay) {
+        showError('Failed to load payment gateway. Please try again.');
+        setProcessing(false);
+        return;
+      }
+
+      // Create order
+      const orderResponse = await paymentApi.createOrder({
+        amount: amount,
+        email: email,
+        couponCode: appliedCoupon?.code || null,
+      });
+
+      const options = {
+        key: orderResponse.key,
+        amount: orderResponse.amount,
+        currency: orderResponse.currency,
+        name: 'Launch & Lift',
+        description: 'Founder Onboarding Activation Fee',
+        order_id: orderResponse.orderId,
+        handler: async (response) => {
+          try {
+            // Verify payment
+            const verifyResponse = await paymentApi.verifyPayment({
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+            });
+
+            if (verifyResponse.payment) {
+              showSuccess('Payment successful!');
+              // Redirect to payment confirmation page
+              navigate('/payment-confirmation', {
+                state: {
+                  payment: verifyResponse.payment,
+                  orderId: response.razorpay_order_id,
+                  paymentId: response.razorpay_payment_id,
+                },
+              });
+            }
+          } catch (error) {
+            console.error('Payment verification error:', error);
+            showError('Payment verification failed. Please contact support.');
+          } finally {
+            setProcessing(false);
+          }
+        },
+        prefill: {
+          email: email,
+          name: user?.fullName || '',
+        },
+        theme: {
+          color: '#5B21D1',
+        },
+        modal: {
+          ondismiss: () => {
+            setProcessing(false);
+          },
+        },
+      };
+
+      const razorpay = new Razorpay(options);
+      razorpay.open();
+    } catch (error) {
+      console.error('Payment error:', error);
+      showError(error.message || 'Failed to initiate payment. Please try again.');
+      setProcessing(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="w-8 h-8 animate-spin text-purple-600" />
+      </div>
+    );
+  }
 
   return (
     <div className="bg-gradient-to-br from-slate-100 via-white to-lilac/40 py-20">
@@ -100,92 +220,85 @@ const Checkout = () => {
           {/* Payment Form */}
           <div className="md:col-span-2">
             <div className="rounded-3xl border border-night/10 bg-white/95 p-8 shadow-2xl backdrop-blur">
-              <div className="mb-6 flex items-center gap-2 text-sm font-semibold text-night/60">
-                <Lock className="w-4 h-4" />
-                <span>Secure Payment</span>
-              </div>
+              <h2 className="mb-6 text-lg font-semibold text-night">Payment Details</h2>
 
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="space-y-4">
-                  <div>
-                    <Label htmlFor="cardholderName">Cardholder Name</Label>
-                    <Input
-                      id="cardholderName"
-                      placeholder="John Doe"
-                      value={formData.cardholderName}
-                      onChange={handleInputChange('cardholderName')}
-                      required
-                    />
+              {/* Coupon Section */}
+              {couponEnabled && (
+                <div className="mb-6 rounded-2xl border border-night/10 bg-night/5 p-6">
+                  <div className="mb-4 flex items-center gap-2">
+                    <Tag className="w-5 h-5 text-purple-600" />
+                    <h3 className="text-base font-semibold text-night">Apply Coupon</h3>
                   </div>
-
-                  <div>
-                    <Label htmlFor="cardNumber">Card Number</Label>
-                    <div className="relative">
-                      <CreditCard className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-night/40" />
+                  
+                  {!appliedCoupon ? (
+                    <div className="flex gap-3">
                       <Input
-                        id="cardNumber"
-                        placeholder="1234 5678 9012 3456"
-                        value={formData.cardNumber}
-                        onChange={handleInputChange('cardNumber')}
-                        className="pl-10"
-                        maxLength={19}
-                        required
+                        placeholder="Enter coupon code"
+                        value={couponCode}
+                        onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                        onKeyPress={(e) => {
+                          if (e.key === 'Enter') {
+                            handleApplyCoupon();
+                          }
+                        }}
+                        disabled={validatingCoupon || processing}
+                        className="flex-1"
                       />
+                      <Button
+                        onClick={handleApplyCoupon}
+                        disabled={validatingCoupon || processing || !couponCode.trim()}
+                        variant="outline"
+                      >
+                        {validatingCoupon ? 'Applying...' : 'Apply'}
+                      </Button>
                     </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="expiryDate">Expiry Date</Label>
-                      <Input
-                        id="expiryDate"
-                        placeholder="MM/YY"
-                        value={formData.expiryDate}
-                        onChange={handleInputChange('expiryDate')}
-                        maxLength={5}
-                        required
-                      />
+                  ) : (
+                    <div className="flex items-center justify-between rounded-lg bg-green-50 p-4 border border-green-200">
+                      <div className="flex items-center gap-2">
+                        <CheckCircle2 className="w-5 h-5 text-green-600" />
+                        <div>
+                          <p className="text-sm font-semibold text-green-800">
+                            {appliedCoupon.code} Applied
+                          </p>
+                          <p className="text-xs text-green-600">
+                            {appliedCoupon.discountType === 'percentage'
+                              ? `${appliedCoupon.discountValue}% off`
+                              : `${formatAmount(appliedCoupon.discountValue)} off`}
+                          </p>
+                        </div>
+                      </div>
+                      <Button
+                        onClick={handleRemoveCoupon}
+                        variant="ghost"
+                        size="sm"
+                        disabled={processing}
+                      >
+                        Remove
+                      </Button>
                     </div>
-                    <div>
-                      <Label htmlFor="cvv">CVV</Label>
-                      <Input
-                        id="cvv"
-                        placeholder="123"
-                        type="password"
-                        value={formData.cvv}
-                        onChange={handleInputChange('cvv')}
-                        maxLength={4}
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <Label htmlFor="email">Email for receipt</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="your@email.com"
-                      value={formData.email}
-                      onChange={handleInputChange('email')}
-                      required
-                    />
-                  </div>
+                  )}
                 </div>
+              )}
 
-                <Button
-                  type="submit"
-                  disabled={isProcessing}
-                  className="w-full px-8 py-6 text-base"
-                >
-                  {isProcessing ? 'Processing...' : `Pay $799`}
-                </Button>
+              <Button
+                onClick={handlePayment}
+                disabled={processing}
+                className="w-full px-8 py-6 text-base"
+              >
+                {processing ? (
+                  <>
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                    Processing...
+                  </>
+                ) : (
+                  `Pay ${formatAmount(finalAmount)}`
+                )}
+              </Button>
 
-                <p className="text-center text-xs text-night/50">
-                  By clicking "Pay", you agree to our terms of service and privacy policy.
-                  This is a mock payment flow for demonstration purposes.
-                </p>
-              </form>
+              <p className="mt-4 text-center text-xs text-night/50">
+                By clicking "Pay", you agree to our terms of service and privacy policy.
+                Payments are processed securely through Razorpay.
+              </p>
             </div>
           </div>
 
@@ -197,17 +310,23 @@ const Checkout = () => {
               <div className="space-y-4 border-b border-night/10 pb-4">
                 <div className="flex justify-between text-sm">
                   <span className="text-night/70">Activation Fee</span>
-                  <span className="font-medium text-night">$799</span>
+                  <span className="font-medium text-night">{formatAmount(amount)}</span>
                 </div>
+                {appliedCoupon && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-night/70">Discount</span>
+                    <span className="font-medium text-green-600">-{formatAmount(discountAmount)}</span>
+                  </div>
+                )}
                 <div className="flex justify-between text-sm">
                   <span className="text-night/70">Tax</span>
-                  <span className="font-medium text-night">$0.00</span>
+                  <span className="font-medium text-night">₹0.00</span>
                 </div>
               </div>
 
               <div className="mt-4 flex justify-between text-lg font-semibold text-night">
                 <span>Total</span>
-                <span>$799.00</span>
+                <span>{formatAmount(finalAmount)}</span>
               </div>
 
               <div className="mt-6 space-y-3 rounded-2xl border border-night/10 bg-night/5 p-4 text-sm">
@@ -248,4 +367,3 @@ const Checkout = () => {
 };
 
 export default Checkout;
-

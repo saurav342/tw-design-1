@@ -13,6 +13,8 @@ const adminRoutes = require('./routes/adminRoutes');
 const intakeRoutes = require('./routes/intakeRoutes');
 const founderExtrasRoutes = require('./routes/founderExtrasRoutes');
 const uploadRoutes = require('./routes/uploadRoutes');
+const paymentRoutes = require('./routes/paymentRoutes');
+const paymentAdminRoutes = require('./routes/paymentAdminRoutes');
 
 const app = express();
 
@@ -103,6 +105,8 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/intakes', intakeRoutes);
 app.use('/api/founder-extras', founderExtrasRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/payment', paymentRoutes);
+app.use('/api/admin/payment', paymentAdminRoutes);
 
 const clientDistPath = path.resolve(__dirname, '../../frontend/dist');
 const clientIndexPath = path.join(clientDistPath, 'index.html');

@@ -1,0 +1,271 @@
+const Razorpay = require('razorpay');
+const crypto = require('crypto');
+const {
+  createPayment,
+  getPaymentByOrderId,
+  updatePayment,
+  getPaymentConfigByEmail,
+  getCouponByCode,
+  incrementCouponUsage,
+  getDefaultAmount,
+} = require('../models/paymentModel');
+
+// Initialize Razorpay
+const razorpay = new Razorpay({
+  key_id: process.env.RAZORPAY_KEY_ID,
+  key_secret: process.env.RAZORPAY_KEY_SECRET,
+});
+
+// Get payment amount for a founder email
+const getPaymentAmount = async (req, res) => {
+  try {
+    const { email } = req.query;
+    
+    if (!email) {
+      return res.status(400).json({ message: 'Email is required.' });
+    }
+
+    // Check for custom amount configuration
+    const config = await getPaymentConfigByEmail(email);
+    const amount = config ? config.customAmount : getDefaultAmount();
+
+    return res.status(200).json({
+      amount,
+      currency: 'INR',
+      hasCustomAmount: !!config,
+    });
+  } catch (error) {
+    console.error('Error getting payment amount:', error);
+    return res.status(500).json({ message: 'Unable to fetch payment amount.' });
+  }
+};
+
+// Create Razorpay order
+const createOrder = async (req, res) => {
+  try {
+    const { amount, email, couponCode } = req.body;
+    // Authentication is optional - founders may not be logged in yet
+    const userId = req.user?.id || null;
+
+    if (!amount || !email) {
+      return res.status(400).json({ message: 'Amount and email are required.' });
+    }
+
+    // Validate amount
+    const paymentAmount = parseInt(amount, 10);
+    if (isNaN(paymentAmount) || paymentAmount <= 0) {
+      return res.status(400).json({ message: 'Invalid amount.' });
+    }
+
+    let finalAmount = paymentAmount;
+    let discountAmount = 0;
+    let appliedCoupon = null;
+
+    // Apply coupon if provided
+    if (couponCode) {
+      const coupon = await getCouponByCode(couponCode);
+      if (coupon && coupon.isValid(paymentAmount)) {
+        discountAmount = coupon.calculateDiscount(paymentAmount);
+        finalAmount = paymentAmount - discountAmount;
+        appliedCoupon = coupon.code;
+      } else {
+        return res.status(400).json({ message: 'Invalid or expired coupon code.' });
+      }
+    }
+
+    // Create Razorpay order
+    const options = {
+      amount: Math.round(finalAmount * 100), // Convert to paise
+      currency: 'INR',
+      receipt: `receipt_${Date.now()}`,
+      notes: {
+        email: email.toLowerCase(),
+        userId: userId || 'guest',
+        couponCode: appliedCoupon || '',
+        originalAmount: paymentAmount,
+        discountAmount: discountAmount,
+      },
+    };
+
+    const razorpayOrder = await razorpay.orders.create(options);
+
+    // Save payment record
+    const payment = await createPayment({
+      userId: userId || null,
+      founderEmail: email.toLowerCase(),
+      amount: paymentAmount,
+      currency: 'INR',
+      razorpayOrderId: razorpayOrder.id,
+      status: 'pending',
+      couponCode: appliedCoupon,
+      discountAmount: discountAmount,
+      finalAmount: finalAmount,
+      metadata: {
+        receipt: options.receipt,
+      },
+    });
+
+    return res.status(200).json({
+      orderId: razorpayOrder.id,
+      amount: razorpayOrder.amount,
+      currency: razorpayOrder.currency,
+      key: process.env.RAZORPAY_KEY_ID,
+      paymentId: payment._id || payment.id,
+      appliedCoupon: appliedCoupon,
+      discountAmount: discountAmount,
+      originalAmount: paymentAmount,
+      finalAmount: finalAmount,
+    });
+  } catch (error) {
+    console.error('Error creating order:', error);
+    return res.status(500).json({ 
+      message: error.message || 'Unable to create payment order.' 
+    });
+  }
+};
+
+// Verify payment
+const verifyPayment = async (req, res) => {
+  try {
+    const { razorpay_order_id, razorpay_payment_id, razorpay_signature, couponCode } = req.body;
+
+    if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
+      return res.status(400).json({ message: 'Missing payment verification data.' });
+    }
+
+    // Get payment record
+    const payment = await getPaymentByOrderId(razorpay_order_id);
+    if (!payment) {
+      return res.status(404).json({ message: 'Payment order not found.' });
+    }
+
+    // Verify signature
+    const text = `${razorpay_order_id}|${razorpay_payment_id}`;
+    const generatedSignature = crypto
+      .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
+      .update(text)
+      .digest('hex');
+
+    if (generatedSignature !== razorpay_signature) {
+      // Update payment status to failed
+      await updatePayment(razorpay_order_id, {
+        status: 'failed',
+        razorpayPaymentId: razorpay_payment_id,
+        razorpaySignature: razorpay_signature,
+      });
+      return res.status(400).json({ message: 'Payment verification failed.' });
+    }
+
+    // Increment coupon usage if coupon was used
+    if (payment.couponCode) {
+      await incrementCouponUsage(payment.couponCode);
+    }
+
+    // Update payment status to completed
+    const updatedPayment = await updatePayment(razorpay_order_id, {
+      status: 'completed',
+      razorpayPaymentId: razorpay_payment_id,
+      razorpaySignature: razorpay_signature,
+    });
+
+    return res.status(200).json({
+      message: 'Payment verified successfully.',
+      payment: updatedPayment,
+    });
+  } catch (error) {
+    console.error('Error verifying payment:', error);
+    return res.status(500).json({ 
+      message: error.message || 'Unable to verify payment.' 
+    });
+  }
+};
+
+// Get payment status
+const getPaymentStatus = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+
+    if (!orderId) {
+      return res.status(400).json({ message: 'Order ID is required.' });
+    }
+
+    const payment = await getPaymentByOrderId(orderId);
+    if (!payment) {
+      return res.status(404).json({ message: 'Payment not found.' });
+    }
+
+    return res.status(200).json({ payment });
+  } catch (error) {
+    console.error('Error getting payment status:', error);
+    return res.status(500).json({ message: 'Unable to fetch payment status.' });
+  }
+};
+
+// Validate coupon
+const validateCoupon = async (req, res) => {
+  try {
+    const { code, amount } = req.body;
+
+    if (!code || !amount) {
+      return res.status(400).json({ message: 'Coupon code and amount are required.' });
+    }
+
+    // Check if coupons are enabled
+    const couponEnabled = await getCouponEnabled();
+    if (!couponEnabled) {
+      return res.status(400).json({ message: 'Coupons are currently disabled.' });
+    }
+
+    const coupon = await getCouponByCode(code);
+    if (!coupon) {
+      return res.status(404).json({ message: 'Coupon not found.' });
+    }
+
+    const isValid = coupon.isValid(parseFloat(amount));
+    if (!isValid) {
+      return res.status(400).json({ 
+        message: 'Coupon is not valid for this amount or has expired.' 
+      });
+    }
+
+    const discountAmount = coupon.calculateDiscount(parseFloat(amount));
+    const finalAmount = parseFloat(amount) - discountAmount;
+
+    return res.status(200).json({
+      valid: true,
+      coupon: {
+        code: coupon.code,
+        description: coupon.description,
+        discountType: coupon.discountType,
+        discountValue: coupon.discountValue,
+      },
+      discountAmount,
+      finalAmount,
+      originalAmount: parseFloat(amount),
+    });
+  } catch (error) {
+    console.error('Error validating coupon:', error);
+    return res.status(500).json({ message: 'Unable to validate coupon.' });
+  }
+};
+
+// Get coupon settings (public endpoint to check if coupons are enabled)
+const getCouponSettings = async (req, res) => {
+  try {
+    const couponEnabled = await getCouponEnabled();
+    return res.status(200).json({ couponEnabled });
+  } catch (error) {
+    console.error('Error getting coupon settings:', error);
+    return res.status(500).json({ message: 'Unable to fetch coupon settings.' });
+  }
+};
+
+module.exports = {
+  getPaymentAmount,
+  createOrder,
+  verifyPayment,
+  getPaymentStatus,
+  validateCoupon,
+  getCouponSettings,
+};
+

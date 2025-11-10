@@ -45,6 +45,7 @@ import {
   Link as LinkIcon,
   Calendar,
   Globe,
+  CreditCard,
 } from 'lucide-react';
 import { Button } from '../components/ui/button.jsx';
 import {
@@ -62,6 +63,7 @@ import { useAppStore } from '../store/useAppStore.js';
 import { useAuth } from '../context/useAuth.js';
 import { createDefaultFounderExtras } from '../data/founderExtras.js';
 import { adminApi } from '../services/api.js';
+import PaymentManagement from './admin/PaymentManagement.jsx';
 
 const AdminDashboard = () => {
   const { token, user } = useAuth();
@@ -329,6 +331,7 @@ const AdminDashboard = () => {
     { id: 'matchmaking', label: 'Matchmaking', icon: Target },
     { id: 'services', label: 'Services', icon: Sparkles },
     { id: 'users', label: 'Users', icon: Users },
+    { id: 'payments', label: 'Payments', icon: CreditCard },
     { id: 'analytics', label: 'Analytics', icon: BarChart3 },
   ];
 
@@ -1866,6 +1869,9 @@ const AdminDashboard = () => {
               )}
             </div>
           )}
+
+          {/* Payments View */}
+          {activeView === 'payments' && <PaymentManagement />}
 
           {/* Analytics View */}
           {activeView === 'analytics' && (

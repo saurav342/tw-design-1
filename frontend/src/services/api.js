@@ -194,3 +194,24 @@ export const uploadApi = {
     return response.json();
   },
 };
+
+export const paymentApi = {
+  getPaymentAmount: (email) => apiClient.get(`/payment/amount?email=${encodeURIComponent(email)}`),
+  getCouponSettings: () => apiClient.get('/payment/coupon-settings'),
+  createOrder: (data) => apiClient.post('/payment/create-order', data),
+  verifyPayment: (data) => apiClient.post('/payment/verify', data),
+  getPaymentStatus: (orderId) => apiClient.get(`/payment/status/${orderId}`),
+  validateCoupon: (data) => apiClient.post('/payment/validate-coupon', data),
+};
+
+export const paymentAdminApi = {
+  getPaymentConfigs: (token) => apiClient.get('/admin/payment/payment-configs', token),
+  createOrUpdatePaymentConfig: (data, token) => apiClient.post('/admin/payment/payment-configs', data, token),
+  deletePaymentConfig: (email, token) => apiClient.delete(`/admin/payment/payment-configs/${encodeURIComponent(email)}`, token),
+  getCoupons: (token) => apiClient.get('/admin/payment/coupons', token),
+  createCoupon: (data, token) => apiClient.post('/admin/payment/coupons', data, token),
+  updateCoupon: (code, data, token) => apiClient.patch(`/admin/payment/coupons/${code}`, data, token),
+  deleteCoupon: (code, token) => apiClient.delete(`/admin/payment/coupons/${code}`, token),
+  getCouponSettings: (token) => apiClient.get('/admin/payment/coupon-settings', token),
+  updateCouponSettings: (data, token) => apiClient.patch('/admin/payment/coupon-settings', data, token),
+};

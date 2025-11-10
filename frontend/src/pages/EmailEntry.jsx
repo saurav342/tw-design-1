@@ -53,8 +53,8 @@ const EmailEntry = () => {
       sessionStorage.setItem('signup.email', email.trim());
       sessionStorage.setItem('signup.role', roleFromUrl);
 
-      // Navigate to email verification success page
-      navigate(`/signup/${roleFromUrl}/verify-email`, { 
+      // Navigate to OTP verification page
+      navigate(`/signup/${roleFromUrl}/verify-otp`, { 
         replace: false,
         state: { email: email.trim(), role: roleFromUrl }
       });
@@ -176,7 +176,7 @@ const EmailEntry = () => {
           {/* Info Box */}
           <div className="mt-8 p-4 bg-blue-50 border border-blue-200 rounded-xl">
             <p className="text-xs text-blue-800">
-              <span className="font-semibold">Note:</span> We'll send you a verification email. Click the link in the email to verify your address.
+              <span className="font-semibold">Note:</span> We'll send you a 6-digit verification code to verify your email address.
             </p>
           </div>
 

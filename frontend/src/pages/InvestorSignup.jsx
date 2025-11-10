@@ -32,8 +32,8 @@ const InvestorSignup = () => {
     if (!verifiedEmail) {
       navigate('/signup/email?role=investor', { replace: true });
     } else if (!isEmailVerified) {
-      // Email not verified yet, redirect to verification page
-      navigate('/signup/investor/verify-email', { replace: true });
+      // Email not verified yet, redirect to OTP verification page
+      navigate('/signup/investor/verify-otp', { replace: true });
     }
   }, [verifiedEmail, isEmailVerified, navigate]);
 

@@ -1,17 +1,24 @@
-const { randomUUID } = require('crypto');
 const EmailVerification = require('./schemas/EmailVerification');
 
-const EXPIRY_MINUTES = 30;
+const EXPIRY_MINUTES = 10; // OTP expires in 10 minutes
 const EXPIRY_MS = EXPIRY_MINUTES * 60 * 1000;
+const OTP_LENGTH = 6;
 
 /**
- * Create an email verification token
+ * Generate a random 6-digit OTP
  */
-const createVerificationToken = async (email, role) => {
-  const token = randomUUID();
+const generateOTP = () => {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+};
+
+/**
+ * Create an email verification OTP
+ */
+const createVerificationOTP = async (email, role) => {
+  const otp = generateOTP();
   const expiresAt = new Date(Date.now() + EXPIRY_MS);
 
-  // Remove any existing unverified tokens for this email and role
+  // Remove any existing unverified OTPs for this email and role
   await EmailVerification.deleteMany({
     email: email.toLowerCase(),
     role,
@@ -19,7 +26,7 @@ const createVerificationToken = async (email, role) => {
   });
 
   const verification = new EmailVerification({
-    token,
+    otp,
     email: email.toLowerCase(),
     role,
     expiresAt,
@@ -27,25 +34,27 @@ const createVerificationToken = async (email, role) => {
   });
 
   await verification.save();
-  return { token, expiresAt: expiresAt.getTime(), email: email.toLowerCase() };
+  return { otp, expiresAt: expiresAt.getTime(), email: email.toLowerCase() };
 };
 
 /**
- * Verify an email verification token
+ * Verify an email verification OTP
  */
-const verifyToken = async (token) => {
+const verifyOTP = async (email, role, otp) => {
   const verification = await EmailVerification.findOne({
-    token,
+    email: email.toLowerCase(),
+    role,
+    otp,
     verified: false,
   });
 
   if (!verification) {
-    throw new Error('Invalid or expired verification token.');
+    throw new Error('Invalid or expired OTP.');
   }
 
   if (verification.expiresAt < new Date()) {
     await EmailVerification.findByIdAndDelete(verification._id);
-    throw new Error('Verification token has expired.');
+    throw new Error('OTP has expired. Please request a new one.');
   }
 
   // Mark as verified
@@ -73,9 +82,9 @@ const isEmailVerified = async (email, role) => {
 };
 
 /**
- * Get verification token by email and role
+ * Get verification OTP by email and role
  */
-const getVerificationToken = async (email, role) => {
+const getVerificationOTP = async (email, role) => {
   const verification = await EmailVerification.findOne({
     email: email.toLowerCase(),
     role,
@@ -87,8 +96,8 @@ const getVerificationToken = async (email, role) => {
 };
 
 module.exports = {
-  createVerificationToken,
-  verifyToken,
+  createVerificationOTP,
+  verifyOTP,
   isEmailVerified,
-  getVerificationToken,
+  getVerificationOTP,
 };

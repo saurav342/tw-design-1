@@ -1,10 +1,9 @@
 const mongoose = require('mongoose');
 
 const emailVerificationSchema = new mongoose.Schema({
-  token: {
+  otp: {
     type: String,
     required: true,
-    unique: true,
   },
   email: {
     type: String,
@@ -31,7 +30,6 @@ const emailVerificationSchema = new mongoose.Schema({
 });
 
 // Indexes
-emailVerificationSchema.index({ token: 1 });
 emailVerificationSchema.index({ email: 1, role: 1 });
 emailVerificationSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 }); // TTL index
 

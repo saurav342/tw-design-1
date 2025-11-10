@@ -346,9 +346,9 @@ const sendAdminWelcomeEmail = async (adminName, email) => {
 };
 
 /**
- * Email template for email verification
+ * Email template for email verification with OTP
  */
-const getEmailVerificationTemplate = (email, role, verificationLink) => ({
+const getEmailVerificationTemplate = (email, role, otp) => ({
   subject: 'Verify Your Email - LaunchAndLift',
   html: `
     <!DOCTYPE html>
@@ -378,28 +378,24 @@ const getEmailVerificationTemplate = (email, role, verificationLink) => ({
                   </p>
                   
                   <p style="margin: 0 0 20px; color: #475569; font-size: 16px; line-height: 1.6;">
-                    Thank you for signing up for LaunchAndLift as a <strong>${role === 'founder' ? 'Founder' : 'Investor'}</strong>! To complete your registration, please verify your email address by clicking the button below.
+                    Thank you for signing up for LaunchAndLift as a <strong>${role === 'founder' ? 'Founder' : 'Investor'}</strong>! To complete your registration, please enter the verification code below.
                   </p>
                   
-                  <!-- CTA Button -->
+                  <!-- OTP Display -->
                   <table role="presentation" style="width: 100%; margin: 30px 0;">
                     <tr>
                       <td style="text-align: center;">
-                        <a href="${verificationLink}" style="display: inline-block; padding: 14px 32px; background: linear-gradient(135deg, #7c3aed 0%, #5b21d6 100%); color: #ffffff; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);">Verify Email Address</a>
+                        <div style="display: inline-block; padding: 20px 40px; background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%); border: 2px solid #7c3aed; border-radius: 12px;">
+                          <p style="margin: 0 0 10px; color: #64748b; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">Your Verification Code</p>
+                          <p style="margin: 0; color: #7c3aed; font-size: 36px; font-weight: 700; letter-spacing: 8px; font-family: 'Courier New', monospace;">${otp}</p>
+                        </div>
                       </td>
                     </tr>
                   </table>
                   
-                  <p style="margin: 30px 0 20px; color: #64748b; font-size: 14px; line-height: 1.6;">
-                    Or copy and paste this link into your browser:
-                  </p>
-                  <p style="margin: 0 0 30px; color: #7c3aed; font-size: 12px; word-break: break-all; padding: 15px; background-color: #f1f5f9; border-radius: 8px;">
-                    ${verificationLink}
-                  </p>
-                  
                   <div style="background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin: 30px 0; border-radius: 8px;">
                     <p style="margin: 0; color: #92400e; font-size: 13px; line-height: 1.6;">
-                      <strong>⚠️ Important:</strong> This verification link will expire in 30 minutes. If you didn't create an account, please ignore this email.
+                      <strong>⚠️ Important:</strong> This verification code will expire in 10 minutes. If you didn't create an account, please ignore this email.
                     </p>
                   </div>
                   
@@ -439,13 +435,10 @@ const sendFounderIntakeNotification = async (founderData, adminEmail = process.e
 };
 
 /**
- * Send email verification email
+ * Send email verification email with OTP
  */
-const sendVerificationEmail = async (email, role, verificationToken) => {
-  const appUrl = process.env.APP_URL || 'http://localhost:5173';
-  const verificationLink = `${appUrl}/verify-email?token=${verificationToken}&role=${role}`;
-  
-  const template = getEmailVerificationTemplate(email, role, verificationLink);
+const sendVerificationEmail = async (email, role, otp) => {
+  const template = getEmailVerificationTemplate(email, role, otp);
   return sendEmail(email, template.subject, template.html);
 };
 

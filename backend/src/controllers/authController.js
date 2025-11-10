@@ -8,7 +8,7 @@ const {
 } = require('../models/userModel');
 const { signToken } = require('../utils/jwt');
 const { createResetToken, consumeResetToken } = require('../models/passwordResetModel');
-const { createVerificationToken, verifyToken, isEmailVerified } = require('../models/emailVerificationModel');
+const { createVerificationOTP, verifyOTP, isEmailVerified } = require('../models/emailVerificationModel');
 const { sendVerificationEmail } = require('../utils/email');
 
 const buildAuthResponse = (user) => ({
@@ -93,19 +93,19 @@ const sendEmailVerification = async (req, res) => {
       }
     }
 
-    // Create verification token
-    const { token } = createVerificationToken(email, role);
+    // Create verification OTP
+    const { otp } = await createVerificationOTP(email, role);
 
-    // Send verification email
+    // Send verification email with OTP
     try {
-      await sendVerificationEmail(email, role, token);
+      await sendVerificationEmail(email, role, otp);
     } catch (emailError) {
       console.error('Failed to send verification email:', emailError);
       // Don't fail the request if email fails, but log it
     }
 
     return res.status(200).json({
-      message: 'Verification email sent successfully. Please check your inbox.',
+      message: 'Verification code sent successfully. Please check your inbox.',
       email: email.toLowerCase(),
     });
   } catch (error) {
@@ -115,26 +115,26 @@ const sendEmailVerification = async (req, res) => {
 };
 
 /**
- * Verify email with token
+ * Verify email with OTP
  */
 const verifyEmail = async (req, res) => {
   try {
-    const { token } = req.body;
+    const { email, role, otp } = req.body;
 
-    if (!token) {
-      return res.status(400).json({ message: 'Verification token is required.' });
+    if (!email || !role || !otp) {
+      return res.status(400).json({ message: 'Email, role, and OTP are required.' });
     }
 
-    const { email, role } = await verifyToken(token);
+    const verified = await verifyOTP(email, role, otp);
 
     return res.status(200).json({
       message: 'Email verified successfully.',
-      email,
-      role,
+      email: verified.email,
+      role: verified.role,
       verified: true,
     });
   } catch (error) {
-    return res.status(400).json({ message: error.message || 'Invalid or expired verification token.' });
+    return res.status(400).json({ message: error.message || 'Invalid or expired OTP.' });
   }
 };
 

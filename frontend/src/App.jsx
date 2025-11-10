@@ -13,8 +13,7 @@ import Login from './pages/Login';
 import AdminLogin from './pages/AdminLogin';
 import Signup from './pages/Signup';
 import EmailEntry from './pages/EmailEntry';
-import EmailVerificationSent from './pages/EmailVerificationSent';
-import VerifyEmail from './pages/VerifyEmail';
+import OTPVerification from './pages/OTPVerification';
 import InvestorSignup from './pages/InvestorSignup';
 import FounderSignup from './pages/FounderSignup';
 import PaymentDetails from './pages/PaymentDetails';
@@ -58,8 +57,7 @@ const AppContent = () => {
                   <Route path="/login" element={<Login />} />
                   <Route path="/signup" element={<Signup />} />
                   <Route path="/signup/email" element={<EmailEntry />} />
-                  <Route path="/signup/:role/verify-email" element={<EmailVerificationSent />} />
-                  <Route path="/verify-email" element={<VerifyEmail />} />
+                  <Route path="/signup/:role/verify-otp" element={<OTPVerification />} />
                   <Route path="/signup/investor" element={<InvestorSignup />} />
                   <Route path="/signup/founder" element={<FounderSignup />} />
                   <Route path="/payment-details" element={<PaymentDetails />} />

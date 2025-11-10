@@ -39,9 +39,8 @@ const FounderSignup = () => {
   const { showSuccess, showInfo } = useNotification();
   const addFounder = useAppStore((state) => state.addFounder);
   
-  // Get email and OTP verification status from location state or sessionStorage
+  // Get email from location state or sessionStorage
   const verifiedEmail = location.state?.email || sessionStorage.getItem('signup.email') || '';
-  const isOtpVerified = location.state?.otpVerified || sessionStorage.getItem('signup.otpVerified') === 'true';
   
   const [form, setForm] = useState({
     ...initialForm,
@@ -53,12 +52,12 @@ const FounderSignup = () => {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState('');
 
-  // Redirect to email entry if OTP not verified
+  // Redirect to email entry if no email
   useEffect(() => {
-    if (!isOtpVerified || !verifiedEmail) {
+    if (!verifiedEmail) {
       navigate('/signup/email?role=founder', { replace: true });
     }
-  }, [isOtpVerified, verifiedEmail, navigate]);
+  }, [verifiedEmail, navigate]);
 
   const updateForm = (field) => (event) => {
     const value = event.target.value;
@@ -233,7 +232,7 @@ const FounderSignup = () => {
       // Clear signup flow sessionStorage
       sessionStorage.removeItem('signup.email');
       sessionStorage.removeItem('signup.role');
-      sessionStorage.removeItem('signup.otpVerified');
+      sessionStorage.removeItem('signup.emailVerified');
       
       setIsSubmitting(false);
       showSuccess('Founder application submitted successfully! Redirecting to payment...');

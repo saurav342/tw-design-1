@@ -4,10 +4,11 @@ const {
   getProfile,
   login,
   requestPasswordReset,
-  sendOtp,
+  sendEmailVerification,
+  verifyEmail,
+  checkEmailVerification,
   signup,
   updateProfile,
-  verifyOtp,
 } = require('../controllers/authController');
 const { authenticate } = require('../middleware/auth');
 
@@ -15,8 +16,9 @@ const router = express.Router();
 
 router.post('/signup', signup);
 router.post('/login', login);
-router.post('/send-otp', sendOtp);
-router.post('/verify-otp', verifyOtp);
+router.post('/send-verification-email', sendEmailVerification);
+router.post('/verify-email', verifyEmail);
+router.get('/check-email-verification', checkEmailVerification);
 router.get('/profile', authenticate, getProfile);
 router.put('/profile', authenticate, updateProfile);
 router.post('/reset-password', requestPasswordReset);

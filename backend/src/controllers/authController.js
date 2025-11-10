@@ -8,6 +8,8 @@ const {
 } = require('../models/userModel');
 const { signToken } = require('../utils/jwt');
 const { createResetToken, consumeResetToken } = require('../models/passwordResetModel');
+const { createVerificationToken, verifyToken, isEmailVerified } = require('../models/emailVerificationModel');
+const { sendVerificationEmail } = require('../utils/email');
 
 const buildAuthResponse = (user) => ({
   token: signToken({ sub: user.id, role: user.role }),
@@ -16,11 +18,6 @@ const buildAuthResponse = (user) => ({
 
 const truthyValues = new Set(['true', '1', 'yes', 'y', 'on']);
 const falsyValues = new Set(['false', '0', 'no', 'n', 'off']);
-
-const TEST_PHONE_NUMBER = '9312121212';
-const TEST_OTP_CODE = '1234';
-const OTP_EXPIRY_MS = 5 * 60 * 1000;
-const otpStore = new Map();
 
 const toBoolean = (value) => {
   if (typeof value === 'boolean') return value;
@@ -52,68 +49,100 @@ const sanitizeFilePayload = (file) => {
   };
 };
 
-const normalizePhone = (value) => (typeof value === 'string' ? value.replace(/\D/g, '') : '');
 
-const sendOtp = (req, res) => {
+/**
+ * Send email verification
+ */
+const sendEmailVerification = async (req, res) => {
   try {
-    const { phone } = req.body;
-    const normalized = normalizePhone(phone);
-    if (!normalized) {
-      return res.status(400).json({ message: 'Phone number is required.' });
+    const { email, role } = req.body;
+
+    if (!email || !role) {
+      return res.status(400).json({ message: 'Email and role are required.' });
     }
 
-    if (normalized !== TEST_PHONE_NUMBER) {
-      return res.status(400).json({
-        message: `Only the test number ${TEST_PHONE_NUMBER} is enabled in this environment.`,
-      });
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ message: 'Invalid email format.' });
     }
 
-    const expiresAt = Date.now() + OTP_EXPIRY_MS;
-    otpStore.set(normalized, { code: TEST_OTP_CODE, expiresAt });
+    // Validate role
+    if (!['founder', 'investor'].includes(role)) {
+      return res.status(400).json({ message: 'Invalid role. Must be founder or investor.' });
+    }
 
-    console.log('[LaunchAndLift] OTP issued', {
-      phone: normalized,
-      otp: TEST_OTP_CODE,
-      expiresAt: new Date(expiresAt).toISOString(),
-    });
+    // Check if email already exists
+    const existingUser = findByEmail(email);
+    if (existingUser) {
+      return res.status(400).json({ message: 'An account with this email already exists.' });
+    }
+
+    // Create verification token
+    const { token } = createVerificationToken(email, role);
+
+    // Send verification email
+    try {
+      await sendVerificationEmail(email, role, token);
+    } catch (emailError) {
+      console.error('Failed to send verification email:', emailError);
+      // Don't fail the request if email fails, but log it
+    }
 
     return res.status(200).json({
-      message: 'OTP sent successfully. Use 1234 for verification.',
-      phone: normalized,
-      otp: TEST_OTP_CODE,
-      expiresAt: new Date(expiresAt).toISOString(),
+      message: 'Verification email sent successfully. Please check your inbox.',
+      email: email.toLowerCase(),
     });
   } catch (error) {
-    return res.status(500).json({ message: 'Unable to issue OTP.' });
+    console.error('Error sending email verification:', error);
+    return res.status(500).json({ message: 'Unable to send verification email.' });
   }
 };
 
-const verifyOtp = (req, res) => {
+/**
+ * Verify email with token
+ */
+const verifyEmail = (req, res) => {
   try {
-    const { phone, otp } = req.body;
-    const normalizedPhone = normalizePhone(phone);
-    if (!normalizedPhone || !otp) {
-      return res.status(400).json({ message: 'Phone number and OTP are required.' });
+    const { token } = req.body;
+
+    if (!token) {
+      return res.status(400).json({ message: 'Verification token is required.' });
     }
 
-    const entry = otpStore.get(normalizedPhone);
-    if (!entry) {
-      return res.status(400).json({ message: 'No OTP request found. Please request a new code.' });
-    }
+    const { email, role } = verifyToken(token);
 
-    if (entry.expiresAt < Date.now()) {
-      otpStore.delete(normalizedPhone);
-      return res.status(400).json({ message: 'OTP expired. Please request a new code.' });
-    }
-
-    if (entry.code !== otp) {
-      return res.status(400).json({ message: 'Invalid OTP. Use 1234 for this environment.' });
-    }
-
-    otpStore.delete(normalizedPhone);
-    return res.status(200).json({ message: 'OTP verified successfully.', phone: normalizedPhone });
+    return res.status(200).json({
+      message: 'Email verified successfully.',
+      email,
+      role,
+      verified: true,
+    });
   } catch (error) {
-    return res.status(500).json({ message: 'Unable to verify OTP.' });
+    return res.status(400).json({ message: error.message || 'Invalid or expired verification token.' });
+  }
+};
+
+/**
+ * Check if email is verified
+ */
+const checkEmailVerification = (req, res) => {
+  try {
+    const { email, role } = req.query;
+
+    if (!email || !role) {
+      return res.status(400).json({ message: 'Email and role are required.' });
+    }
+
+    const verified = isEmailVerified(email, role);
+
+    return res.status(200).json({
+      email: email.toLowerCase(),
+      role,
+      verified,
+    });
+  } catch (error) {
+    return res.status(500).json({ message: 'Unable to check email verification status.' });
   }
 };
 
@@ -133,6 +162,16 @@ const signup = async (req, res) => {
       return res.status(403).json({ 
         message: 'Admin accounts cannot be created through this endpoint. Please use the admin authentication portal.' 
       });
+    }
+
+    // Check if email is verified (only for investor role, founder doesn't use this endpoint)
+    if (role === 'investor') {
+      const emailVerified = isEmailVerified(email, role);
+      if (!emailVerified) {
+        return res.status(400).json({ 
+          message: 'Email not verified. Please verify your email before signing up.' 
+        });
+      }
     }
 
     let investorDetails = null;
@@ -394,9 +433,10 @@ module.exports = {
   confirmPasswordReset,
   getProfile,
   login,
-  sendOtp,
+  sendEmailVerification,
+  verifyEmail,
+  checkEmailVerification,
   requestPasswordReset,
   signup,
   updateProfile,
-  verifyOtp,
 };

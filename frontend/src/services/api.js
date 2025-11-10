@@ -115,8 +115,9 @@ export const apiClient = {
 export const authApi = {
   login: (credentials) => apiClient.post('/auth/login', credentials),
   signup: (payload) => apiClient.post('/auth/signup', payload),
-  sendOtp: (payload) => apiClient.post('/auth/send-otp', payload),
-  verifyOtp: (payload) => apiClient.post('/auth/verify-otp', payload),
+  sendVerificationEmail: (payload) => apiClient.post('/auth/send-verification-email', payload),
+  verifyEmail: (payload) => apiClient.post('/auth/verify-email', payload),
+  checkEmailVerification: (email, role) => apiClient.get(`/auth/check-email-verification?email=${encodeURIComponent(email)}&role=${role}`),
   resetPassword: (payload) => apiClient.post('/auth/reset-password', payload),
   fetchProfile: (token) => apiClient.get('/auth/profile', token),
 };

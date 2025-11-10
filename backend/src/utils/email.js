@@ -346,6 +346,91 @@ const sendAdminWelcomeEmail = async (adminName, email) => {
 };
 
 /**
+ * Email template for email verification
+ */
+const getEmailVerificationTemplate = (email, role, verificationLink) => ({
+  subject: 'Verify Your Email - LaunchAndLift',
+  html: `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Verify Your Email</title>
+    </head>
+    <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f5f5f5;">
+      <table role="presentation" style="width: 100%; border-collapse: collapse;">
+        <tr>
+          <td style="padding: 40px 20px; text-align: center;">
+            <table role="presentation" style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+              <!-- Header -->
+              <tr>
+                <td style="padding: 40px 30px 30px; background: linear-gradient(135deg, #7c3aed 0%, #5b21d6 100%); border-radius: 12px 12px 0 0; text-align: center;">
+                  <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 600;">Verify Your Email 📧</h1>
+                </td>
+              </tr>
+              
+              <!-- Content -->
+              <tr>
+                <td style="padding: 40px 30px;">
+                  <p style="margin: 0 0 20px; color: #1e293b; font-size: 16px; line-height: 1.6;">
+                    Hi there,
+                  </p>
+                  
+                  <p style="margin: 0 0 20px; color: #475569; font-size: 16px; line-height: 1.6;">
+                    Thank you for signing up for LaunchAndLift as a <strong>${role === 'founder' ? 'Founder' : 'Investor'}</strong>! To complete your registration, please verify your email address by clicking the button below.
+                  </p>
+                  
+                  <!-- CTA Button -->
+                  <table role="presentation" style="width: 100%; margin: 30px 0;">
+                    <tr>
+                      <td style="text-align: center;">
+                        <a href="${verificationLink}" style="display: inline-block; padding: 14px 32px; background: linear-gradient(135deg, #7c3aed 0%, #5b21d6 100%); color: #ffffff; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);">Verify Email Address</a>
+                      </td>
+                    </tr>
+                  </table>
+                  
+                  <p style="margin: 30px 0 20px; color: #64748b; font-size: 14px; line-height: 1.6;">
+                    Or copy and paste this link into your browser:
+                  </p>
+                  <p style="margin: 0 0 30px; color: #7c3aed; font-size: 12px; word-break: break-all; padding: 15px; background-color: #f1f5f9; border-radius: 8px;">
+                    ${verificationLink}
+                  </p>
+                  
+                  <div style="background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin: 30px 0; border-radius: 8px;">
+                    <p style="margin: 0; color: #92400e; font-size: 13px; line-height: 1.6;">
+                      <strong>⚠️ Important:</strong> This verification link will expire in 30 minutes. If you didn't create an account, please ignore this email.
+                    </p>
+                  </div>
+                  
+                  <p style="margin: 30px 0 20px; color: #475569; font-size: 16px; line-height: 1.6;">
+                    If you have any questions, feel free to reach out to us at <a href="mailto:support@launchandlift.com" style="color: #7c3aed; text-decoration: none;">support@launchandlift.com</a>.
+                  </p>
+                </td>
+              </tr>
+              
+              <!-- Footer -->
+              <tr>
+                <td style="padding: 30px; background-color: #f8fafc; border-radius: 0 0 12px 12px; text-align: center; border-top: 1px solid #e2e8f0;">
+                  <p style="margin: 0 0 10px; color: #64748b; font-size: 14px;">
+                    Best regards,<br>
+                    <strong>The LaunchAndLift Team</strong>
+                  </p>
+                  <p style="margin: 20px 0 0; color: #94a3b8; font-size: 12px;">
+                    This email was sent to ${email}. If you didn't create an account, please ignore this email.
+                  </p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </body>
+    </html>
+  `,
+});
+
+/**
  * Send founder intake notification to admin
  */
 const sendFounderIntakeNotification = async (founderData, adminEmail = process.env.ADMIN_NOTIFICATION_EMAIL || 'admin@launchandlift.com') => {
@@ -353,11 +438,23 @@ const sendFounderIntakeNotification = async (founderData, adminEmail = process.e
   return sendEmail(adminEmail, template.subject, template.html);
 };
 
+/**
+ * Send email verification email
+ */
+const sendVerificationEmail = async (email, role, verificationToken) => {
+  const appUrl = process.env.APP_URL || 'http://localhost:5173';
+  const verificationLink = `${appUrl}/verify-email?token=${verificationToken}&role=${role}`;
+  
+  const template = getEmailVerificationTemplate(email, role, verificationLink);
+  return sendEmail(email, template.subject, template.html);
+};
+
 module.exports = {
   sendEmail,
   sendFounderWelcomeEmail,
   sendAdminWelcomeEmail,
   sendFounderIntakeNotification,
+  sendVerificationEmail,
   transporter,
 };
 

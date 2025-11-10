@@ -38,23 +38,27 @@ const EmailEntry = () => {
 
     setIsSubmitting(true);
 
-    // Simulate API call to send OTP (mock)
-    // In real implementation, this would call the backend
     try {
-      // Mock delay
-      await new Promise((resolve) => setTimeout(resolve, 800));
+      // Import API function
+      const { authApi } = await import('../services/api.js');
+      
+      // Send verification email
+      await authApi.sendVerificationEmail({
+        email: email.trim(),
+        role: roleFromUrl,
+      });
 
-      // Store email and role in sessionStorage for the OTP flow
+      // Store email and role in sessionStorage
       sessionStorage.setItem('signup.email', email.trim());
       sessionStorage.setItem('signup.role', roleFromUrl);
 
-      // Navigate to OTP verification page
-      navigate(`/signup/${roleFromUrl}/otp`, { 
+      // Navigate to email verification success page
+      navigate(`/signup/${roleFromUrl}/verify-email`, { 
         replace: false,
         state: { email: email.trim(), role: roleFromUrl }
       });
     } catch (err) {
-      setError('Failed to send OTP. Please try again.');
+      setError(err.message || 'Failed to send verification email. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -151,7 +155,7 @@ const EmailEntry = () => {
           {/* Info Box */}
           <div className="mt-8 p-4 bg-blue-50 border border-blue-200 rounded-xl">
             <p className="text-xs text-blue-800">
-              <span className="font-semibold">Note:</span> For testing purposes, use OTP code <span className="font-mono font-bold">1234</span>
+              <span className="font-semibold">Note:</span> We'll send you a verification email. Click the link in the email to verify your address.
             </p>
           </div>
 

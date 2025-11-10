@@ -8,9 +8,9 @@ const InvestorSignup = () => {
   const location = useLocation();
   const { signup, logout } = useAuth();
   
-  // Get email and OTP verification status from location state or sessionStorage
+  // Get email from location state or sessionStorage
   const verifiedEmail = location.state?.email || sessionStorage.getItem('signup.email') || '';
-  const isOtpVerified = location.state?.otpVerified || sessionStorage.getItem('signup.otpVerified') === 'true';
+  const isEmailVerified = location.state?.emailVerified || sessionStorage.getItem('signup.emailVerified') === 'true';
   
   const [formData, setFormData] = useState({
     fullName: '',
@@ -27,12 +27,15 @@ const InvestorSignup = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
 
-  // Redirect to email entry if OTP not verified
+  // Redirect to email entry if no email or email not verified
   useEffect(() => {
-    if (!isOtpVerified || !verifiedEmail) {
+    if (!verifiedEmail) {
       navigate('/signup/email?role=investor', { replace: true });
+    } else if (!isEmailVerified) {
+      // Email not verified yet, redirect to verification page
+      navigate('/signup/investor/verify-email', { replace: true });
     }
-  }, [isOtpVerified, verifiedEmail, navigate]);
+  }, [verifiedEmail, isEmailVerified, navigate]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -77,7 +80,7 @@ const InvestorSignup = () => {
       // Clear signup flow sessionStorage
       sessionStorage.removeItem('signup.email');
       sessionStorage.removeItem('signup.role');
-      sessionStorage.removeItem('signup.otpVerified');
+      sessionStorage.removeItem('signup.emailVerified');
       
       // Logout to clear auto-authentication (user should log in manually)
       logout();

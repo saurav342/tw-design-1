@@ -155,6 +155,7 @@ const store = {
   news: defaultNews,
   founderIntakes: [],
   passwordResets: [],
+  emailVerifications: [],
   founderExtras: {
     [demoFounder.id]: createDefaultFounderExtras(),
   },

@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { motion, useScroll, useSpring, useTransform } from 'framer-motion';
 import Hero from '../components/Hero';
 import CTASection from '../components/CTASection';
-import FooterEX1 from '../components/FooterEX1';
+import Footer from '../components/Footer';
 import FAQAccordion from '../components/FAQAccordion';
 import Testimonials from '../components/Testimonials';
 import { faqItems, homeTestimonials } from '../data/content';
@@ -500,7 +500,7 @@ const Home = () => {
 
         <CTASection />
       </div>
-      <FooterEX1 />
+      <Footer />
     </>
   );
 };

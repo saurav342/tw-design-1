@@ -1346,7 +1346,7 @@ const AdminDashboard = () => {
                                           {founder.raiseStage}
                                         </span>
                                       )}
-                                      {founder.raiseAmountUSD && (
+                                      {founder.raiseAmountUSD !== undefined && founder.raiseAmountUSD !== null && (
                                         <span className="px-2 py-1 bg-white text-gray-700 text-xs rounded border border-gray-200">
                                           {formatCurrency(founder.raiseAmountUSD)}
                                         </span>
@@ -1461,7 +1461,7 @@ const AdminDashboard = () => {
                                           </span>
                                         </div>
                                       )}
-                                      {founder.revenueRunRateUSD && (
+                                      {founder.revenueRunRateUSD !== undefined && founder.revenueRunRateUSD !== null && (
                                         <div>
                                           <span className="text-gray-600">Revenue Run Rate:</span>
                                           <span className="font-medium text-gray-900 ml-2">
@@ -1486,14 +1486,14 @@ const AdminDashboard = () => {
                                 )}
 
                                 {/* Metrics */}
-                                {founder.benchmarks && founder.benchmarks.length > 0 && (
+                                {founder.benchmarks && Array.isArray(founder.benchmarks) && founder.benchmarks.length > 0 && (
                                   <div>
                                     <h4 className="text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wide">
                                       Key Metrics
                                     </h4>
                                     <BenchmarkTable
                                       rows={founder.benchmarks}
-                                      founderNotes={founder.benchmarkNotes}
+                                      founderNotes={founder.benchmarkNotes || {}}
                                       onChangeNote={() => {}}
                                       onSave={() => {}}
                                       isDisabled
@@ -1506,9 +1506,9 @@ const AdminDashboard = () => {
                                   <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                                     <div className="lg:col-span-2">
                                       <h4 className="text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wide">
-                                        Service Requests ({founder.extras.serviceRequests?.length || 0})
+                                        Service Requests ({Array.isArray(founder.extras.serviceRequests) ? founder.extras.serviceRequests.length : 0})
                                       </h4>
-                                      {founder.extras.serviceRequests &&
+                                      {Array.isArray(founder.extras.serviceRequests) &&
                                       founder.extras.serviceRequests.length > 0 ? (
                                         <div className="space-y-2">
                                           {founder.extras.serviceRequests.map((request, idx) => (
@@ -1518,21 +1518,23 @@ const AdminDashboard = () => {
                                             >
                                               <div className="flex items-center justify-between mb-1">
                                                 <span className="font-medium text-gray-900">
-                                                  {request.serviceType}
+                                                  {request?.serviceType || 'Unknown Service'}
                                                 </span>
-                                                <span
-                                                  className={`px-2 py-1 text-xs font-semibold rounded ${
-                                                    request.urgency === 'High'
-                                                      ? 'bg-red-100 text-red-800'
-                                                      : request.urgency === 'Low'
-                                                        ? 'bg-emerald-100 text-emerald-800'
-                                                        : 'bg-blue-100 text-blue-800'
-                                                  }`}
-                                                >
-                                                  {request.urgency}
-                                                </span>
+                                                {request?.urgency && (
+                                                  <span
+                                                    className={`px-2 py-1 text-xs font-semibold rounded ${
+                                                      request.urgency === 'High'
+                                                        ? 'bg-red-100 text-red-800'
+                                                        : request.urgency === 'Low'
+                                                          ? 'bg-emerald-100 text-emerald-800'
+                                                          : 'bg-blue-100 text-blue-800'
+                                                    }`}
+                                                  >
+                                                    {request.urgency}
+                                                  </span>
+                                                )}
                                               </div>
-                                              {request.note && (
+                                              {request?.note && (
                                                 <p className="text-sm text-gray-600">{request.note}</p>
                                               )}
                                             </div>
@@ -1549,20 +1551,24 @@ const AdminDashboard = () => {
                                             Success Fee Request
                                           </h5>
                                           <div className="space-y-1 text-sm">
-                                            <div>
-                                              <span className="text-gray-600">Round:</span>
-                                              <span className="font-medium ml-2">
-                                                {founder.extras.successFeeRequest.round}
-                                              </span>
-                                            </div>
-                                            <div>
-                                              <span className="text-gray-600">Target:</span>
-                                              <span className="font-medium ml-2">
-                                                {formatCurrencyInr(
-                                                  founder.extras.successFeeRequest.targetAmount,
-                                                )}
-                                              </span>
-                                            </div>
+                                            {founder.extras.successFeeRequest.round && (
+                                              <div>
+                                                <span className="text-gray-600">Round:</span>
+                                                <span className="font-medium ml-2">
+                                                  {founder.extras.successFeeRequest.round}
+                                                </span>
+                                              </div>
+                                            )}
+                                            {founder.extras.successFeeRequest.targetAmount !== undefined && founder.extras.successFeeRequest.targetAmount !== null && (
+                                              <div>
+                                                <span className="text-gray-600">Target:</span>
+                                                <span className="font-medium ml-2">
+                                                  {formatCurrencyInr(
+                                                    founder.extras.successFeeRequest.targetAmount,
+                                                  )}
+                                                </span>
+                                              </div>
+                                            )}
                                           </div>
                                         </div>
                                       )}
@@ -1572,22 +1578,26 @@ const AdminDashboard = () => {
                                             Marketplace Listing
                                           </h5>
                                           <div className="space-y-1 text-sm">
-                                            <div>
-                                              <span className="text-gray-600">Raise Amount:</span>
-                                              <span className="font-medium ml-2">
-                                                {formatCurrencyInr(
-                                                  founder.extras.marketplaceListing.raiseAmount,
-                                                )}
-                                              </span>
-                                            </div>
-                                            <div>
-                                              <span className="text-gray-600">Min Ticket:</span>
-                                              <span className="font-medium ml-2">
-                                                {formatCurrencyInr(
-                                                  founder.extras.marketplaceListing.minTicket,
-                                                )}
-                                              </span>
-                                            </div>
+                                            {founder.extras.marketplaceListing.raiseAmount !== undefined && founder.extras.marketplaceListing.raiseAmount !== null && (
+                                              <div>
+                                                <span className="text-gray-600">Raise Amount:</span>
+                                                <span className="font-medium ml-2">
+                                                  {formatCurrencyInr(
+                                                    founder.extras.marketplaceListing.raiseAmount,
+                                                  )}
+                                                </span>
+                                              </div>
+                                            )}
+                                            {founder.extras.marketplaceListing.minTicket !== undefined && founder.extras.marketplaceListing.minTicket !== null && (
+                                              <div>
+                                                <span className="text-gray-600">Min Ticket:</span>
+                                                <span className="font-medium ml-2">
+                                                  {formatCurrencyInr(
+                                                    founder.extras.marketplaceListing.minTicket,
+                                                  )}
+                                                </span>
+                                              </div>
+                                            )}
                                           </div>
                                         </div>
                                       )}

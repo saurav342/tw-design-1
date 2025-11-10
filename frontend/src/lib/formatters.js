@@ -1,10 +1,12 @@
-export const formatCurrency = (amount, options = {}) =>
-  new Intl.NumberFormat('en-US', {
+export const formatCurrency = (amount, options = {}) => {
+  if (amount === null || amount === undefined || isNaN(amount)) return '—';
+  return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',
     maximumFractionDigits: 0,
     ...options,
   }).format(amount);
+};
 
 export const formatPercentage = (value, precision = 0) => `${value.toFixed(precision)}%`;
 

@@ -1,5 +1,4 @@
-const { randomUUID } = require('crypto');
-const store = require('../data/store');
+const FounderExtras = require('./schemas/FounderExtras');
 
 const createDefaultFounderExtras = () => ({
   marketplaceListing: null,
@@ -7,101 +6,116 @@ const createDefaultFounderExtras = () => ({
   serviceRequests: [],
 });
 
-const cloneExtras = (extras) => ({
-  marketplaceListing: extras.marketplaceListing ? { ...extras.marketplaceListing } : null,
-  successFeeRequest: extras.successFeeRequest ? { ...extras.successFeeRequest } : null,
-  serviceRequests: Array.isArray(extras.serviceRequests)
-    ? extras.serviceRequests.map((item) => ({ ...item }))
-    : [],
-});
+const cloneExtras = (extras) => {
+  if (!extras) return createDefaultFounderExtras();
+  const extrasObj = extras.toObject ? extras.toObject() : extras;
+  // Remove MongoDB internal fields
+  const { _id, __v, createdAt, updatedAt, ...cleanExtras } = extrasObj;
+  return {
+    marketplaceListing: cleanExtras.marketplaceListing ? { ...cleanExtras.marketplaceListing } : null,
+    successFeeRequest: cleanExtras.successFeeRequest ? { ...cleanExtras.successFeeRequest } : null,
+    serviceRequests: Array.isArray(cleanExtras.serviceRequests)
+      ? cleanExtras.serviceRequests.map((item) => ({ ...item }))
+      : [],
+  };
+};
 
-const ensureExtrasRecord = (founderId) => {
+const ensureExtrasRecord = async (founderId) => {
   if (!founderId) {
     throw new Error('founderId is required.');
   }
 
-  if (!store.founderExtras) {
-    store.founderExtras = {};
+  let extras = await FounderExtras.findOne({ founderId });
+  if (!extras) {
+    extras = new FounderExtras({
+      founderId,
+      marketplaceListing: null,
+      successFeeRequest: null,
+      serviceRequests: [],
+    });
+    await extras.save();
   }
 
-  if (!store.founderExtras[founderId]) {
-    store.founderExtras[founderId] = createDefaultFounderExtras();
-  }
-
-  return store.founderExtras[founderId];
+  return cloneExtras(extras);
 };
 
-const persistExtras = (founderId, extras) => {
-  store.founderExtras[founderId] = {
-    marketplaceListing: extras.marketplaceListing ? { ...extras.marketplaceListing } : null,
-    successFeeRequest: extras.successFeeRequest ? { ...extras.successFeeRequest } : null,
-    serviceRequests: Array.isArray(extras.serviceRequests)
-      ? extras.serviceRequests.map((item) => ({ ...item }))
-      : [],
-  };
+const persistExtras = async (founderId, extrasData) => {
+  const extras = await FounderExtras.findOneAndUpdate(
+    { founderId },
+    {
+      marketplaceListing: extrasData.marketplaceListing || null,
+      successFeeRequest: extrasData.successFeeRequest || null,
+      serviceRequests: extrasData.serviceRequests || [],
+    },
+    { new: true, upsert: true }
+  );
 
-  return cloneExtras(store.founderExtras[founderId]);
+  return cloneExtras(extras);
 };
 
-const listFounderExtras = () =>
-  Object.entries(store.founderExtras ?? {}).map(([founderId, extras]) => ({
-    founderId,
-    extras: cloneExtras(extras),
-  }));
-
-const getFounderExtras = (founderId) => {
-  const record = ensureExtrasRecord(founderId);
-  return cloneExtras(record);
+const listFounderExtras = async () => {
+  const allExtras = await FounderExtras.find({});
+  return allExtras.map((extras) => {
+    const extrasObj = extras.toObject ? extras.toObject() : extras;
+    return {
+      founderId: extrasObj.founderId,
+      extras: cloneExtras(extras),
+    };
+  });
 };
 
-const upsertMarketplaceListing = (founderId, listing) => {
-  const record = ensureExtrasRecord(founderId);
+const getFounderExtras = async (founderId) => {
+  const record = await ensureExtrasRecord(founderId);
+  return record;
+};
+
+const upsertMarketplaceListing = async (founderId, listing) => {
+  const record = await ensureExtrasRecord(founderId);
   const normalized = listing
     ? {
         ...listing,
-        id: listing.id ?? `marketplace-${randomUUID()}`,
-        lastUpdated: listing.lastUpdated ?? new Date().toISOString(),
+        id: listing.id || `marketplace-${Date.now()}`,
+        lastUpdated: listing.lastUpdated || new Date().toISOString(),
       }
     : null;
+
   record.marketplaceListing = normalized;
-  return persistExtras(founderId, record);
+  return await persistExtras(founderId, record);
 };
 
-const recordSuccessFeeRequest = (founderId, request) => {
-  const record = ensureExtrasRecord(founderId);
-  if (!request) {
-    record.successFeeRequest = null;
-    return persistExtras(founderId, record);
-  }
-
-  record.successFeeRequest = {
-    ...request,
-    createdAt: request.createdAt ?? new Date().toISOString(),
-  };
-  return persistExtras(founderId, record);
+const recordSuccessFeeRequest = async (founderId, request) => {
+  const record = await ensureExtrasRecord(founderId);
+  record.successFeeRequest = request
+    ? {
+        ...request,
+        createdAt: request.createdAt || new Date().toISOString(),
+      }
+    : null;
+  return await persistExtras(founderId, record);
 };
 
-const addServiceRequest = (founderId, request) => {
+const addServiceRequest = async (founderId, request) => {
   if (!request) {
     throw new Error('A service request payload is required.');
   }
-  const record = ensureExtrasRecord(founderId);
-  const now = new Date().toISOString();
+
+  const record = await ensureExtrasRecord(founderId);
   const normalized = {
     ...request,
-    id: request.id ?? `service-${randomUUID()}`,
-    createdAt: request.createdAt ?? now,
+    id: request.id || `service-${Date.now()}`,
+    createdAt: request.createdAt || new Date().toISOString(),
   };
 
-  const queue = Array.isArray(record.serviceRequests) ? [...record.serviceRequests] : [];
-  queue.push(normalized);
-  record.serviceRequests = queue;
-  return persistExtras(founderId, record);
+  const serviceRequests = Array.isArray(record.serviceRequests) ? [...record.serviceRequests] : [];
+  serviceRequests.push(normalized);
+  record.serviceRequests = serviceRequests;
+
+  return await persistExtras(founderId, record);
 };
 
-const clearFounderExtras = (founderId) => {
-  if (!founderId || !store.founderExtras) return;
-  delete store.founderExtras[founderId];
+const clearFounderExtras = async (founderId) => {
+  if (!founderId) return;
+  await FounderExtras.findOneAndDelete({ founderId });
 };
 
 module.exports = {

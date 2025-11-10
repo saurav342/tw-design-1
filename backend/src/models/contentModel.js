@@ -1,80 +1,156 @@
-const { randomUUID } = require('crypto');
-const store = require('../data/store');
+const { Team, Testimonial, FAQ, News, ContentSettings } = require('./schemas/Content');
 
-const getStats = () => store.stats;
+// Helper to sanitize documents (convert _id to id)
+const sanitizeDocument = (doc) => {
+  if (!doc) return null;
+  const docObj = doc.toObject ? doc.toObject() : doc;
+  if (docObj._id) {
+    docObj.id = docObj._id.toString();
+    delete docObj._id;
+  }
+  delete docObj.__v;
+  return docObj;
+};
 
-const updateStats = (metrics) => {
-  store.stats = {
-    metrics,
-    lastUpdated: new Date().toISOString(),
+// Stats
+const getStats = async () => {
+  let settings = await ContentSettings.findOne({ _id: 'settings' });
+  if (!settings) {
+    settings = new ContentSettings({
+      _id: 'settings',
+      stats: {
+        metrics: [],
+        lastUpdated: new Date(),
+      },
+    });
+    await settings.save();
+  }
+  // Convert stats to plain object and ensure lastUpdated is a string
+  const stats = settings.stats.toObject ? settings.stats.toObject() : settings.stats;
+  return {
+    ...stats,
+    lastUpdated: stats.lastUpdated instanceof Date ? stats.lastUpdated.toISOString() : stats.lastUpdated,
   };
-  return store.stats;
 };
 
-const getTeam = () => store.team;
-
-const setTeam = (team) => {
-  store.team = team.map((member) => ({
-    id: member.id ?? randomUUID(),
-    ...member,
-  }));
-  return store.team;
+const updateStats = async (metrics) => {
+  let settings = await ContentSettings.findOne({ _id: 'settings' });
+  if (!settings) {
+    settings = new ContentSettings({
+      _id: 'settings',
+      stats: {
+        metrics,
+        lastUpdated: new Date(),
+      },
+    });
+  } else {
+    settings.stats = {
+      metrics,
+      lastUpdated: new Date(),
+    };
+  }
+  await settings.save();
+  // Convert stats to plain object and ensure lastUpdated is a string
+  const stats = settings.stats.toObject ? settings.stats.toObject() : settings.stats;
+  return {
+    ...stats,
+    lastUpdated: stats.lastUpdated instanceof Date ? stats.lastUpdated.toISOString() : stats.lastUpdated,
+  };
 };
 
-const getTestimonials = () => store.testimonials;
+// Team
+const getTeam = async () => {
+  const team = await Team.find({}).sort({ createdAt: -1 });
+  return team.map(sanitizeDocument);
+};
 
-const addTestimonial = (testimonial) => {
-  const newItem = {
-    id: randomUUID(),
+const setTeam = async (team) => {
+  // Delete all existing team members
+  await Team.deleteMany({});
+  
+  // Insert new team members
+  const teamMembers = team.map((member) => {
+    const { id, ...memberData } = member; // Remove id if present
+    return new Team(memberData);
+  });
+  await Team.insertMany(teamMembers);
+  
+  return teamMembers.map(sanitizeDocument);
+};
+
+// Testimonials
+const getTestimonials = async () => {
+  const testimonials = await Testimonial.find({}).sort({ createdAt: -1 });
+  return testimonials.map(sanitizeDocument);
+};
+
+const addTestimonial = async (testimonial) => {
+  const newTestimonial = new Testimonial({
     name: testimonial.name,
     role: testimonial.role,
     quote: testimonial.quote,
-    createdAt: new Date().toISOString(),
-  };
-  store.testimonials.push(newItem);
-  return newItem;
+  });
+  await newTestimonial.save();
+  return sanitizeDocument(newTestimonial);
 };
 
-const removeTestimonial = (id) => {
-  const index = store.testimonials.findIndex((item) => item.id === id);
-  if (index === -1) {
+const removeTestimonial = async (id) => {
+  const testimonial = await Testimonial.findByIdAndDelete(id);
+  if (!testimonial) {
     throw new Error('Testimonial not found');
   }
-  const [removed] = store.testimonials.splice(index, 1);
-  return removed;
+  return sanitizeDocument(testimonial);
 };
 
-const getFaqs = (audience) => {
-  if (!audience) return store.faqs;
-  return store.faqs.filter((item) => item.audience === audience || item.audience === 'general');
+// FAQs
+const getFaqs = async (audience) => {
+  let faqs;
+  if (!audience) {
+    faqs = await FAQ.find({}).sort({ createdAt: -1 });
+  } else {
+    faqs = await FAQ.find({
+      $or: [{ audience }, { audience: 'general' }],
+    }).sort({ createdAt: -1 });
+  }
+  return faqs.map(sanitizeDocument);
 };
 
-const addFaq = (faq) => {
-  const newFaq = {
-    id: randomUUID(),
+const addFaq = async (faq) => {
+  const newFaq = new FAQ({
     audience: faq.audience ?? 'general',
     question: faq.question,
     answer: faq.answer,
-    createdAt: new Date().toISOString(),
-  };
-  store.faqs.push(newFaq);
-  return newFaq;
+  });
+  await newFaq.save();
+  return sanitizeDocument(newFaq);
 };
 
-const removeFaq = (id) => {
-  const index = store.faqs.findIndex((item) => item.id === id);
-  if (index === -1) {
+const removeFaq = async (id) => {
+  const faq = await FAQ.findByIdAndDelete(id);
+  if (!faq) {
     throw new Error('FAQ not found');
   }
-  const [removed] = store.faqs.splice(index, 1);
-  return removed;
+  return sanitizeDocument(faq);
 };
 
-const getNews = () => store.news;
+// News
+const getNews = async () => {
+  const news = await News.find({}).sort({ createdAt: -1 });
+  return news.map(sanitizeDocument);
+};
 
-const setNews = (newsItems) => {
-  store.news = newsItems.map((item) => ({ id: item.id ?? randomUUID(), ...item }));
-  return store.news;
+const setNews = async (newsItems) => {
+  // Delete all existing news
+  await News.deleteMany({});
+  
+  // Insert new news items
+  const newsDocs = newsItems.map((item) => {
+    const { id, ...itemData } = item; // Remove id if present
+    return new News(itemData);
+  });
+  await News.insertMany(newsDocs);
+  
+  return newsDocs.map(sanitizeDocument);
 };
 
 module.exports = {

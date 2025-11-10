@@ -1,7 +1,7 @@
 const { verifyToken } = require('../utils/jwt');
 const { findById, sanitizeUser } = require('../models/userModel');
 
-const authenticate = (req, res, next) => {
+const authenticate = async (req, res, next) => {
   const authHeader = req.headers.authorization;
   if (!authHeader) {
     return res.status(401).json({ message: 'Authentication required.' });
@@ -14,7 +14,7 @@ const authenticate = (req, res, next) => {
 
   try {
     const decoded = verifyToken(token);
-    const user = findById(decoded.sub);
+    const user = await findById(decoded.sub);
 
     if (!user) {
       return res.status(401).json({ message: 'Account no longer exists.' });

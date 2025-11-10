@@ -1,36 +1,47 @@
 const { randomUUID } = require('crypto');
-const store = require('../data/store');
+const PasswordReset = require('./schemas/PasswordReset');
 const { findByEmail } = require('./userModel');
 
 const EXPIRY_MINUTES = 30;
 
-const createResetToken = (email) => {
-  const user = findByEmail(email);
+const createResetToken = async (email) => {
+  const user = await findByEmail(email);
   if (!user) {
     throw new Error('No account found for that email.');
   }
 
   const token = randomUUID();
-  const expiresAt = Date.now() + EXPIRY_MINUTES * 60 * 1000;
+  const expiresAt = new Date(Date.now() + EXPIRY_MINUTES * 60 * 1000);
 
-  store.passwordResets.push({ token, email: user.email, expiresAt });
-  return { token, expiresAt, email: user.email };
+  // Remove any existing tokens for this email
+  await PasswordReset.deleteMany({ email: user.email });
+
+  const resetToken = new PasswordReset({
+    token,
+    email: user.email,
+    expiresAt,
+  });
+
+  await resetToken.save();
+  return { token, expiresAt: expiresAt.getTime(), email: user.email };
 };
 
-const consumeResetToken = (token) => {
-  const recordIndex = store.passwordResets.findIndex((entry) => entry.token === token);
-  if (recordIndex === -1) {
+const consumeResetToken = async (token) => {
+  const resetToken = await PasswordReset.findOne({ token });
+
+  if (!resetToken) {
     throw new Error('Reset token not found or already used.');
   }
 
-  const record = store.passwordResets[recordIndex];
-  if (Date.now() > record.expiresAt) {
-    store.passwordResets.splice(recordIndex, 1);
+  if (new Date() > resetToken.expiresAt) {
+    await PasswordReset.findByIdAndDelete(resetToken._id);
     throw new Error('Reset token has expired.');
   }
 
-  store.passwordResets.splice(recordIndex, 1);
-  return record.email;
+  const email = resetToken.email;
+  await PasswordReset.findByIdAndDelete(resetToken._id);
+
+  return email;
 };
 
 module.exports = {

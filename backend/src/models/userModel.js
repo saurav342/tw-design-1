@@ -1,18 +1,34 @@
 const bcrypt = require('bcryptjs');
-const { randomUUID } = require('crypto');
-const store = require('../data/store');
+const User = require('./schemas/User');
 
 const sanitizeUser = (user) => {
   if (!user) return null;
-  const { passwordHash, ...rest } = user;
+  const userObj = user.toObject ? user.toObject() : user;
+  const { passwordHash, __v, ...rest } = userObj;
+  // Convert _id to id for consistency with frontend
+  if (rest._id) {
+    rest.id = rest._id.toString();
+    delete rest._id;
+  }
   return rest;
 };
 
-const findByEmail = (email) => store.users.find((user) => user.email.toLowerCase() === email.toLowerCase());
+const findByEmail = async (email) => {
+  const user = await User.findOne({ email: email.toLowerCase() });
+  return user;
+};
 
-const findById = (id) => store.users.find((user) => user.id === id);
+const findById = async (id) => {
+  if (!id) return null;
+  // MongoDB _id can be either ObjectId or string
+  const user = await User.findById(id);
+  return user;
+};
 
-const getAllUsers = () => store.users.map(sanitizeUser);
+const getAllUsers = async () => {
+  const users = await User.find({}).sort({ createdAt: -1 });
+  return users.map(sanitizeUser);
+};
 
 const createUser = async ({
   fullName,
@@ -25,34 +41,31 @@ const createUser = async ({
   founderDetails = null,
   adminDetails = null,
 }) => {
-  if (findByEmail(email)) {
+  const existingUser = await findByEmail(email);
+  if (existingUser) {
     throw new Error('Account already exists for this email.');
   }
 
   const passwordHash = await bcrypt.hash(password, 10);
-  const now = new Date().toISOString();
 
-  const user = {
-    id: randomUUID(),
+  const user = new User({
     fullName,
     email: email.toLowerCase(),
+    passwordHash,
     role,
     organization,
     notes,
     investorDetails,
     founderDetails,
     adminDetails,
-    passwordHash,
-    createdAt: now,
-    updatedAt: now,
-  };
+  });
 
-  store.users.push(user);
+  await user.save();
   return sanitizeUser(user);
 };
 
 const verifyUser = async ({ email, password, role }) => {
-  const user = findByEmail(email);
+  const user = await findByEmail(email);
   if (!user) {
     throw new Error('Invalid credentials.');
   }
@@ -70,34 +83,36 @@ const verifyUser = async ({ email, password, role }) => {
 };
 
 const updatePassword = async (id, password) => {
-  const user = findById(id);
+  const user = await User.findById(id);
   if (!user) {
     throw new Error('User not found');
   }
 
   user.passwordHash = await bcrypt.hash(password, 10);
-  user.updatedAt = new Date().toISOString();
+  await user.save();
   return sanitizeUser(user);
 };
 
-const updateUser = (id, updates) => {
-  const user = findById(id);
+const updateUser = async (id, updates) => {
+  const user = await User.findByIdAndUpdate(
+    id,
+    { ...updates, updatedAt: new Date() },
+    { new: true, runValidators: true }
+  );
+
   if (!user) {
     throw new Error('User not found');
   }
 
-  Object.assign(user, { ...updates, updatedAt: new Date().toISOString() });
   return sanitizeUser(user);
 };
 
-const deleteUser = (id) => {
-  const index = store.users.findIndex((user) => user.id === id);
-  if (index === -1) {
+const deleteUser = async (id) => {
+  const user = await User.findByIdAndDelete(id);
+  if (!user) {
     throw new Error('User not found');
   }
-
-  const [removed] = store.users.splice(index, 1);
-  return sanitizeUser(removed);
+  return sanitizeUser(user);
 };
 
 module.exports = {

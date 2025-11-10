@@ -1,33 +1,60 @@
-const { randomUUID } = require('crypto');
-const store = require('../data/store');
+const FounderIntake = require('./schemas/FounderIntake');
 const { ensureExtrasRecord } = require('./founderExtrasModel');
 
-const sanitizeIntake = (record) => ({ ...record });
+const sanitizeIntake = (record) => {
+  if (!record) return null;
+  const recordObj = record.toObject ? record.toObject() : record;
+  // Convert _id to id for consistency with frontend
+  if (recordObj._id) {
+    recordObj.id = recordObj._id.toString();
+    delete recordObj._id;
+  }
+  // Remove MongoDB internal fields
+  delete recordObj.__v;
+  return recordObj;
+};
 
-const listFounderIntakes = () => store.founderIntakes.map(sanitizeIntake);
+const listFounderIntakes = async () => {
+  const intakes = await FounderIntake.find({}).sort({ createdAt: -1 });
+  return intakes.map(sanitizeIntake);
+};
 
-const createFounderIntake = (input = {}) => {
-  const now = new Date().toISOString();
-  const id = input.id ?? `founder-${randomUUID()}`;
-
+const createFounderIntake = async (input = {}) => {
   const normalized = {
     ...input,
-    id,
     status: input.status ?? 'pending',
-    createdAt: input.createdAt ?? now,
-    updatedAt: now,
   };
 
-  const existingIndex = store.founderIntakes.findIndex((item) => item.id === id);
-  if (existingIndex >= 0) {
-    store.founderIntakes.splice(existingIndex, 1, normalized);
-  } else {
-    store.founderIntakes.unshift(normalized);
+  // Remove id from normalized if it exists (MongoDB will generate _id)
+  delete normalized.id;
+
+  // Check if ID is provided for update (convert to MongoDB _id format if needed)
+  if (input.id) {
+    try {
+      const existing = await FounderIntake.findById(input.id);
+      if (existing) {
+        const updated = await FounderIntake.findByIdAndUpdate(
+          input.id,
+          normalized,
+          { new: true, runValidators: true }
+        );
+        await ensureExtrasRecord(updated._id.toString());
+        return sanitizeIntake(updated);
+      }
+    } catch (error) {
+      // If ID format is invalid, continue to create new
+      console.log('Invalid ID format, creating new intake');
+    }
   }
 
-  ensureExtrasRecord(id);
+  // Create new intake
+  const intake = new FounderIntake(normalized);
+  await intake.save();
 
-  return sanitizeIntake(normalized);
+  // Ensure extras record exists
+  await ensureExtrasRecord(intake._id.toString());
+
+  return sanitizeIntake(intake);
 };
 
 module.exports = {

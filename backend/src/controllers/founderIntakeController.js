@@ -30,7 +30,7 @@ const buildSecondFounder = (input) => {
   return hasContent ? details : null;
 };
 
-const submitFounderIntake = (req, res) => {
+const submitFounderIntake = async (req, res) => {
   try {
     const payload = req.body ?? {};
 
@@ -103,7 +103,7 @@ const submitFounderIntake = (req, res) => {
       aiSummary: payload.aiSummary || '',
     };
 
-    const created = createFounderIntake(normalized);
+    const created = await createFounderIntake(normalized);
 
     // Automatically create portfolio item from founder intake
     try {
@@ -124,7 +124,7 @@ const submitFounderIntake = (req, res) => {
         status: 'Active',
       };
 
-      addPortfolioItem(portfolioItem);
+      await addPortfolioItem(portfolioItem);
     } catch (portfolioError) {
       // Log error but don't fail the founder intake submission
       console.error('Failed to create portfolio item:', portfolioError);
@@ -152,9 +152,13 @@ const submitFounderIntake = (req, res) => {
   }
 };
 
-const getFounderIntakes = (req, res) => {
-  const items = listFounderIntakes();
-  return res.status(200).json({ items });
+const getFounderIntakes = async (req, res) => {
+  try {
+    const items = await listFounderIntakes();
+    return res.status(200).json({ items });
+  } catch (error) {
+    return res.status(500).json({ message: error.message || 'Unable to fetch founder intakes.' });
+  }
 };
 
 module.exports = {

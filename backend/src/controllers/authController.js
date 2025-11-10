@@ -102,7 +102,7 @@ const sendEmailVerification = async (req, res) => {
 /**
  * Verify email with token
  */
-const verifyEmail = (req, res) => {
+const verifyEmail = async (req, res) => {
   try {
     const { token } = req.body;
 
@@ -110,7 +110,7 @@ const verifyEmail = (req, res) => {
       return res.status(400).json({ message: 'Verification token is required.' });
     }
 
-    const { email, role } = verifyToken(token);
+    const { email, role } = await verifyToken(token);
 
     return res.status(200).json({
       message: 'Email verified successfully.',
@@ -126,7 +126,7 @@ const verifyEmail = (req, res) => {
 /**
  * Check if email is verified
  */
-const checkEmailVerification = (req, res) => {
+const checkEmailVerification = async (req, res) => {
   try {
     const { email, role } = req.query;
 
@@ -134,7 +134,7 @@ const checkEmailVerification = (req, res) => {
       return res.status(400).json({ message: 'Email and role are required.' });
     }
 
-    const verified = isEmailVerified(email, role);
+    const verified = await isEmailVerified(email, role);
 
     return res.status(200).json({
       email: email.toLowerCase(),
@@ -166,7 +166,7 @@ const signup = async (req, res) => {
 
     // Check if email is verified (only for investor role, founder doesn't use this endpoint)
     if (role === 'investor') {
-      const emailVerified = isEmailVerified(email, role);
+      const emailVerified = await isEmailVerified(email, role);
       if (!emailVerified) {
         return res.status(400).json({ 
           message: 'Email not verified. Please verify your email before signing up.' 

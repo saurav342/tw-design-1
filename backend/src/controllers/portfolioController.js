@@ -5,32 +5,36 @@ const {
   updatePortfolioItem,
 } = require('../models/portfolioModel');
 
-const getPortfolio = (req, res) => {
-  const items = listPortfolio();
-  return res.status(200).json({ items });
+const getPortfolio = async (req, res) => {
+  try {
+    const items = await listPortfolio();
+    return res.status(200).json({ items });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
 };
 
-const createPortfolio = (req, res) => {
+const createPortfolio = async (req, res) => {
   try {
-    const newItem = addPortfolioItem(req.body ?? {});
+    const newItem = await addPortfolioItem(req.body ?? {});
     return res.status(201).json({ item: newItem });
   } catch (error) {
     return res.status(400).json({ message: error.message });
   }
 };
 
-const editPortfolio = (req, res) => {
+const editPortfolio = async (req, res) => {
   try {
-    const updated = updatePortfolioItem(req.params.id, req.body ?? {});
+    const updated = await updatePortfolioItem(req.params.id, req.body ?? {});
     return res.status(200).json({ item: updated });
   } catch (error) {
     return res.status(404).json({ message: error.message });
   }
 };
 
-const deletePortfolio = (req, res) => {
+const deletePortfolio = async (req, res) => {
   try {
-    const removed = removePortfolioItem(req.params.id);
+    const removed = await removePortfolioItem(req.params.id);
     return res.status(200).json({ item: removed });
   } catch (error) {
     return res.status(404).json({ message: error.message });

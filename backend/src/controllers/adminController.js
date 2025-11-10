@@ -1,9 +1,20 @@
-const store = require('../data/store');
 const { getAllUsers, updateUser, deleteUser } = require('../models/userModel');
+const FounderIntake = require('../models/schemas/FounderIntake');
+const FounderExtras = require('../models/schemas/FounderExtras');
+const User = require('../models/schemas/User');
+const Portfolio = require('../models/schemas/Portfolio');
+const { Testimonial, FAQ } = require('../models/schemas/Content');
 
-const getUsers = (req, res) => res.status(200).json({ items: getAllUsers() });
+const getUsers = async (req, res) => {
+  try {
+    const items = await getAllUsers();
+    return res.status(200).json({ items });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
 
-const updateUserController = (req, res) => {
+const updateUserController = async (req, res) => {
   try {
     const { id } = req.params;
     const { role, organization, notes } = req.body || {};
@@ -11,65 +22,85 @@ const updateUserController = (req, res) => {
     if (role) updates.role = role;
     if (organization) updates.organization = organization;
     if (notes) updates.notes = notes;
-    const user = updateUser(id, updates);
+    const user = await updateUser(id, updates);
     return res.status(200).json({ item: user });
   } catch (error) {
     return res.status(400).json({ message: error.message });
   }
 };
 
-const deleteUserController = (req, res) => {
+const deleteUserController = async (req, res) => {
   try {
-    const user = deleteUser(req.params.id);
+    const user = await deleteUser(req.params.id);
     return res.status(200).json({ item: user });
   } catch (error) {
     return res.status(404).json({ message: error.message });
   }
 };
 
-const getSiteMetrics = (req, res) => {
-  const metrics = {
-    totalUsers: store.users.length,
-    investors: store.users.filter((user) => user.role === 'investor').length,
-    founders: store.users.filter((user) => user.role === 'founder').length,
-    admins: store.users.filter((user) => user.role === 'admin').length,
-    portfolioCompanies: store.portfolio.length,
-    testimonials: store.testimonials.length,
-    faqs: store.faqs.length,
-  };
+const getSiteMetrics = async (req, res) => {
+  try {
+    const [totalUsers, investors, founders, admins, portfolioCompanies, testimonials, faqs] = await Promise.all([
+      User.countDocuments(),
+      User.countDocuments({ role: 'investor' }),
+      User.countDocuments({ role: 'founder' }),
+      User.countDocuments({ role: 'admin' }),
+      Portfolio.countDocuments(),
+      Testimonial.countDocuments(),
+      FAQ.countDocuments(),
+    ]);
 
-  return res.status(200).json({ metrics });
+    const metrics = {
+      totalUsers,
+      investors,
+      founders,
+      admins,
+      portfolioCompanies,
+      testimonials,
+      faqs,
+    };
+
+    return res.status(200).json({ metrics });
+  } catch (error) {
+    return res.status(500).json({ message: error.message || 'Unable to fetch metrics' });
+  }
 };
 
-const getAnalytics = (req, res) => {
+const getAnalytics = async (req, res) => {
   try {
     const now = new Date();
     const last30Days = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
     const last7Days = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
 
     // User analytics
-    const recentFounders = store.users.filter(
-      (u) => u.role === 'founder' && new Date(u.createdAt) >= last30Days
-    );
-    const recentInvestors = store.users.filter(
-      (u) => u.role === 'investor' && new Date(u.createdAt) >= last30Days
-    );
+    const [recentFounders, recentInvestors, totalUsers, founderUsers, investorUsers, adminUsers] = await Promise.all([
+      User.countDocuments({ role: 'founder', createdAt: { $gte: last30Days } }),
+      User.countDocuments({ role: 'investor', createdAt: { $gte: last30Days } }),
+      User.countDocuments(),
+      User.countDocuments({ role: 'founder' }),
+      User.countDocuments({ role: 'investor' }),
+      User.countDocuments({ role: 'admin' }),
+    ]);
 
     // Founder intake analytics
-    const pendingIntakes = store.founderIntakes.filter((f) => f.status === 'pending');
-    const approvedIntakes = store.founderIntakes.filter((f) => f.status === 'approved');
-    const recentIntakes = store.founderIntakes.filter(
-      (f) => new Date(f.createdAt) >= last7Days
-    );
+    const [totalIntakes, pendingIntakes, approvedIntakes, recentIntakes] = await Promise.all([
+      FounderIntake.countDocuments(),
+      FounderIntake.countDocuments({ status: 'pending' }),
+      FounderIntake.countDocuments({ status: 'approved' }),
+      FounderIntake.countDocuments({ createdAt: { $gte: last7Days } }),
+    ]);
 
     // Service request analytics
+    const allExtras = await FounderExtras.find({});
     let totalServiceRequests = 0;
     let highUrgencyRequests = 0;
     let successFeeRequests = 0;
     let marketplaceListings = 0;
     let recentServiceRequests = 0;
+    let activeFounders = 0;
+    let engagedFounders = 0;
 
-    Object.values(store.founderExtras || {}).forEach((extras) => {
+    allExtras.forEach((extras) => {
       if (Array.isArray(extras.serviceRequests)) {
         totalServiceRequests += extras.serviceRequests.length;
         highUrgencyRequests += extras.serviceRequests.filter(
@@ -78,39 +109,44 @@ const getAnalytics = (req, res) => {
         recentServiceRequests += extras.serviceRequests.filter(
           (r) => new Date(r.createdAt) >= last7Days
         ).length;
+        if (extras.serviceRequests.length > 0) engagedFounders++;
       }
       if (extras.successFeeRequest) successFeeRequests++;
       if (extras.marketplaceListing) marketplaceListings++;
+      if (
+        (Array.isArray(extras.serviceRequests) && extras.serviceRequests.length > 0) ||
+        extras.successFeeRequest ||
+        extras.marketplaceListing
+      ) {
+        activeFounders++;
+      }
     });
 
-    // Calculate revenue metrics (mock calculations based on service requests)
+    // Calculate revenue metrics
     const estimatedRevenue = {
-      services: totalServiceRequests * 2500, // Avg $2.5k per service
-      successFees: successFeeRequests * 50000, // Avg $50k per success fee engagement
-      marketplace: marketplaceListings * 5000, // Avg $5k per listing
+      services: totalServiceRequests * 2500,
+      successFees: successFeeRequests * 50000,
+      marketplace: marketplaceListings * 5000,
     };
 
     const analytics = {
       users: {
-        total: store.users.length,
-        founders: store.users.filter((u) => u.role === 'founder').length,
-        investors: store.users.filter((u) => u.role === 'investor').length,
-        admins: store.users.filter((u) => u.role === 'admin').length,
+        total: totalUsers,
+        founders: founderUsers,
+        investors: investorUsers,
+        admins: adminUsers,
         growth: {
-          last30Days: recentFounders.length + recentInvestors.length,
-          foundersLast30Days: recentFounders.length,
-          investorsLast30Days: recentInvestors.length,
+          last30Days: recentFounders + recentInvestors,
+          foundersLast30Days: recentFounders,
+          investorsLast30Days: recentInvestors,
         },
       },
       founderIntakes: {
-        total: store.founderIntakes.length,
-        pending: pendingIntakes.length,
-        approved: approvedIntakes.length,
-        recentLast7Days: recentIntakes.length,
-        conversionRate:
-          store.founderIntakes.length > 0
-            ? ((approvedIntakes.length / store.founderIntakes.length) * 100).toFixed(1)
-            : 0,
+        total: totalIntakes,
+        pending: pendingIntakes,
+        approved: approvedIntakes,
+        recentLast7Days: recentIntakes,
+        conversionRate: totalIntakes > 0 ? ((approvedIntakes / totalIntakes) * 100).toFixed(1) : 0,
       },
       services: {
         totalRequests: totalServiceRequests,
@@ -118,20 +154,14 @@ const getAnalytics = (req, res) => {
         successFeeRequests,
         marketplaceListings,
         recentLast7Days: recentServiceRequests,
-        averagePerFounder: (
-          totalServiceRequests /
-          Math.max(store.founderIntakes.length, 1)
-        ).toFixed(1),
+        averagePerFounder: (totalServiceRequests / Math.max(totalIntakes, 1)).toFixed(1),
       },
       revenue: {
         estimated: {
           services: estimatedRevenue.services,
           successFees: estimatedRevenue.successFees,
           marketplace: estimatedRevenue.marketplace,
-          total:
-            estimatedRevenue.services +
-            estimatedRevenue.successFees +
-            estimatedRevenue.marketplace,
+          total: estimatedRevenue.services + estimatedRevenue.successFees + estimatedRevenue.marketplace,
         },
         breakdown: [
           {
@@ -152,22 +182,8 @@ const getAnalytics = (req, res) => {
         ],
       },
       engagement: {
-        activeFounders: Object.keys(store.founderExtras || {}).filter((founderId) => {
-          const extras = store.founderExtras[founderId];
-          return (
-            (Array.isArray(extras?.serviceRequests) && extras.serviceRequests.length > 0) ||
-            extras?.successFeeRequest ||
-            extras?.marketplaceListing
-          );
-        }).length,
-        engagementRate: (
-          (Object.keys(store.founderExtras || {}).filter((founderId) => {
-            const extras = store.founderExtras[founderId];
-            return Array.isArray(extras?.serviceRequests) && extras.serviceRequests.length > 0;
-          }).length /
-            Math.max(store.founderIntakes.length, 1)) *
-          100
-        ).toFixed(1),
+        activeFounders,
+        engagementRate: ((engagedFounders / Math.max(totalIntakes, 1)) * 100).toFixed(1),
       },
     };
 
@@ -177,56 +193,63 @@ const getAnalytics = (req, res) => {
   }
 };
 
-const getActivityLog = (req, res) => {
+const getActivityLog = async (req, res) => {
   try {
     const limit = parseInt(req.query.limit) || 50;
     const activities = [];
 
     // User activities
-    store.users
-      .slice()
-      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-      .slice(0, 20)
-      .forEach((user) => {
-        activities.push({
-          id: `user-${user.id}`,
-          type: 'user_registration',
+    const recentUsers = await User.find({})
+      .sort({ createdAt: -1 })
+      .limit(20)
+      .select('fullName email role createdAt _id');
+    
+    recentUsers.forEach((user) => {
+      activities.push({
+        id: `user-${user._id}`,
+        type: 'user_registration',
+        role: user.role,
+        timestamp: user.createdAt,
+        description: `${user.fullName} registered as ${user.role}`,
+        user: {
+          id: user._id.toString(),
+          name: user.fullName,
+          email: user.email,
           role: user.role,
-          timestamp: user.createdAt,
-          description: `${user.fullName} registered as ${user.role}`,
-          user: {
-            id: user.id,
-            name: user.fullName,
-            email: user.email,
-            role: user.role,
-          },
-        });
+        },
       });
+    });
 
     // Founder intake activities
-    store.founderIntakes
-      .slice()
-      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-      .slice(0, 20)
-      .forEach((intake) => {
-        activities.push({
-          id: `intake-${intake.id}`,
-          type: 'founder_intake',
+    const recentIntakes = await FounderIntake.find({})
+      .sort({ createdAt: -1 })
+      .limit(20)
+      .select('fullName startupName status createdAt _id');
+    
+    recentIntakes.forEach((intake) => {
+      activities.push({
+        id: `intake-${intake._id}`,
+        type: 'founder_intake',
+        status: intake.status,
+        timestamp: intake.createdAt,
+        description: `${intake.startupName} submitted intake form`,
+        founder: {
+          id: intake._id.toString(),
+          name: intake.fullName,
+          startupName: intake.startupName,
           status: intake.status,
-          timestamp: intake.createdAt,
-          description: `${intake.startupName} submitted intake form`,
-          founder: {
-            id: intake.id,
-            name: intake.fullName,
-            startupName: intake.startupName,
-            status: intake.status,
-          },
-        });
+        },
       });
+    });
 
     // Service request activities
-    Object.entries(store.founderExtras || {}).forEach(([founderId, extras]) => {
-      const founder = store.founderIntakes.find((f) => f.id === founderId);
+    const allExtras = await FounderExtras.find({});
+    const allIntakes = await FounderIntake.find({}).select('_id fullName startupName');
+    const intakeMap = new Map(allIntakes.map((i) => [i._id.toString(), i]));
+
+    for (const extras of allExtras) {
+      const founder = intakeMap.get(extras.founderId);
+      
       if (Array.isArray(extras.serviceRequests)) {
         extras.serviceRequests.forEach((request) => {
           activities.push({
@@ -237,7 +260,7 @@ const getActivityLog = (req, res) => {
             description: `${founder?.startupName || 'Founder'} requested ${request.serviceType}`,
             founder: founder
               ? {
-                  id: founderId,
+                  id: extras.founderId,
                   name: founder.fullName,
                   startupName: founder.startupName,
                 }
@@ -253,13 +276,13 @@ const getActivityLog = (req, res) => {
       // Success fee activities
       if (extras.successFeeRequest) {
         activities.push({
-          id: `success-${founderId}`,
+          id: `success-${extras.founderId}`,
           type: 'success_fee_request',
           timestamp: extras.successFeeRequest.createdAt,
           description: `${founder?.startupName || 'Founder'} submitted success fee request`,
           founder: founder
             ? {
-                id: founderId,
+                id: extras.founderId,
                 name: founder.fullName,
                 startupName: founder.startupName,
               }
@@ -270,20 +293,20 @@ const getActivityLog = (req, res) => {
       // Marketplace activities
       if (extras.marketplaceListing) {
         activities.push({
-          id: `marketplace-${founderId}`,
+          id: `marketplace-${extras.founderId}`,
           type: 'marketplace_listing',
           timestamp: extras.marketplaceListing.lastUpdated,
           description: `${founder?.startupName || 'Founder'} updated marketplace listing`,
           founder: founder
             ? {
-                id: founderId,
+                id: extras.founderId,
                 name: founder.fullName,
                 startupName: founder.startupName,
               }
             : null,
         });
       }
-    });
+    }
 
     // Sort all activities by timestamp
     activities.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
@@ -297,54 +320,52 @@ const getActivityLog = (req, res) => {
   }
 };
 
-const getDashboardSummary = (req, res) => {
+const getDashboardSummary = async (req, res) => {
   try {
     const now = new Date();
     const last7Days = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
     
     // Recent signups
-    const recentFounders = store.users.filter(
-      (u) => u.role === 'founder' && new Date(u.createdAt) >= last7Days
-    );
-    const recentInvestors = store.users.filter(
-      (u) => u.role === 'investor' && new Date(u.createdAt) >= last7Days
-    );
-
-    // Pending actions
-    const pendingFounders = store.founderIntakes.filter((f) => f.status === 'pending');
+    const [recentFounders, recentInvestors, pendingFounders] = await Promise.all([
+      User.countDocuments({ role: 'founder', createdAt: { $gte: last7Days } }),
+      User.countDocuments({ role: 'investor', createdAt: { $gte: last7Days } }),
+      FounderIntake.countDocuments({ status: 'pending' }),
+    ]);
     
+    // High urgency services
+    const allExtras = await FounderExtras.find({});
     let highUrgencyServices = 0;
-    Object.values(store.founderExtras || {}).forEach((extras) => {
+    allExtras.forEach((extras) => {
       if (Array.isArray(extras.serviceRequests)) {
         highUrgencyServices += extras.serviceRequests.filter((r) => r.urgency === 'High').length;
       }
     });
 
-    // Top sectors
+    // Top sectors and stages
+    const intakes = await FounderIntake.find({}).select('sector raiseStage');
     const sectorCounts = {};
-    store.founderIntakes.forEach((founder) => {
+    const stageCounts = {};
+    
+    intakes.forEach((founder) => {
       const sector = founder.sector || 'Uncategorized';
       sectorCounts[sector] = (sectorCounts[sector] || 0) + 1;
+      
+      const stage = founder.raiseStage || 'Unknown';
+      stageCounts[stage] = (stageCounts[stage] || 0) + 1;
     });
+    
     const topSectors = Object.entries(sectorCounts)
       .sort(([, a], [, b]) => b - a)
       .slice(0, 5)
       .map(([sector, count]) => ({ sector, count }));
 
-    // Raise stages distribution
-    const stageCounts = {};
-    store.founderIntakes.forEach((founder) => {
-      const stage = founder.raiseStage || 'Unknown';
-      stageCounts[stage] = (stageCounts[stage] || 0) + 1;
-    });
-
     const summary = {
       recentActivity: {
-        foundersLast7Days: recentFounders.length,
-        investorsLast7Days: recentInvestors.length,
+        foundersLast7Days: recentFounders,
+        investorsLast7Days: recentInvestors,
       },
       pendingActions: {
-        founderApprovals: pendingFounders.length,
+        founderApprovals: pendingFounders,
         highUrgencyServices,
       },
       insights: {

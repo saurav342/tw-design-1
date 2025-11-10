@@ -3,6 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const express = require('express');
 const cors = require('cors');
+const { connectDB } = require('./config/database');
 
 const authRoutes = require('./routes/authRoutes');
 const adminAuthRoutes = require('./routes/adminAuthRoutes');
@@ -51,8 +52,14 @@ app.use((req, res) => {
 const PORT = process.env.PORT || 3000;
 
 if (require.main === module) {
-  app.listen(PORT, () => {
-    console.log(`LaunchAndLift API running on port ${PORT}`);
+  // Connect to MongoDB
+  connectDB().then(() => {
+    app.listen(PORT, () => {
+      console.log(`LaunchAndLift API running on port ${PORT}`);
+    });
+  }).catch((error) => {
+    console.error('Failed to start server:', error);
+    process.exit(1);
   });
 }
 

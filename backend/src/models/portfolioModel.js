@@ -1,11 +1,24 @@
-const { randomUUID } = require('crypto');
-const store = require('../data/store');
+const Portfolio = require('./schemas/Portfolio');
 
-const listPortfolio = () => store.portfolio;
+const sanitizePortfolioItem = (item) => {
+  if (!item) return null;
+  const itemObj = item.toObject ? item.toObject() : item;
+  // Convert _id to id for consistency with frontend
+  if (itemObj._id) {
+    itemObj.id = itemObj._id.toString();
+    delete itemObj._id;
+  }
+  delete itemObj.__v;
+  return itemObj;
+};
 
-const addPortfolioItem = (item) => {
-  const newItem = {
-    id: randomUUID(),
+const listPortfolio = async () => {
+  const portfolio = await Portfolio.find({}).sort({ createdAt: -1 });
+  return portfolio.map(sanitizePortfolioItem);
+};
+
+const addPortfolioItem = async (item) => {
+  const portfolioItem = new Portfolio({
     name: item.name,
     sector: item.sector,
     founders: item.founders ?? [],
@@ -13,39 +26,32 @@ const addPortfolioItem = (item) => {
     summary: item.summary ?? '',
     link: item.link ?? '',
     status: item.status ?? 'Active',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  };
+  });
 
-  store.portfolio.push(newItem);
-  return newItem;
+  await portfolioItem.save();
+  return sanitizePortfolioItem(portfolioItem);
 };
 
-const updatePortfolioItem = (id, updates) => {
-  const index = store.portfolio.findIndex((company) => company.id === id);
-  if (index === -1) {
+const updatePortfolioItem = async (id, updates) => {
+  const portfolioItem = await Portfolio.findByIdAndUpdate(
+    id,
+    updates,
+    { new: true, runValidators: true }
+  );
+
+  if (!portfolioItem) {
     throw new Error('Portfolio entry not found');
   }
 
-  const existing = store.portfolio[index];
-  const updated = {
-    ...existing,
-    ...updates,
-    updatedAt: new Date().toISOString(),
-  };
-
-  store.portfolio[index] = updated;
-  return updated;
+  return sanitizePortfolioItem(portfolioItem);
 };
 
-const removePortfolioItem = (id) => {
-  const index = store.portfolio.findIndex((company) => company.id === id);
-  if (index === -1) {
+const removePortfolioItem = async (id) => {
+  const portfolioItem = await Portfolio.findByIdAndDelete(id);
+  if (!portfolioItem) {
     throw new Error('Portfolio entry not found');
   }
-
-  const [removed] = store.portfolio.splice(index, 1);
-  return removed;
+  return sanitizePortfolioItem(portfolioItem);
 };
 
 module.exports = {

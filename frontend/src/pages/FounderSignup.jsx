@@ -4,16 +4,18 @@ import { Button } from '../components/ui/button.jsx';
 import { Input } from '../components/ui/input.jsx';
 import { Label } from '../components/ui/label.jsx';
 import { Textarea } from '../components/ui/textarea.jsx';
-import { CheckCircle2, Upload, X } from 'lucide-react';
+import { CheckCircle2, Upload, X, Eye, EyeOff } from 'lucide-react';
 import { useNotification } from '../context/NotificationContext';
 import { useAppStore } from '../store/useAppStore.js';
 import { uploadApi } from '../services/api.js';
+import { authApi } from '../services/api.js';
 
 const stageOptions = ['Pre-seed', 'Seed', 'Series A', 'Series B', 'Series C+'];
 
 const initialForm = {
   founderFullName: '',
   email: '',
+  password: '',
   phoneNumber: '',
   linkedInUrl: '',
   numberOfFounders: 1,
@@ -51,6 +53,7 @@ const FounderSignup = () => {
   const [pitchDeckFile, setPitchDeckFile] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
   // Redirect to email entry if no email
   useEffect(() => {
@@ -145,6 +148,7 @@ const FounderSignup = () => {
     const requiredFields = [
       { key: 'founderFullName', label: "Founder's full name" },
       { key: 'email', label: 'email address' },
+      { key: 'password', label: 'password' },
       { key: 'companyLegalName', label: "company's legal name" },
       { key: 'brandName', label: 'brand name' },
       { key: 'companyWebsite', label: "company's website" },
@@ -157,6 +161,12 @@ const FounderSignup = () => {
     if (missing.length) {
       const fieldsList = missing.map((item) => item.label).join(', ');
       showInfo(`Please complete the following before submitting: ${fieldsList}.`);
+      return;
+    }
+
+    // Validate password length
+    if (form.password.length < 6) {
+      showInfo('Password must be at least 6 characters long.');
       return;
     }
 
@@ -227,7 +237,48 @@ const FounderSignup = () => {
 
     setIsSubmitting(true);
     try {
+      // First, submit the founder intake
       const added = await addFounder(payload);
+
+      // Then, create a user account with password
+      try {
+        const signupPayload = {
+          fullName: form.founderFullName.trim(),
+          email: form.email.trim(),
+          password: form.password,
+          role: 'founder',
+          gender: 'prefer-not-to-say', // Default value since form doesn't collect this
+          phone: form.phoneNumber.trim() || '',
+          phoneVerified: false,
+          linkedinUrl: form.linkedInUrl.trim() || '',
+          singleFounder: !includeSecondFounder,
+          coFounder: includeSecondFounder ? {
+            name: form.secondFounder.fullName.trim(),
+            email: form.secondFounder.email.trim(),
+            linkedinUrl: form.secondFounder.linkedInUrl.trim(),
+            gender: 'prefer-not-to-say',
+          } : {},
+          startupDetails: {
+            brandName: form.brandName.trim(),
+            legalName: form.companyLegalName.trim(),
+            websiteUrl: form.companyWebsite.trim(),
+            sector: form.sector.trim(),
+            stage: form.currentStage.trim(),
+            cityOfOperation: '',
+            companyType: '',
+            incorporationDate: form.companyFoundingDate.trim() || new Date().toISOString().split('T')[0],
+            description: form.brief.trim(),
+            pitchDeck: payload.pitchDeck || null,
+          },
+        };
+
+        await authApi.signup(signupPayload);
+      } catch (signupError) {
+        // If user account creation fails but intake succeeded, log it but don't fail the whole flow
+        // The user can still log in with OTP if password wasn't set
+        console.error('Failed to create user account:', signupError);
+        // Don't show error to user - they can use OTP login if needed
+      }
 
       // Clear signup flow sessionStorage
       sessionStorage.removeItem('signup.email');
@@ -296,6 +347,36 @@ const FounderSignup = () => {
                     Email verified
                   </p>
                 )}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <div className="relative">
+                  <Input
+                    id="password"
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="Create a password"
+                    required
+                    value={form.password}
+                    onChange={updateForm('password')}
+                    className="pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600 transition-colors"
+                    tabIndex={-1}
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  >
+                    {showPassword ? (
+                      <EyeOff className="w-4 h-4" />
+                    ) : (
+                      <Eye className="w-4 h-4" />
+                    )}
+                  </button>
+                </div>
+                <p className="text-xs text-slate-500 mt-1">
+                  Minimum 6 characters. You'll use this to sign in.
+                </p>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="phoneNumber">Phone number</Label>

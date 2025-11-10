@@ -46,7 +46,8 @@ const createUser = async ({
     throw new Error('Account already exists for this email.');
   }
 
-  const passwordHash = await bcrypt.hash(password, 10);
+  // Hash password if provided, otherwise set to null for OTP-only accounts
+  const passwordHash = password ? await bcrypt.hash(password, 10) : null;
 
   const user = new User({
     fullName,

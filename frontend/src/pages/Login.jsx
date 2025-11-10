@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/useAuth.js';
 import { ArrowRight, CheckCircle2, Eye, EyeOff, Loader2, AlertCircle } from 'lucide-react';
+import { authApi } from '../services/api.js';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -14,6 +15,30 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  const [requiresOTP, setRequiresOTP] = useState(false);
+  const [otp, setOtp] = useState('');
+  const [otpSent, setOtpSent] = useState(false);
+  const [isSendingOTP, setIsSendingOTP] = useState(false);
+
+  const handleSendOTP = async () => {
+    if (!email.trim()) {
+      setError('Please enter your email address');
+      return;
+    }
+
+    setIsSendingOTP(true);
+    setError('');
+
+    try {
+      await authApi.sendVerificationEmail({ email: email.trim(), role });
+      setOtpSent(true);
+      setError('');
+    } catch (err) {
+      setError(err.message || 'Failed to send OTP. Please try again.');
+    } finally {
+      setIsSendingOTP(false);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -24,8 +49,50 @@ const Login = () => {
     setIsLoading(true);
 
     // Simple validation
-    if (!email.trim() || !password.trim()) {
-      setError('Please fill in all fields');
+    if (!email.trim()) {
+      setError('Please enter your email address');
+      setIsLoading(false);
+      return;
+    }
+
+    // If OTP mode, validate OTP
+    if (requiresOTP || otpSent) {
+      if (!otp.trim()) {
+        setError('Please enter the OTP code');
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        console.log('🔐 Attempting OTP login:', { email, role, otp });
+        
+        // Use login endpoint with OTP
+        const response = await authApi.login({ email: email.trim(), role, otp });
+        
+        console.log('✅ OTP login successful:', response);
+        
+        // Show success state
+        setSuccess(true);
+        
+        // Navigate after a brief moment to show success
+        setTimeout(() => {
+          const destination = `/dashboard/${response.user.role}`;
+          console.log('🚀 Navigating to:', destination);
+          navigate(destination, { replace: true });
+        }, 600);
+        
+      } catch (err) {
+        console.error('❌ OTP login failed:', err);
+        setIsLoading(false);
+        const errorMessage = err.message || 'Invalid OTP. Please try again.';
+        setError(errorMessage);
+      }
+      return;
+    }
+
+    // Password login
+    if (!password.trim()) {
+      setError('Please enter your password');
       setIsLoading(false);
       return;
     }
@@ -50,8 +117,17 @@ const Login = () => {
     } catch (err) {
       console.error('❌ Login failed:', err);
       setIsLoading(false);
-      const errorMessage = err.message || 'Invalid credentials. Please try again.';
-      setError(errorMessage);
+      
+      // Check if error indicates OTP is required
+      if (err.data?.requiresOTP || err.message?.includes('OTP')) {
+        setRequiresOTP(true);
+        setError('Password not set for this account. Please use OTP login.');
+        // Automatically send OTP
+        handleSendOTP();
+      } else {
+        const errorMessage = err.message || 'Invalid credentials. Please try again.';
+        setError(errorMessage);
+      }
     }
   };
 
@@ -173,38 +249,87 @@ const Login = () => {
                 />
               </div>
 
-              {/* Password Input */}
-              <div>
-                <label htmlFor="password" className="block text-sm font-semibold text-gray-700 mb-2">
-                  Password
-                </label>
-                <div className="relative">
-                  <input
-                    id="password"
-                    type={showPassword ? 'text' : 'password'}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Enter your password"
-                    className="w-full px-4 py-3 sm:py-3.5 pr-12 text-base bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-                    disabled={isLoading || success}
-                    autoComplete="current-password"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors"
-                    disabled={isLoading || success}
-                    tabIndex={-1}
-                    aria-label={showPassword ? 'Hide password' : 'Show password'}
-                  >
-                    {showPassword ? (
-                      <EyeOff className="w-5 h-5" />
-                    ) : (
-                      <Eye className="w-5 h-5" />
+              {/* OTP Input (shown when OTP is required or sent) */}
+              {(requiresOTP || otpSent) ? (
+                <div>
+                  <label htmlFor="otp" className="block text-sm font-semibold text-gray-700 mb-2">
+                    Verification Code
+                  </label>
+                  <div className="space-y-3">
+                    <input
+                      id="otp"
+                      type="text"
+                      value={otp}
+                      onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                      placeholder="Enter 6-digit code"
+                      className="w-full px-4 py-3 sm:py-3.5 text-base bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-center text-2xl tracking-widest"
+                      disabled={isLoading || success}
+                      autoComplete="one-time-code"
+                      maxLength={6}
+                    />
+                    {!otpSent && (
+                      <button
+                        type="button"
+                        onClick={handleSendOTP}
+                        disabled={isSendingOTP || isLoading || success}
+                        className="w-full py-2.5 px-4 text-sm font-medium text-indigo-600 hover:text-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      >
+                        {isSendingOTP ? 'Sending...' : 'Send verification code'}
+                      </button>
                     )}
-                  </button>
+                    {otpSent && (
+                      <p className="text-xs text-gray-600 text-center">
+                        Verification code sent to {email}. Check your inbox.
+                      </p>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setRequiresOTP(false);
+                        setOtpSent(false);
+                        setOtp('');
+                        setError('');
+                      }}
+                      className="w-full py-2 text-sm text-gray-600 hover:text-gray-700 underline"
+                    >
+                      Use password instead
+                    </button>
+                  </div>
                 </div>
-              </div>
+              ) : (
+                /* Password Input */
+                <div>
+                  <label htmlFor="password" className="block text-sm font-semibold text-gray-700 mb-2">
+                    Password
+                  </label>
+                  <div className="relative">
+                    <input
+                      id="password"
+                      type={showPassword ? 'text' : 'password'}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="Enter your password"
+                      className="w-full px-4 py-3 sm:py-3.5 pr-12 text-base bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                      disabled={isLoading || success}
+                      autoComplete="current-password"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors"
+                      disabled={isLoading || success}
+                      tabIndex={-1}
+                      aria-label={showPassword ? 'Hide password' : 'Show password'}
+                    >
+                      {showPassword ? (
+                        <EyeOff className="w-5 h-5" />
+                      ) : (
+                        <Eye className="w-5 h-5" />
+                      )}
+                    </button>
+                  </div>
+                </div>
+              )}
 
               {/* Role Selection */}
               <div>

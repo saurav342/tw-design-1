@@ -10,6 +10,7 @@ const { signToken } = require('../utils/jwt');
 const { createResetToken, consumeResetToken } = require('../models/passwordResetModel');
 const { createVerificationOTP, verifyOTP, isEmailVerified } = require('../models/emailVerificationModel');
 const { sendVerificationEmail } = require('../utils/email');
+const bcrypt = require('bcryptjs');
 
 const buildAuthResponse = (user) => ({
   token: signToken({ sub: user.id, role: user.role }),
@@ -167,8 +168,13 @@ const signup = async (req, res) => {
     const organization = req.body.organization ?? null;
     const notes = req.body.notes ?? null;
 
-    if (!fullName || !email || !password || !role) {
+    if (!fullName || !email || !role) {
       return res.status(400).json({ message: 'Missing required fields.' });
+    }
+
+    // Password is optional for founders (they can use OTP login), but required for investors
+    if (role === 'investor' && !password) {
+      return res.status(400).json({ message: 'Password is required for investor accounts.' });
     }
 
     // Restrict public signup to only investor and founder roles
@@ -231,17 +237,10 @@ const signup = async (req, res) => {
         startupDetails = {},
       } = req.body;
 
-      const founderMissing = [
-        ['gender', gender],
-        ['phone', phone],
-        ['linkedinUrl', linkedinUrl],
-      ]
-        .filter(([, value]) => !value)
-        .map(([key]) => key);
-
-      if (founderMissing.length) {
+      // Gender is required, but phone and linkedinUrl can be empty strings
+      if (!gender || (typeof gender === 'string' && !gender.trim())) {
         return res.status(400).json({
-          message: `Missing founder onboarding fields: ${founderMissing.join(', ')}`,
+          message: 'Missing founder onboarding field: gender',
         });
       }
 
@@ -352,9 +351,10 @@ const signup = async (req, res) => {
 
 const login = async (req, res) => {
   try {
-    const { email, password, role } = req.body;
-    if (!email || !password) {
-      return res.status(400).json({ message: 'Email and password are required.' });
+    const { email, password, role, otp } = req.body;
+    
+    if (!email) {
+      return res.status(400).json({ message: 'Email is required.' });
     }
 
     // If role is admin, reject - admins must use admin auth endpoint
@@ -364,9 +364,17 @@ const login = async (req, res) => {
       });
     }
 
-    // Allow login without role specification, or with investor/founder role
-    const user = await verifyUser({ email, password, role: role || undefined });
-    
+    // Check if user exists
+    const user = await findByEmail(email);
+    if (!user) {
+      return res.status(401).json({ message: 'Invalid credentials.' });
+    }
+
+    // Check role match if specified
+    if (role && user.role !== role) {
+      return res.status(401).json({ message: 'Role mismatch. Please check your selection.' });
+    }
+
     // Double-check: if user is admin, reject even if they didn't specify role
     if (user.role === 'admin') {
       return res.status(403).json({ 
@@ -374,7 +382,62 @@ const login = async (req, res) => {
       });
     }
 
-    return res.status(200).json(buildAuthResponse(user));
+    // Check if user has a password
+    const hasPassword = !!user.passwordHash;
+
+    // If OTP is provided, handle OTP login
+    if (otp) {
+      if (hasPassword) {
+        return res.status(400).json({ 
+          message: 'Password login is available for this account. Please use password instead of OTP.' 
+        });
+      }
+
+      // Verify OTP
+      try {
+        const verified = await verifyOTP(email, user.role, otp);
+        if (verified && verified.email === email.toLowerCase()) {
+          return res.status(200).json(buildAuthResponse(sanitizeUser(user)));
+        } else {
+          return res.status(401).json({ message: 'Invalid or expired OTP.' });
+        }
+      } catch (otpError) {
+        return res.status(401).json({ message: otpError.message || 'Invalid or expired OTP.' });
+      }
+    }
+
+    // If password is provided, handle password login
+    if (password) {
+      if (!hasPassword) {
+        // User doesn't have password, need to use OTP
+        return res.status(400).json({ 
+          message: 'Password not set for this account. Please use OTP login.',
+          requiresOTP: true,
+          email: email.toLowerCase(),
+          role: user.role,
+        });
+      }
+
+      // Verify password
+      const passwordValid = await bcrypt.compare(password, user.passwordHash);
+      if (!passwordValid) {
+        return res.status(401).json({ message: 'Invalid credentials.' });
+      }
+
+      return res.status(200).json(buildAuthResponse(sanitizeUser(user)));
+    }
+
+    // Neither password nor OTP provided
+    if (!hasPassword) {
+      return res.status(400).json({ 
+        message: 'Password not set for this account. Please use OTP login.',
+        requiresOTP: true,
+        email: email.toLowerCase(),
+        role: user.role,
+      });
+    }
+
+    return res.status(400).json({ message: 'Password or OTP is required.' });
   } catch (error) {
     return res.status(401).json({ message: error.message });
   }

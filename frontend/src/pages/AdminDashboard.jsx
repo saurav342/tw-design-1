@@ -38,6 +38,13 @@ import {
   Users,
   X,
   Zap,
+  Briefcase,
+  Phone,
+  Mail,
+  MapPin,
+  Link as LinkIcon,
+  Calendar,
+  Globe,
 } from 'lucide-react';
 import { Button } from '../components/ui/button.jsx';
 import {
@@ -78,6 +85,12 @@ const AdminDashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activeView, setActiveView] = useState('dashboard');
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [allFounders, setAllFounders] = useState([]);
+  const [allInvestors, setAllInvestors] = useState([]);
+  const [isLoadingFounders, setIsLoadingFounders] = useState(false);
+  const [isLoadingInvestors, setIsLoadingInvestors] = useState(false);
+  const [founderSearchQuery, setFounderSearchQuery] = useState('');
+  const [investorSearchQuery, setInvestorSearchQuery] = useState('');
 
   const pendingFounders = founders.filter((founder) => founder.status === 'pending');
   const approvedFounders = founders.filter((founder) => founder.status === 'approved');
@@ -106,6 +119,44 @@ const AdminDashboard = () => {
 
     fetchAnalytics();
   }, [token]);
+
+  // Fetch founders when viewing founders section
+  useEffect(() => {
+    if (!token || activeView !== 'founders-list') return;
+
+    const fetchFounders = async () => {
+      setIsLoadingFounders(true);
+      try {
+        const response = await adminApi.getFounders(token);
+        setAllFounders(response.items || []);
+      } catch (error) {
+        console.error('Failed to fetch founders:', error);
+      } finally {
+        setIsLoadingFounders(false);
+      }
+    };
+
+    fetchFounders();
+  }, [token, activeView]);
+
+  // Fetch investors when viewing investors section
+  useEffect(() => {
+    if (!token || activeView !== 'investors-list') return;
+
+    const fetchInvestors = async () => {
+      setIsLoadingInvestors(true);
+      try {
+        const response = await adminApi.getInvestors(token);
+        setAllInvestors(response.items || []);
+      } catch (error) {
+        console.error('Failed to fetch investors:', error);
+      } finally {
+        setIsLoadingInvestors(false);
+      }
+    };
+
+    fetchInvestors();
+  }, [token, activeView]);
 
   useEffect(() => {
     if (!token || hasSynced) return;
@@ -273,6 +324,8 @@ const AdminDashboard = () => {
   const navigationItems = [
     { id: 'dashboard', label: 'Dashboard', icon: Grid3x3 },
     { id: 'founders', label: 'Founder Journey', icon: Building2, badge: pendingFounders.length },
+    { id: 'founders-list', label: 'Founders', icon: User },
+    { id: 'investors-list', label: 'Investors', icon: Briefcase },
     { id: 'matchmaking', label: 'Matchmaking', icon: Target },
     { id: 'services', label: 'Services', icon: Sparkles },
     { id: 'users', label: 'Users', icon: Users },
@@ -1181,6 +1234,616 @@ const AdminDashboard = () => {
                     ))}
                 </div>
               </div>
+            </div>
+          )}
+
+          {/* Founders List View */}
+          {activeView === 'founders-list' && (
+            <div className="space-y-6">
+              {/* Search and Filter */}
+              <div className="bg-white rounded-lg border border-gray-200 p-4">
+                <div className="flex items-center gap-4">
+                  <div className="relative flex-1">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                    <input
+                      type="text"
+                      placeholder="Search founders by name, startup, email, or sector..."
+                      value={founderSearchQuery}
+                      onChange={(e) => setFounderSearchQuery(e.target.value)}
+                      className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  <button className="px-4 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 flex items-center gap-2">
+                    <Filter className="h-4 w-4" />
+                    Filter
+                  </button>
+                </div>
+              </div>
+
+              {/* Loading State */}
+              {isLoadingFounders && (
+                <div className="bg-white rounded-lg border border-gray-200 p-12 text-center">
+                  <RefreshCw className="h-8 w-8 text-gray-400 mx-auto mb-4 animate-spin" />
+                  <p className="text-gray-600">Loading founders...</p>
+                </div>
+              )}
+
+              {/* Founders List */}
+              {!isLoadingFounders && (
+                <>
+                  {allFounders.length === 0 ? (
+                    <div className="bg-white rounded-lg border border-gray-200 p-12 text-center">
+                      <Building2 className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                      <p className="text-gray-600">No founders found.</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-6">
+                      {allFounders
+                        .filter((founder) => {
+                          if (!founderSearchQuery.trim()) return true;
+                          const query = founderSearchQuery.toLowerCase();
+                          return (
+                            founder.fullName?.toLowerCase().includes(query) ||
+                            founder.startupName?.toLowerCase().includes(query) ||
+                            founder.email?.toLowerCase().includes(query) ||
+                            founder.sector?.toLowerCase().includes(query) ||
+                            founder.brandName?.toLowerCase().includes(query)
+                          );
+                        })
+                        .map((founder) => (
+                          <Motion.div
+                            key={founder.id}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                          >
+                            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                              {/* Header */}
+                              <div className="p-6 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50">
+                                <div className="flex items-start justify-between gap-4">
+                                  <div className="flex-1">
+                                    <div className="flex items-center gap-3 mb-2">
+                                      <h3 className="text-2xl font-bold text-gray-900">
+                                        {founder.startupName}
+                                      </h3>
+                                      <span
+                                        className={`px-3 py-1 text-xs font-semibold rounded-full ${
+                                          founder.status === 'approved'
+                                            ? 'bg-emerald-100 text-emerald-800'
+                                            : founder.status === 'rejected'
+                                              ? 'bg-red-100 text-red-800'
+                                              : 'bg-amber-100 text-amber-800'
+                                        }`}
+                                      >
+                                        {founder.status?.toUpperCase() || 'PENDING'}
+                                      </span>
+                                    </div>
+                                    {founder.brief && (
+                                      <p className="text-gray-700 mb-3">{founder.brief}</p>
+                                    )}
+                                    <div className="flex flex-wrap gap-2">
+                                      {founder.sector && (
+                                        <span className="px-2 py-1 bg-white text-gray-700 text-xs rounded border border-gray-200">
+                                          {founder.sector}
+                                        </span>
+                                      )}
+                                      {founder.geography && (
+                                        <span className="px-2 py-1 bg-white text-gray-700 text-xs rounded border border-gray-200">
+                                          {founder.geography}
+                                        </span>
+                                      )}
+                                      {founder.raiseStage && (
+                                        <span className="px-2 py-1 bg-white text-gray-700 text-xs rounded border border-gray-200">
+                                          {founder.raiseStage}
+                                        </span>
+                                      )}
+                                      {founder.raiseAmountUSD && (
+                                        <span className="px-2 py-1 bg-white text-gray-700 text-xs rounded border border-gray-200">
+                                          {formatCurrency(founder.raiseAmountUSD)}
+                                        </span>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Content */}
+                              <div className="p-6 space-y-6">
+                                {/* Founder Info */}
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                  <div>
+                                    <h4 className="text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wide">
+                                      Founder Information
+                                    </h4>
+                                    <div className="space-y-2 text-sm">
+                                      <div className="flex items-center gap-2">
+                                        <User className="h-4 w-4 text-gray-400" />
+                                        <span className="text-gray-600">Name:</span>
+                                        <span className="font-medium text-gray-900">
+                                          {founder.fullName}
+                                        </span>
+                                      </div>
+                                      <div className="flex items-center gap-2">
+                                        <Mail className="h-4 w-4 text-gray-400" />
+                                        <span className="text-gray-600">Email:</span>
+                                        <span className="font-medium text-gray-900">
+                                          {founder.email}
+                                        </span>
+                                      </div>
+                                      {founder.phoneNumber && (
+                                        <div className="flex items-center gap-2">
+                                          <Phone className="h-4 w-4 text-gray-400" />
+                                          <span className="text-gray-600">Phone:</span>
+                                          <span className="font-medium text-gray-900">
+                                            {founder.phoneNumber}
+                                          </span>
+                                        </div>
+                                      )}
+                                      {founder.linkedInUrl && (
+                                        <div className="flex items-center gap-2">
+                                          <LinkIcon className="h-4 w-4 text-gray-400" />
+                                          <a
+                                            href={founder.linkedInUrl}
+                                            target="_blank"
+                                            rel="noreferrer"
+                                            className="text-blue-600 hover:underline"
+                                          >
+                                            LinkedIn Profile
+                                          </a>
+                                        </div>
+                                      )}
+                                      <div className="flex items-center gap-2">
+                                        <Calendar className="h-4 w-4 text-gray-400" />
+                                        <span className="text-gray-600">Registered:</span>
+                                        <span className="font-medium text-gray-900">
+                                          {formatDateDisplay(founder.createdAt)}
+                                        </span>
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  <div>
+                                    <h4 className="text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wide">
+                                      Company Details
+                                    </h4>
+                                    <div className="space-y-2 text-sm">
+                                      {founder.brandName && (
+                                        <div>
+                                          <span className="text-gray-600">Brand Name:</span>
+                                          <span className="font-medium text-gray-900 ml-2">
+                                            {founder.brandName}
+                                          </span>
+                                        </div>
+                                      )}
+                                      {founder.companyLegalName && (
+                                        <div>
+                                          <span className="text-gray-600">Legal Name:</span>
+                                          <span className="font-medium text-gray-900 ml-2">
+                                            {founder.companyLegalName}
+                                          </span>
+                                        </div>
+                                      )}
+                                      {founder.companyWebsite && (
+                                        <div className="flex items-center gap-2">
+                                          <Globe className="h-4 w-4 text-gray-400" />
+                                          <a
+                                            href={founder.companyWebsite}
+                                            target="_blank"
+                                            rel="noreferrer"
+                                            className="text-blue-600 hover:underline"
+                                          >
+                                            {founder.companyWebsite}
+                                          </a>
+                                        </div>
+                                      )}
+                                      {founder.teamSize && (
+                                        <div>
+                                          <span className="text-gray-600">Team Size:</span>
+                                          <span className="font-medium text-gray-900 ml-2">
+                                            {founder.teamSize} members
+                                          </span>
+                                        </div>
+                                      )}
+                                      {founder.currentStage && (
+                                        <div>
+                                          <span className="text-gray-600">Current Stage:</span>
+                                          <span className="font-medium text-gray-900 ml-2">
+                                            {founder.currentStage}
+                                          </span>
+                                        </div>
+                                      )}
+                                      {founder.revenueRunRateUSD && (
+                                        <div>
+                                          <span className="text-gray-600">Revenue Run Rate:</span>
+                                          <span className="font-medium text-gray-900 ml-2">
+                                            {formatCurrency(founder.revenueRunRateUSD)}
+                                          </span>
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+
+                                {/* AI Summary */}
+                                {founder.aiSummary && (
+                                  <div>
+                                    <h4 className="text-sm font-semibold text-gray-700 mb-2 uppercase tracking-wide">
+                                      AI Assessment
+                                    </h4>
+                                    <p className="text-gray-600 leading-relaxed">
+                                      {founder.aiSummary}
+                                    </p>
+                                  </div>
+                                )}
+
+                                {/* Metrics */}
+                                {founder.benchmarks && founder.benchmarks.length > 0 && (
+                                  <div>
+                                    <h4 className="text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wide">
+                                      Key Metrics
+                                    </h4>
+                                    <BenchmarkTable
+                                      rows={founder.benchmarks}
+                                      founderNotes={founder.benchmarkNotes}
+                                      onChangeNote={() => {}}
+                                      onSave={() => {}}
+                                      isDisabled
+                                    />
+                                  </div>
+                                )}
+
+                                {/* Service Requests & Extras */}
+                                {founder.extras && (
+                                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                                    <div className="lg:col-span-2">
+                                      <h4 className="text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wide">
+                                        Service Requests ({founder.extras.serviceRequests?.length || 0})
+                                      </h4>
+                                      {founder.extras.serviceRequests &&
+                                      founder.extras.serviceRequests.length > 0 ? (
+                                        <div className="space-y-2">
+                                          {founder.extras.serviceRequests.map((request, idx) => (
+                                            <div
+                                              key={idx}
+                                              className="p-3 border border-gray-200 rounded-lg"
+                                            >
+                                              <div className="flex items-center justify-between mb-1">
+                                                <span className="font-medium text-gray-900">
+                                                  {request.serviceType}
+                                                </span>
+                                                <span
+                                                  className={`px-2 py-1 text-xs font-semibold rounded ${
+                                                    request.urgency === 'High'
+                                                      ? 'bg-red-100 text-red-800'
+                                                      : request.urgency === 'Low'
+                                                        ? 'bg-emerald-100 text-emerald-800'
+                                                        : 'bg-blue-100 text-blue-800'
+                                                  }`}
+                                                >
+                                                  {request.urgency}
+                                                </span>
+                                              </div>
+                                              {request.note && (
+                                                <p className="text-sm text-gray-600">{request.note}</p>
+                                              )}
+                                            </div>
+                                          ))}
+                                        </div>
+                                      ) : (
+                                        <p className="text-sm text-gray-500">No service requests</p>
+                                      )}
+                                    </div>
+                                    <div className="space-y-4">
+                                      {founder.extras.successFeeRequest && (
+                                        <div className="p-4 border border-gray-200 rounded-lg">
+                                          <h5 className="text-sm font-semibold text-gray-900 mb-2">
+                                            Success Fee Request
+                                          </h5>
+                                          <div className="space-y-1 text-sm">
+                                            <div>
+                                              <span className="text-gray-600">Round:</span>
+                                              <span className="font-medium ml-2">
+                                                {founder.extras.successFeeRequest.round}
+                                              </span>
+                                            </div>
+                                            <div>
+                                              <span className="text-gray-600">Target:</span>
+                                              <span className="font-medium ml-2">
+                                                {formatCurrencyInr(
+                                                  founder.extras.successFeeRequest.targetAmount,
+                                                )}
+                                              </span>
+                                            </div>
+                                          </div>
+                                        </div>
+                                      )}
+                                      {founder.extras.marketplaceListing && (
+                                        <div className="p-4 border border-gray-200 rounded-lg">
+                                          <h5 className="text-sm font-semibold text-gray-900 mb-2">
+                                            Marketplace Listing
+                                          </h5>
+                                          <div className="space-y-1 text-sm">
+                                            <div>
+                                              <span className="text-gray-600">Raise Amount:</span>
+                                              <span className="font-medium ml-2">
+                                                {formatCurrencyInr(
+                                                  founder.extras.marketplaceListing.raiseAmount,
+                                                )}
+                                              </span>
+                                            </div>
+                                            <div>
+                                              <span className="text-gray-600">Min Ticket:</span>
+                                              <span className="font-medium ml-2">
+                                                {formatCurrencyInr(
+                                                  founder.extras.marketplaceListing.minTicket,
+                                                )}
+                                              </span>
+                                            </div>
+                                          </div>
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+                                )}
+
+                                {/* User Account Info */}
+                                {founder.userAccount && (
+                                  <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                                    <h4 className="text-sm font-semibold text-gray-700 mb-2 uppercase tracking-wide">
+                                      User Account
+                                    </h4>
+                                    <div className="text-sm text-gray-600">
+                                      Account created: {formatDateDisplay(founder.userAccount.createdAt)}
+                                    </div>
+                                  </div>
+                                )}
+
+                                {/* Pitch Deck */}
+                                {founder.pitchDeckUrl && (
+                                  <div>
+                                    <a
+                                      href={founder.pitchDeckUrl}
+                                      target="_blank"
+                                      rel="noreferrer"
+                                      className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium"
+                                    >
+                                      <Download className="h-4 w-4" />
+                                      View Pitch Deck
+                                    </a>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </Motion.div>
+                        ))}
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          )}
+
+          {/* Investors List View */}
+          {activeView === 'investors-list' && (
+            <div className="space-y-6">
+              {/* Search and Filter */}
+              <div className="bg-white rounded-lg border border-gray-200 p-4">
+                <div className="flex items-center gap-4">
+                  <div className="relative flex-1">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                    <input
+                      type="text"
+                      placeholder="Search investors by name, email, or organization..."
+                      value={investorSearchQuery}
+                      onChange={(e) => setInvestorSearchQuery(e.target.value)}
+                      className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  <button className="px-4 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 flex items-center gap-2">
+                    <Filter className="h-4 w-4" />
+                    Filter
+                  </button>
+                </div>
+              </div>
+
+              {/* Loading State */}
+              {isLoadingInvestors && (
+                <div className="bg-white rounded-lg border border-gray-200 p-12 text-center">
+                  <RefreshCw className="h-8 w-8 text-gray-400 mx-auto mb-4 animate-spin" />
+                  <p className="text-gray-600">Loading investors...</p>
+                </div>
+              )}
+
+              {/* Investors List */}
+              {!isLoadingInvestors && (
+                <>
+                  {allInvestors.length === 0 ? (
+                    <div className="bg-white rounded-lg border border-gray-200 p-12 text-center">
+                      <Briefcase className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                      <p className="text-gray-600">No investors found.</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-6">
+                      {allInvestors
+                        .filter((investor) => {
+                          if (!investorSearchQuery.trim()) return true;
+                          const query = investorSearchQuery.toLowerCase();
+                          return (
+                            investor.fullName?.toLowerCase().includes(query) ||
+                            investor.email?.toLowerCase().includes(query) ||
+                            investor.organization?.toLowerCase().includes(query) ||
+                            (investor.investorDetails?.location &&
+                              investor.investorDetails.location.toLowerCase().includes(query))
+                          );
+                        })
+                        .map((investor) => (
+                          <Motion.div
+                            key={investor.id}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                          >
+                            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                              {/* Header */}
+                              <div className="p-6 border-b border-gray-200 bg-gradient-to-r from-purple-50 to-indigo-50">
+                                <div className="flex items-start justify-between gap-4">
+                                  <div className="flex-1">
+                                    <div className="flex items-center gap-3 mb-2">
+                                      <h3 className="text-2xl font-bold text-gray-900">
+                                        {investor.fullName}
+                                      </h3>
+                                      {investor.organization && (
+                                        <span className="px-3 py-1 bg-white text-gray-700 text-xs font-semibold rounded-full border border-gray-200">
+                                          {investor.organization}
+                                        </span>
+                                      )}
+                                    </div>
+                                    <div className="flex flex-wrap gap-2">
+                                      {investor.portfolioCount > 0 && (
+                                        <span className="px-2 py-1 bg-white text-gray-700 text-xs rounded border border-gray-200">
+                                          {investor.portfolioCount} Portfolio Companies
+                                        </span>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Content */}
+                              <div className="p-6 space-y-6">
+                                {/* Investor Info */}
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                  <div>
+                                    <h4 className="text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wide">
+                                      Contact Information
+                                    </h4>
+                                    <div className="space-y-2 text-sm">
+                                      <div className="flex items-center gap-2">
+                                        <Mail className="h-4 w-4 text-gray-400" />
+                                        <span className="text-gray-600">Email:</span>
+                                        <span className="font-medium text-gray-900">
+                                          {investor.email}
+                                        </span>
+                                      </div>
+                                      {investor.investorDetails?.phone && (
+                                        <div className="flex items-center gap-2">
+                                          <Phone className="h-4 w-4 text-gray-400" />
+                                          <span className="text-gray-600">Phone:</span>
+                                          <span className="font-medium text-gray-900">
+                                            {investor.investorDetails.phone}
+                                          </span>
+                                        </div>
+                                      )}
+                                      {investor.investorDetails?.location && (
+                                        <div className="flex items-center gap-2">
+                                          <MapPin className="h-4 w-4 text-gray-400" />
+                                          <span className="text-gray-600">Location:</span>
+                                          <span className="font-medium text-gray-900">
+                                            {investor.investorDetails.location}
+                                          </span>
+                                        </div>
+                                      )}
+                                      {investor.investorDetails?.linkedinUrl && (
+                                        <div className="flex items-center gap-2">
+                                          <LinkIcon className="h-4 w-4 text-gray-400" />
+                                          <a
+                                            href={investor.investorDetails.linkedinUrl}
+                                            target="_blank"
+                                            rel="noreferrer"
+                                            className="text-blue-600 hover:underline"
+                                          >
+                                            LinkedIn Profile
+                                          </a>
+                                        </div>
+                                      )}
+                                      <div className="flex items-center gap-2">
+                                        <Calendar className="h-4 w-4 text-gray-400" />
+                                        <span className="text-gray-600">Registered:</span>
+                                        <span className="font-medium text-gray-900">
+                                          {formatDateDisplay(investor.createdAt)}
+                                        </span>
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  <div>
+                                    <h4 className="text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wide">
+                                      Additional Details
+                                    </h4>
+                                    <div className="space-y-2 text-sm">
+                                      {investor.notes && (
+                                        <div>
+                                          <span className="text-gray-600">Notes:</span>
+                                          <p className="text-gray-900 mt-1">{investor.notes}</p>
+                                        </div>
+                                      )}
+                                      {investor.investorDetails &&
+                                        Object.keys(investor.investorDetails).length > 0 && (
+                                          <div>
+                                            <span className="text-gray-600">Details:</span>
+                                            <pre className="text-xs text-gray-700 mt-1 bg-gray-50 p-2 rounded overflow-auto">
+                                              {JSON.stringify(investor.investorDetails, null, 2)}
+                                            </pre>
+                                          </div>
+                                        )}
+                                    </div>
+                                  </div>
+                                </div>
+
+                                {/* Portfolio Companies */}
+                                {investor.portfolios && investor.portfolios.length > 0 && (
+                                  <div>
+                                    <h4 className="text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wide">
+                                      Portfolio Companies ({investor.portfolios.length})
+                                    </h4>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                      {investor.portfolios.map((portfolio) => (
+                                        <div
+                                          key={portfolio.id}
+                                          className="p-4 border border-gray-200 rounded-lg hover:border-blue-300 transition-colors"
+                                        >
+                                          <h5 className="font-semibold text-gray-900 mb-2">
+                                            {portfolio.companyName}
+                                          </h5>
+                                          {portfolio.description && (
+                                            <p className="text-sm text-gray-600 mb-2 line-clamp-2">
+                                              {portfolio.description}
+                                            </p>
+                                          )}
+                                          <div className="flex flex-wrap gap-2 mt-2">
+                                            {portfolio.sector && (
+                                              <span className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded">
+                                                {portfolio.sector}
+                                              </span>
+                                            )}
+                                            {portfolio.stage && (
+                                              <span className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded">
+                                                {portfolio.stage}
+                                              </span>
+                                            )}
+                                          </div>
+                                          {portfolio.website && (
+                                            <a
+                                              href={portfolio.website}
+                                              target="_blank"
+                                              rel="noreferrer"
+                                              className="text-xs text-blue-600 hover:underline mt-2 inline-flex items-center gap-1"
+                                            >
+                                              <Globe className="h-3 w-3" />
+                                              Visit Website
+                                            </a>
+                                          )}
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </Motion.div>
+                        ))}
+                    </div>
+                  )}
+                </>
+              )}
             </div>
           )}
 

@@ -172,6 +172,8 @@ export const adminApi = {
   getAnalytics: (token) => apiClient.get('/admin/analytics', token),
   getActivityLog: (token, limit) => apiClient.get(`/admin/activity-log${limit ? `?limit=${limit}` : ''}`, token),
   getDashboardSummary: (token) => apiClient.get('/admin/dashboard-summary', token),
+  getFounders: (token) => apiClient.get('/admin/founders', token),
+  getInvestors: (token) => apiClient.get('/admin/investors', token),
 };
 
 export const uploadApi = {

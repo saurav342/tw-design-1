@@ -383,11 +383,118 @@ const getDashboardSummary = async (req, res) => {
   }
 };
 
+const getFounders = async (req, res) => {
+  try {
+    // Get all founder intakes
+    const intakes = await FounderIntake.find({}).sort({ createdAt: -1 });
+    
+    // Get all founder extras
+    const allExtras = await FounderExtras.find({});
+    const extrasMap = new Map();
+    allExtras.forEach((extra) => {
+      extrasMap.set(extra.founderId, extra);
+    });
+    
+    // Get all users with founder role
+    const founderUsers = await User.find({ role: 'founder' }).sort({ createdAt: -1 });
+    const userMap = new Map();
+    founderUsers.forEach((user) => {
+      userMap.set(user.email.toLowerCase(), user);
+    });
+    
+    // Combine intake data with extras and user data
+    const founders = intakes.map((intake) => {
+      const intakeObj = intake.toObject();
+      const extras = extrasMap.get(intake._id.toString()) || null;
+      const user = userMap.get(intake.email.toLowerCase()) || null;
+      
+      // Convert _id to id
+      const founder = {
+        id: intakeObj._id.toString(),
+        ...intakeObj,
+        _id: undefined,
+        __v: undefined,
+      };
+      
+      // Add extras data
+      if (extras) {
+        founder.extras = {
+          serviceRequests: extras.serviceRequests || [],
+          successFeeRequest: extras.successFeeRequest || null,
+          marketplaceListing: extras.marketplaceListing || null,
+        };
+      } else {
+        founder.extras = {
+          serviceRequests: [],
+          successFeeRequest: null,
+          marketplaceListing: null,
+        };
+      }
+      
+      // Add user account data if exists
+      if (user) {
+        founder.userAccount = {
+          id: user._id.toString(),
+          fullName: user.fullName,
+          email: user.email,
+          organization: user.organization,
+          notes: user.notes,
+          founderDetails: user.founderDetails,
+          createdAt: user.createdAt,
+          updatedAt: user.updatedAt,
+        };
+      } else {
+        founder.userAccount = null;
+      }
+      
+      return founder;
+    });
+    
+    return res.status(200).json({ items: founders });
+  } catch (error) {
+    return res.status(500).json({ message: error.message || 'Unable to fetch founders' });
+  }
+};
+
+const getInvestors = async (req, res) => {
+  try {
+    // Get all users with investor role
+    const investors = await User.find({ role: 'investor' }).sort({ createdAt: -1 });
+    
+    // Format investor data
+    const formattedInvestors = investors.map((investor) => {
+      const investorObj = investor.toObject();
+      const investorId = investorObj._id.toString();
+      
+      const formatted = {
+        id: investorId,
+        fullName: investorObj.fullName,
+        email: investorObj.email,
+        organization: investorObj.organization,
+        notes: investorObj.notes,
+        investorDetails: investorObj.investorDetails || {},
+        createdAt: investorObj.createdAt,
+        updatedAt: investorObj.updatedAt,
+        portfolios: [], // Portfolios are not currently linked to specific investors in the schema
+        portfolioCount: 0,
+      };
+      
+      return formatted;
+    });
+    
+    return res.status(200).json({ items: formattedInvestors });
+  } catch (error) {
+    return res.status(500).json({ message: error.message || 'Unable to fetch investors' });
+  }
+};
+
 module.exports = {
   deleteUserController,
   getActivityLog,
   getAnalytics,
   getDashboardSummary,
+  getFounders,
+  getInvestors,
   getSiteMetrics,
   getUsers,
   updateUserController,

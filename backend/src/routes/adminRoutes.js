@@ -4,6 +4,8 @@ const {
   getActivityLog,
   getAnalytics,
   getDashboardSummary,
+  getFounders,
+  getInvestors,
   getSiteMetrics,
   getUsers,
   updateUserController,
@@ -21,5 +23,7 @@ router.get('/metrics', getSiteMetrics);
 router.get('/analytics', getAnalytics);
 router.get('/activity-log', getActivityLog);
 router.get('/dashboard-summary', getDashboardSummary);
+router.get('/founders', getFounders);
+router.get('/investors', getInvestors);
 
 module.exports = router;

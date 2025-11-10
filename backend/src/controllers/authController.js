@@ -32,6 +32,17 @@ const toBoolean = (value) => {
 
 const sanitizeFilePayload = (file) => {
   if (!file) return null;
+  
+  // If it's a string (URL), return it as-is
+  if (typeof file === 'string') {
+    return file;
+  }
+  
+  // If it's an object, validate it has the required file properties
+  if (typeof file !== 'object') {
+    throw new Error('Invalid file payload supplied.');
+  }
+  
   const { fileName, mimeType, size, data } = file;
   if (!fileName || !mimeType || data === undefined) {
     throw new Error('Invalid file payload supplied.');

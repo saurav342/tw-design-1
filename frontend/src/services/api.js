@@ -13,10 +13,10 @@ const resolveApiBaseUrl = () => {
 
     if (hasWindow && window.location.protocol === 'https:' && normalized.startsWith('http://')) {
       console.warn(
-        '[Launch & Lift] Detected insecure API base on HTTPS page. Falling back to default backend. ' +
+        '[Launch & Lift] Detected insecure API base on HTTPS page. Falling back to relative path. ' +
           'Set up a reverse proxy or provide an HTTPS API URL to avoid mixed-content blocks.',
       );
-      return DEFAULT_API_BASE;
+      return '/api';
     }
 
     return normalized;
@@ -28,13 +28,18 @@ const resolveApiBaseUrl = () => {
     if (isLocalHostname(hostname)) {
       return `${origin}/api`;
     }
+    
+    // When deployed (not localhost), use relative path to go through Netlify proxy
+    // This avoids CORS issues since the request will be same-origin
+    return '/api';
   }
 
   if (import.meta.env.DEV) {
     return LOCAL_API_BASE;
   }
 
-  return DEFAULT_API_BASE;
+  // Fallback: use relative path for production to leverage Netlify proxy
+  return '/api';
 };
 
 const API_BASE_URL = resolveApiBaseUrl();

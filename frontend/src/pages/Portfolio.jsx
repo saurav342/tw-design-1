@@ -33,8 +33,8 @@ const Portfolio = () => {
     <div className="mx-auto max-w-7xl space-y-12 px-4 py-12 lg:px-8">
       <SectionHeader
         eyebrow="Portfolio"
-        title="LaunchAndLift portfolio snapshots"
-        description="A cross-section of LaunchAndLift-backed companies building climate resilience, applied AI, health, and infrastructure solutions."
+        title="Launch & Lift portfolio snapshots"
+        description="A cross-section of Launch & Lift-backed companies building climate resilience, applied AI, health, and infrastructure solutions."
       />
       {isLoading ? (
         <div className="flex items-center justify-center py-12">
@@ -53,9 +53,9 @@ const Portfolio = () => {
       )}
       <section className="rounded-3xl bg-night-soft p-8 text-sm text-slate-600">
         <p>
-          Portfolio companies highlighted represent a subset of LaunchAndLift's investments and may include realized and
+          Portfolio companies highlighted represent a subset of <span className="font-semibold text-[#8b5cf6]">Launch & Lift</span>'s investments and may include realized and
           unrealized holdings. Data reflects publicly shareable information as of Q1 2025. For full details, investors can log in
-          to LaunchAndLift Mission Control or contact our capital partnerships team.
+          to <span className="font-semibold text-[#8b5cf6]">Launch & Lift</span> Mission Control or contact our capital partnerships team.
         </p>
       </section>
     </div>

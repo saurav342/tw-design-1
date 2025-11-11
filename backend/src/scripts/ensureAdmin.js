@@ -43,11 +43,11 @@ const ensureAdmin = async () => {
     console.log('Creating admin user...');
     const adminPasswordHash = await bcrypt.hash(adminPassword, 10);
     const adminUser = new User({
-      fullName: 'LaunchAndLift Admin',
+      fullName: 'Launch & Lift Admin',
       email: adminEmail,
       passwordHash: adminPasswordHash,
       role: 'admin',
-      organization: 'LaunchAndLift',
+      organization: 'Launch & Lift',
       adminDetails: { department: 'Operations' },
     });
     await adminUser.save();

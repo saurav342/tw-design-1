@@ -339,7 +339,7 @@ const Checkout = () => {
                 <div className="flex items-start gap-2">
                   <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-purple-600" />
                   <span className="text-night/70">
-                    Access to Launch&Lift Mission Control
+                    Access to <span className="font-semibold text-[#8b5cf6]">Launch & Lift</span> Mission Control
                   </span>
                 </div>
                 <div className="flex items-start gap-2">

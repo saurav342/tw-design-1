@@ -84,10 +84,10 @@ const AdminLogin = () => {
               Admin Portal
             </div>
             <h1 className="text-4xl font-bold mb-4 leading-tight">
-              LaunchAndLift<br />Administration
+              <span className="font-bold text-[#8b5cf6]">Launch & Lift</span><br />Administration
             </h1>
             <p className="text-white/90 text-lg leading-relaxed">
-              Secure access to the LaunchAndLift admin dashboard. Manage users, content, and platform operations.
+              Secure access to the <span className="font-semibold text-[#8b5cf6]">Launch & Lift</span> admin dashboard. Manage users, content, and platform operations.
             </p>
           </div>
 
@@ -123,7 +123,7 @@ const AdminLogin = () => {
                 <Shield className="w-6 h-6 text-gray-900" />
                 <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">Admin Sign In</h2>
               </div>
-              <p className="text-sm sm:text-base text-gray-600">Access the LaunchAndLift administration portal</p>
+              <p className="text-sm sm:text-base text-gray-600">Access the <span className="font-semibold text-[#8b5cf6]">Launch & Lift</span> administration portal</p>
             </div>
 
             {/* Demo Credentials Banner */}

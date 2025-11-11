@@ -350,7 +350,7 @@ const AdminDashboard = () => {
               <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
                 <Zap className="h-5 w-5 text-white" />
               </div>
-              <span className="font-bold text-lg">Launch&Lift</span>
+              <span className="font-bold text-lg text-[#8b5cf6]">Launch & Lift</span>
             </div>
           )}
           {!sidebarOpen && (

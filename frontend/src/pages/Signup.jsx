@@ -8,10 +8,10 @@ const signupFlows = [
     eyebrow: 'For capital partners',
     title: 'Investor onboarding',
     description:
-      'Request access to LaunchAndLift funds, co-investments, and our Mission Control workspace built for family offices and institutions.',
+      'Request access to Launch & Lift funds, co-investments, and our Mission Control workspace built for family offices and institutions.',
     benefits: [
       'Allocation diligence, quarterly NAV, and performance dashboards.',
-      'Direct access to LaunchAndLift deal teams and co-investment pipeline.',
+      'Direct access to Launch & Lift deal teams and co-investment pipeline.',
       'Secure document vault with compliance-ready exports.',
     ],
     to: '/signup/email?role=investor',
@@ -22,7 +22,7 @@ const signupFlows = [
     eyebrow: 'For founders',
     title: 'Founder onboarding',
     description:
-      'Share your company story so LaunchAndLift operators can activate capital, GTM, and product support tailored to your stage.',
+      'Share your company story so Launch & Lift operators can activate capital, GTM, and product support tailored to your stage.',
     benefits: [
       '12-week readiness sprints to accelerate traction and fundraising.',
       'Dedicated operator pod across GTM, product, and finance.',
@@ -49,9 +49,9 @@ const Signup = () => {
         <div className="grid gap-10 p-10 md:grid-cols-[0.9fr_1.1fr] md:p-16">
           <div className="space-y-6">
             <p className="text-xs font-semibold uppercase tracking-[0.3em] text-sprout">Activate access</p>
-            <h1 className="text-3xl font-semibold text-night">Choose your LaunchAndLift onboarding path</h1>
+            <h1 className="text-3xl font-semibold text-night">Choose your <span className="font-bold text-[#8b5cf6]">Launch & Lift</span> onboarding path</h1>
             <p className="text-sm text-slate-600">
-              LaunchAndLift provides tailored onboarding for investors and founders. Select the track that best fits your
+              <span className="font-semibold text-[#8b5cf6]">Launch & Lift</span> provides tailored onboarding for investors and founders. Select the track that best fits your
               role to share details, unlock Mission Control, and collaborate with our team.
             </p>
             <div className="rounded-2xl bg-night-soft p-5 text-sm text-slate-600">

@@ -49,7 +49,7 @@ const Navbar = () => {
     >
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 lg:px-8">
         <Link to="/" className="flex items-center gap-3 group">
-          <img src={logoImage} alt="LaunchAndLift logo" className="h-16 w-auto transition-transform duration-300 group-hover:scale-105" />
+          <img src={logoImage} alt="Launch & Lift logo" className="h-16 w-auto transition-transform duration-300 group-hover:scale-105" />
         </Link>
 
         <button
@@ -111,16 +111,10 @@ const Navbar = () => {
               <button
                 type="button"
                 onClick={() => navigate('/login')}
-                className="px-5 py-2 text-sm font-medium text-gray-700 hover:text-purple-600 transition-colors duration-200"
+                className="px-6 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-[#ff4fa3] to-[#8b5cf6] rounded-lg shadow-lg hover:shadow-xl hover:from-[#ff6bb3] hover:to-[#a78bfa] transition-all duration-200 transform hover:scale-105"
               >
-                Login
+                Log In
               </button>
-              <Link
-                to="/signup"
-                className="px-5 py-2 text-sm font-semibold text-white bg-gradient-to-r from-purple-600 to-pink-500 rounded-lg shadow-sm hover:shadow-md hover:from-purple-700 hover:to-pink-600 transition-all duration-200 transform hover:scale-105"
-              >
-                Create Account
-              </Link>
             </div>
           )}
         </div>
@@ -178,17 +172,10 @@ const Navbar = () => {
                       navigate('/login');
                       setMenuOpen(false);
                     }}
-                    className="w-full rounded-lg px-4 py-3 text-sm font-medium text-gray-700 border border-gray-200 hover:bg-gray-50 transition-colors duration-200"
+                    className="w-full rounded-lg px-4 py-3 text-sm font-semibold text-white bg-gradient-to-r from-[#ff4fa3] to-[#8b5cf6] shadow-lg hover:shadow-xl hover:from-[#ff6bb3] hover:to-[#a78bfa] transition-all duration-200"
                   >
-                    Login
+                    Log In
                   </button>
-                  <Link
-                    to="/signup"
-                    onClick={() => setMenuOpen(false)}
-                    className="block w-full text-center rounded-lg px-4 py-3 text-sm font-semibold text-white bg-gradient-to-r from-purple-600 to-pink-500 shadow-sm hover:shadow-md transition-all duration-200"
-                  >
-                    Create Account
-                  </Link>
                 </div>
               )}
             </div>

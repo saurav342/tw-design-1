@@ -117,7 +117,7 @@ const InvestorSignup = () => {
               Exclusive Investor Access
             </div>
             <h1 className="text-4xl font-bold mb-4 leading-tight">
-              Join the LaunchAndLift<br />Investor Network
+              Join the <span className="font-bold text-[#8b5cf6]">Launch & Lift</span><br />Investor Network
             </h1>
             <p className="text-white/90 text-lg leading-relaxed">
               Get early access to vetted, high-potential startups and comprehensive diligence materials curated by our expert team.

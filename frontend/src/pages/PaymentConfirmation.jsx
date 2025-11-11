@@ -169,7 +169,7 @@ const PaymentConfirmation = () => {
             </li>
             <li className="flex items-start gap-2">
               <CheckCircle2 className="w-5 h-5 text-purple-600 mt-0.5 flex-shrink-0" />
-              <span>Your payment receipt unlocks access to Launch&Lift Mission Control and the founder success pod.</span>
+              <span>Your payment receipt unlocks access to <span className="font-semibold text-[#8b5cf6]">Launch & Lift</span> Mission Control and the founder success pod.</span>
             </li>
             <li className="flex items-start gap-2">
               <CheckCircle2 className="w-5 h-5 text-purple-600 mt-0.5 flex-shrink-0" />

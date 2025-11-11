@@ -490,7 +490,7 @@ const FounderSignup = () => {
                 <Label htmlFor="companyLegalName">Company's legal name</Label>
                 <Input
                   id="companyLegalName"
-                  placeholder="LaunchAndLift Labs Inc."
+                  placeholder="Launch & Lift Labs Inc."
                   required
                   value={form.companyLegalName}
                   onChange={updateForm('companyLegalName')}

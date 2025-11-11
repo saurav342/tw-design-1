@@ -12,20 +12,20 @@ const transporter = nodemailer.createTransport({
 });
 
 const FROM_EMAIL = process.env.SMTP_FROM_EMAIL || process.env.SMTP_USER || 'noreply@launchandlift.com';
-const FROM_NAME = process.env.SMTP_FROM_NAME || 'LaunchAndLift';
+const FROM_NAME = process.env.SMTP_FROM_NAME || 'Launch & Lift';
 
 /**
  * Email template for founder signup welcome
  */
 const getFounderWelcomeEmailTemplate = (founderName, email) => ({
-  subject: 'Welcome to LaunchAndLift - Your Journey Begins! 🚀',
+  subject: 'Welcome to Launch & Lift - Your Journey Begins! 🚀',
   html: `
     <!DOCTYPE html>
     <html>
     <head>
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Welcome to LaunchAndLift</title>
+      <title>Welcome to Launch & Lift</title>
     </head>
     <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f5f5f5;">
       <table role="presentation" style="width: 100%; border-collapse: collapse;">
@@ -35,7 +35,7 @@ const getFounderWelcomeEmailTemplate = (founderName, email) => ({
               <!-- Header -->
               <tr>
                 <td style="padding: 40px 30px 30px; background: linear-gradient(135deg, #5b21d6 0%, #7c3aed 100%); border-radius: 12px 12px 0 0; text-align: center;">
-                  <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 600;">Welcome to LaunchAndLift! 🚀</h1>
+                  <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 600;">Welcome to Launch & Lift! 🚀</h1>
                 </td>
               </tr>
               
@@ -47,7 +47,7 @@ const getFounderWelcomeEmailTemplate = (founderName, email) => ({
                   </p>
                   
                   <p style="margin: 0 0 20px; color: #475569; font-size: 16px; line-height: 1.6;">
-                    Thank you for joining LaunchAndLift! We're excited to have you on board and look forward to supporting your startup journey.
+                    Thank you for joining Launch & Lift! We're excited to have you on board and look forward to supporting your startup journey.
                   </p>
                   
                   <p style="margin: 0 0 20px; color: #475569; font-size: 16px; line-height: 1.6;">
@@ -85,7 +85,7 @@ const getFounderWelcomeEmailTemplate = (founderName, email) => ({
                 <td style="padding: 30px; background-color: #f8fafc; border-radius: 0 0 12px 12px; text-align: center; border-top: 1px solid #e2e8f0;">
                   <p style="margin: 0 0 10px; color: #64748b; font-size: 14px;">
                     Best regards,<br>
-                    <strong>The LaunchAndLift Team</strong>
+                    <strong>The Launch & Lift Team</strong>
                   </p>
                   <p style="margin: 20px 0 0; color: #94a3b8; font-size: 12px;">
                     This email was sent to ${email}. If you didn't create an account, please ignore this email.
@@ -105,14 +105,14 @@ const getFounderWelcomeEmailTemplate = (founderName, email) => ({
  * Email template for admin signup notification
  */
 const getAdminWelcomeEmailTemplate = (adminName, email) => ({
-  subject: 'Welcome to LaunchAndLift Admin Portal 👨‍💼',
+  subject: 'Welcome to Launch & Lift Admin Portal 👨‍💼',
   html: `
     <!DOCTYPE html>
     <html>
     <head>
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Welcome to LaunchAndLift Admin</title>
+      <title>Welcome to Launch & Lift Admin</title>
     </head>
     <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f5f5f5;">
       <table role="presentation" style="width: 100%; border-collapse: collapse;">
@@ -134,7 +134,7 @@ const getAdminWelcomeEmailTemplate = (adminName, email) => ({
                   </p>
                   
                   <p style="margin: 0 0 20px; color: #475569; font-size: 16px; line-height: 1.6;">
-                    Your admin account has been successfully created for LaunchAndLift. You now have access to the admin dashboard with full administrative privileges.
+                    Your admin account has been successfully created for Launch & Lift. You now have access to the admin dashboard with full administrative privileges.
                   </p>
                   
                   <!-- Highlight Box -->
@@ -168,7 +168,7 @@ const getAdminWelcomeEmailTemplate = (adminName, email) => ({
                 <td style="padding: 30px; background-color: #f8fafc; border-radius: 0 0 12px 12px; text-align: center; border-top: 1px solid #e2e8f0;">
                   <p style="margin: 0 0 10px; color: #64748b; font-size: 14px;">
                     Best regards,<br>
-                    <strong>The LaunchAndLift Team</strong>
+                    <strong>The Launch & Lift Team</strong>
                   </p>
                   <p style="margin: 20px 0 0; color: #94a3b8; font-size: 12px;">
                     This email was sent to ${email}. This is an automated notification for admin account creation.
@@ -286,7 +286,7 @@ const getFounderIntakeNotificationTemplate = (founderData) => ({
               <tr>
                 <td style="padding: 30px; background-color: #f8fafc; border-radius: 0 0 12px 12px; text-align: center; border-top: 1px solid #e2e8f0;">
                   <p style="margin: 0 0 10px; color: #64748b; font-size: 14px;">
-                    This is an automated notification from LaunchAndLift Admin Portal.
+                    This is an automated notification from Launch & Lift Admin Portal.
                   </p>
                   <p style="margin: 20px 0 0; color: #94a3b8; font-size: 12px;">
                     Application ID: ${founderData.id || 'N/A'} | Submitted: ${new Date().toLocaleString()}
@@ -349,7 +349,7 @@ const sendAdminWelcomeEmail = async (adminName, email) => {
  * Email template for email verification with OTP
  */
 const getEmailVerificationTemplate = (email, role, otp) => ({
-  subject: 'Verify Your Email - LaunchAndLift',
+  subject: 'Verify Your Email - Launch & Lift',
   html: `
     <!DOCTYPE html>
     <html>
@@ -378,7 +378,7 @@ const getEmailVerificationTemplate = (email, role, otp) => ({
                   </p>
                   
                   <p style="margin: 0 0 20px; color: #475569; font-size: 16px; line-height: 1.6;">
-                    Thank you for signing up for LaunchAndLift as a <strong>${role === 'founder' ? 'Founder' : 'Investor'}</strong>! To complete your registration, please enter the verification code below.
+                    Thank you for signing up for Launch & Lift as a <strong>${role === 'founder' ? 'Founder' : 'Investor'}</strong>! To complete your registration, please enter the verification code below.
                   </p>
                   
                   <!-- OTP Display -->
@@ -410,7 +410,7 @@ const getEmailVerificationTemplate = (email, role, otp) => ({
                 <td style="padding: 30px; background-color: #f8fafc; border-radius: 0 0 12px 12px; text-align: center; border-top: 1px solid #e2e8f0;">
                   <p style="margin: 0 0 10px; color: #64748b; font-size: 14px;">
                     Best regards,<br>
-                    <strong>The LaunchAndLift Team</strong>
+                    <strong>The Launch & Lift Team</strong>
                   </p>
                   <p style="margin: 20px 0 0; color: #94a3b8; font-size: 12px;">
                     This email was sent to ${email}. If you didn't create an account, please ignore this email.

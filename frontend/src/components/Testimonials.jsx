@@ -1,5 +1,6 @@
 import PropTypes from 'prop-types';
 import { motion } from 'framer-motion';
+import { highlightBrandName } from '../lib/brandHighlight';
 
 const MotionCard = motion.div;
 
@@ -89,7 +90,7 @@ const Testimonials = ({ items }) => (
 
               {/* Quote text with better typography */}
               <p className="mb-8 flex-1 text-[15px] leading-[1.75] text-[#3b2a57] lg:text-base font-medium">
-                {testimonial.quote}
+                {highlightBrandName(testimonial.quote)}
               </p>
 
               {/* Author info with enhanced design */}

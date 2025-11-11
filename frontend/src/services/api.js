@@ -13,7 +13,7 @@ const resolveApiBaseUrl = () => {
 
     if (hasWindow && window.location.protocol === 'https:' && normalized.startsWith('http://')) {
       console.warn(
-        '[LaunchAndLift] Detected insecure API base on HTTPS page. Falling back to default backend. ' +
+        '[Launch & Lift] Detected insecure API base on HTTPS page. Falling back to default backend. ' +
           'Set up a reverse proxy or provide an HTTPS API URL to avoid mixed-content blocks.',
       );
       return DEFAULT_API_BASE;

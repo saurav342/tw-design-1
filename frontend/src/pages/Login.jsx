@@ -154,7 +154,7 @@ const Login = () => {
               Trusted by 500+ founders
             </div>
             <h1 className="text-4xl font-bold mb-4 leading-tight">
-              Welcome back to<br />LaunchAndLift
+              Welcome back to<br /><span className="font-bold text-[#8b5cf6]">Launch & Lift</span>
             </h1>
             <p className="text-white/90 text-lg leading-relaxed">
               Your mission control for fundraising success. Track your raise, connect with investors, and access expert support—all in one place.
@@ -190,7 +190,7 @@ const Login = () => {
             {/* Header */}
             <div className="text-center lg:text-left mb-6 sm:mb-8">
               <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Sign in</h2>
-              <p className="text-sm sm:text-base text-gray-600">Access your LaunchAndLift dashboard</p>
+              <p className="text-sm sm:text-base text-gray-600">Access your <span className="font-semibold text-[#8b5cf6]">Launch & Lift</span> dashboard</p>
             </div>
 
             {/* Demo Credentials Banner */}

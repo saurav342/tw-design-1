@@ -95,7 +95,7 @@ app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
-app.get('/health', (req, res) => res.status(200).json({ status: 'ok', brand: 'LaunchAndLift' }));
+app.get('/health', (req, res) => res.status(200).json({ status: 'ok', brand: 'Launch & Lift' }));
 
 app.use('/api/auth', authRoutes);
 app.use('/api/admin/auth', adminAuthRoutes);
@@ -132,7 +132,7 @@ if (require.main === module) {
   // Connect to MongoDB
   connectDB().then(() => {
     app.listen(PORT, () => {
-      console.log(`LaunchAndLift API running on port ${PORT}`);
+      console.log(`Launch & Lift API running on port ${PORT}`);
     });
   }).catch((error) => {
     console.error('Failed to start server:', error);

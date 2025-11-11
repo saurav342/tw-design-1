@@ -198,7 +198,7 @@ const HeroSection = () => {
               Welcome to
             </span>
             <h1
-              className="text-transparent bg-gradient-to-r from-[#ff4fa3] via-[#8b5cf6] to-[#34d399] bg-clip-text"
+              className="text-[#8b5cf6]"
               style={{
                 fontFamily: 'var(--hero-display-font)',
                 fontSize: '4.0rem',

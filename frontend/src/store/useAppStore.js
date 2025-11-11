@@ -134,7 +134,7 @@ export const useAppStore = create((set, get) => ({
     const fallbackHeadline =
       input.headline ||
       (normalizedCompany.brief ? normalizedCompany.brief.slice(0, 140) : '') ||
-      `Building ${normalizedCompany.brandName || normalizedCompany.legalName || 'with Launch&Lift'}`;
+      `Building ${normalizedCompany.brandName || normalizedCompany.legalName || 'with Launch & Lift'}`;
 
     const newFounder = {
       id,

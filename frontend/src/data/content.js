@@ -2,9 +2,9 @@ export const palette = ['#5B21D1', '#FF4F9A', '#F7C948', '#2EDC92', '#9FF5CF'];
 
 export const heroContent = {
   eyebrow: 'Private Market Launchpad',
-  title: 'Secure growth with LaunchAndLift',
+  title: 'Secure growth with Launch & Lift',
   subtitle:
-    'We are the venture platform for family offices and institutional partners seeking resilient exposure to founder-led innovation. LaunchAndLift curates, builds, and scales companies through data-led diligence, operational mentorship, and patient capital.',
+    'We are the venture platform for family offices and institutional partners seeking resilient exposure to founder-led innovation. Launch & Lift curates, builds, and scales companies through data-led diligence, operational mentorship, and patient capital.',
   ctas: [
     { label: 'Explore Investor Platform', to: '/investors', style: 'primary' },
     { label: 'For Founders', to: '/founders', style: 'secondary' },
@@ -36,25 +36,25 @@ export const stats = [
 
 export const videoShowcase = [
   {
-    title: 'How LaunchAndLift builds enduring ventures',
+    title: 'How Launch & Lift builds enduring ventures',
     description: 'Our operating partners share the frameworks behind our founder support model.',
     youtubeId: 'LQ3wB694T6E',
   },
   {
     title: 'Investor roundtable on resilient portfolios',
-    description: 'Hear from limited partners on how LaunchAndLift delivers uncorrelated performance.',
+    description: 'Hear from limited partners on how Launch & Lift delivers uncorrelated performance.',
     youtubeId: '2BrCE_zxM0U',
   },
   {
     title: 'Founder spotlight: Scaling clean logistics',
-    description: 'Arcadia Freight founder Maya Chen details going from seed to Series B with LaunchAndLift.',
+    description: 'Arcadia Freight founder Maya Chen details going from seed to Series B with Launch & Lift.',
     youtubeId: 'HluANRwPyNo',
   },
 ];
 
 export const ecosystem = {
   overview:
-    'LaunchAndLift delivers a coordinated ecosystem that removes friction for both founders and investors. Our platform aligns venture builders, operating specialists, and capital partners to unlock measurable outcomes.',
+    'Launch & Lift delivers a coordinated ecosystem that removes friction for both founders and investors. Our platform aligns venture builders, operating specialists, and capital partners to unlock measurable outcomes.',
   pillars: [
     {
       title: 'Curated capital',
@@ -87,13 +87,13 @@ export const team = [
   {
     name: 'Avery Cole',
     title: 'Managing Partner',
-    bio: 'Former growth equity investor and operator with two IPO exits, leading LaunchAndLift’s capital strategy.',
+    bio: 'Former growth equity investor and operator with two IPO exits, leading Launch & Lift\'s capital strategy.',
     linkedin: 'https://www.linkedin.com/',
   },
   {
     name: 'Riya Deshmukh',
     title: 'Head of Founder Platform',
-    bio: 'Built product teams across three unicorns; now architects LaunchAndLift’s operator guild.',
+    bio: 'Built product teams across three unicorns; now architects Launch & Lift\'s operator guild.',
     linkedin: 'https://www.linkedin.com/',
   },
   {
@@ -117,7 +117,7 @@ export const team = [
   {
     name: 'Emily Park',
     title: 'Head of Research',
-    bio: 'Runs LaunchAndLift’s insight engine and market intelligence lab to surface emerging sectors.',
+    bio: 'Runs Launch & Lift\'s insight engine and market intelligence lab to surface emerging sectors.',
     linkedin: 'https://www.linkedin.com/',
   },
 ];
@@ -173,7 +173,7 @@ export const portfolioEntries = [
     name: 'QuantumWeave',
     sector: 'Applied Quantum',
     founders: ['Dr. Selena Moore'],
-    milestone: 'Closed $45M Series A led by LaunchAndLift Opportunity Fund',
+    milestone: 'Closed $45M Series A led by Launch & Lift Opportunity Fund',
     summary: 'Post-quantum security layer delivering resilient encryption for critical infrastructure.',
     link: 'https://example.com/quantumweave',
   },
@@ -182,25 +182,25 @@ export const portfolioEntries = [
 export const testimonials = [
   {
     quote:
-      'LaunchAndLift is more than capital; they embedded operating leaders who rebuilt our revenue engine. We doubled ARR within nine months while expanding internationally.',
+      'Launch & Lift is more than capital; they embedded operating leaders who rebuilt our revenue engine. We doubled ARR within nine months while expanding internationally.',
     name: 'Maya Chen',
     role: 'Co-founder & CEO, Arcadia Freight',
   },
   {
     quote:
-      'The diligence depth and structured reporting make LaunchAndLift a must-have partner. Their data rooms and operator insights drive conviction quickly.',
+      'The diligence depth and structured reporting make Launch & Lift a must-have partner. Their data rooms and operator insights drive conviction quickly.',
     name: 'Aidan Fox',
     role: 'Principal, Foxbridge Family Office',
   },
   {
     quote:
-      'LaunchAndLift gives us real-time visibility into allocations and risk. Mission Control allows our investment committee to monitor exposure with confidence.',
+      'Launch & Lift gives us real-time visibility into allocations and risk. Mission Control allows our investment committee to monitor exposure with confidence.',
     name: 'Clara Martinez',
     role: 'Chief Investment Officer, Solis Endowment',
   },
   {
     quote:
-      'From the first sprint, LaunchAndLift’s mission control dashboard surfaced portfolio benchmarks tailored to our board. It transformed the way we manage growth.',
+      'From the first sprint, Launch & Lift\'s mission control dashboard surfaced portfolio benchmarks tailored to our board. It transformed the way we manage growth.',
     name: 'Neha Kapoor',
     role: 'Founder, Synapse Harbor',
   },
@@ -218,7 +218,7 @@ export const dashboardOfferings = {
       name: 'Marketplace listing',
       badge: 'Live beta',
       summary:
-        'Launch a single raise request and circulate it across the LaunchAndLift investor marketplace—similar to how Grip syndicates new allocations.',
+        'Launch a single raise request and circulate it across the Launch & Lift investor marketplace—similar to how Grip syndicates new allocations.',
       benefits: [
         'Add your target amount, valuation, and use-of-funds in minutes',
         'Verification workflow keeps investors informed and warm',
@@ -253,31 +253,31 @@ export const dashboardOfferings = {
       cta: 'Request a service',
     },
   ],
-  adminNote: 'Each request routes to the LaunchAndLift command center so our team can respond, staff the right operators, and keep every raise moving.',
+  adminNote: 'Each request routes to the Launch & Lift command center so our team can respond, staff the right operators, and keep every raise moving.',
 };
 
 export const newsItems = [
   {
     outlet: 'Growth Weekly',
-    headline: 'LaunchAndLift unveils $400M opportunity fund for late-stage secondaries',
+    headline: 'Launch & Lift unveils $400M opportunity fund for late-stage secondaries',
   },
   {
     outlet: 'Private Markets Today',
-    headline: 'LaunchAndLift Mission Control adds benchmarking for family offices',
+    headline: 'Launch & Lift Mission Control adds benchmarking for family offices',
   },
   {
     outlet: 'Climate Ledger',
-    headline: 'Northbeam Energy and LaunchAndLift activate 14 clean industrial hubs',
+    headline: 'Northbeam Energy and Launch & Lift activate 14 clean industrial hubs',
   },
   {
     outlet: 'Operator Journal',
-    headline: 'LaunchAndLift expands operator guild with 20 Fortune 500 veterans',
+    headline: 'Launch & Lift expands operator guild with 20 Fortune 500 veterans',
   },
 ];
 
 export const investorHighlights = {
   intro:
-    'LaunchAndLift equips investors with transparent, de-risked exposure to venture-scale outcomes. Our platform blends human expertise and data automation to help you deploy capital with confidence.',
+    'Launch & Lift equips investors with transparent, de-risked exposure to venture-scale outcomes. Our platform blends human expertise and data automation to help you deploy capital with confidence.',
   valueProps: [
     {
       title: 'Structured access',
@@ -300,7 +300,7 @@ export const investorHighlights = {
       label: '01',
       title: 'Alignment workshop',
       description:
-        'Clarify objectives, liquidity timelines, and thematic preferences to shape your LaunchAndLift strategy.',
+        'Clarify objectives, liquidity timelines, and thematic preferences to shape your Launch & Lift strategy.',
     },
     {
       label: '02',
@@ -333,7 +333,7 @@ export const investorHighlights = {
         'Our operator guild and sector leads actively build founder relationships and leverage proprietary data to identify breakout teams before they raise.',
     },
     {
-      question: 'Can LaunchAndLift co-invest alongside our family office?',
+      question: 'Can Launch & Lift co-invest alongside our family office?',
       answer:
         'Yes. We collaborate with LPs on bespoke co-investments, providing diligence support, board resources, and long-term monitoring.',
     },
@@ -342,7 +342,7 @@ export const investorHighlights = {
 
 export const founderHighlights = {
   intro:
-    'LaunchAndLift partners with founders from first institutional checks through global expansion. We provide capital, operators, and market intelligence designed to accelerate resilient growth.',
+    'Launch & Lift partners with founders from first institutional checks through global expansion. We provide capital, operators, and market intelligence designed to accelerate resilient growth.',
   valueProps: [
     {
       title: 'Hands-on operators',
@@ -352,7 +352,7 @@ export const founderHighlights = {
     {
       title: 'Capital continuum',
       description:
-        'From pre-seed studio capital to growth equity and credit lines, LaunchAndLift scales with your momentum.',
+        'From pre-seed studio capital to growth equity and credit lines, Launch & Lift scales with your momentum.',
     },
     {
       title: 'Signals & storytelling',
@@ -388,14 +388,14 @@ export const founderHighlights = {
   ],
   faq: [
     {
-      question: 'What stage companies does LaunchAndLift back?',
+      question: 'What stage companies does Launch & Lift back?',
       answer:
         'We invest from studio and seed through Series C, with dedicated reserves for follow-on capital and growth credit.',
     },
     {
       question: 'Do you invest outside North America?',
       answer:
-        'Yes. LaunchAndLift supports founders across North America and select global hubs aligned with our sector theses.',
+        'Yes. Launch & Lift supports founders across North America and select global hubs aligned with our sector theses.',
     },
     {
       question: 'How do I get connected?',
@@ -407,28 +407,246 @@ export const founderHighlights = {
 
 export const resources = [
   {
-    title: 'LaunchAndLift Market Map 2025',
-    description: 'Our latest analysis covering sustainable logistics, climate resilience, and applied AI trends.',
-    type: 'Report',
-    link: '#',
-  },
-  {
-    title: 'Investor Playbook: Navigating Secondaries',
-    description: 'A framework for family offices to evaluate and execute secondary opportunities with confidence.',
+    id: 1,
+    title: 'The Complete Guide to AI-Powered Investor Matching in 2025',
+    description: 'Learn how AI matching algorithms analyze 100+ data signals to connect founders with perfectly aligned investors. Discover best practices and real-world success stories.',
     type: 'Guide',
+    category: 'Fundraising',
+    date: '2025-01-15',
+    readTime: '8 min read',
     link: '#',
+    featured: true,
   },
   {
-    title: 'Founder Toolkit: Mission Control Readiness',
-    description: 'Step-by-step guidance to prepare your operating metrics for LaunchAndLift’s dashboards.',
+    id: 2,
+    title: 'Launch & Lift Market Map 2025: Startup Ecosystem Trends',
+    description: 'Our latest analysis covering sustainable logistics, climate resilience, and applied AI trends. Comprehensive market insights for founders and investors.',
+    type: 'Report',
+    category: 'Market Research',
+    date: '2025-01-12',
+    readTime: '12 min read',
+    link: '#',
+    featured: true,
+  },
+  {
+    id: 3,
+    title: 'Pitch Deck Optimization: 10 Mistakes That Kill Your Fundraising',
+    description: 'Avoid common pitfalls that prevent founders from securing funding. Learn from real pitch decks and get actionable tips for improvement.',
+    type: 'Guide',
+    category: 'Fundraising',
+    date: '2025-01-10',
+    readTime: '6 min read',
+    link: '#',
+    featured: true,
+  },
+  {
+    id: 4,
+    title: 'Investor Playbook: Navigating Secondaries with Confidence',
+    description: 'A framework for family offices to evaluate and execute secondary opportunities. Complete guide to secondary market dynamics and best practices.',
+    type: 'Guide',
+    category: 'Investing',
+    date: '2025-01-08',
+    readTime: '10 min read',
+    link: '#',
+    featured: true,
+  },
+  {
+    id: 5,
+    title: 'Founder Profiling: How Data-Backed Assessment Improves Outcomes',
+    description: 'Discover how comprehensive founder assessment across 6 dimensions reduces bias and speeds investment decisions. Case studies and insights.',
+    type: 'Article',
+    category: 'Founder Growth',
+    date: '2025-01-05',
+    readTime: '7 min read',
+    link: '#',
+    featured: true,
+  },
+  {
+    id: 6,
+    title: 'Integrated Business Services: One Platform for All Startup Needs',
+    description: 'Stop coordinating with multiple vendors. Learn how integrated legal, tech, marketing, and operational services accelerate startup growth.',
+    type: 'Article',
+    category: 'Operations',
+    date: '2025-01-03',
+    readTime: '9 min read',
+    link: '#',
+    featured: true,
+  },
+  {
+    id: 7,
+    title: 'Cold Outreach vs Warm Introductions: The Data Behind 3-5x Conversion',
+    description: 'Real data showing why warm introductions through Launch & Lift result in 3-5x higher conversion rates compared to cold outreach.',
+    type: 'Case Study',
+    category: 'Fundraising',
+    date: '2024-12-28',
+    readTime: '5 min read',
+    link: '#',
+    featured: true,
+  },
+  {
+    id: 8,
+    title: 'Founder Toolkit: Mission Control Readiness Checklist',
+    description: 'Step-by-step guidance to prepare your operating metrics for Launch & Lift\'s dashboards. Essential checklist for investor-ready startups.',
     type: 'Toolkit',
+    category: 'Operations',
+    date: '2024-12-25',
+    readTime: '4 min read',
     link: '#',
+    featured: true,
   },
   {
-    title: 'Operator Guild Webinar Series',
-    description: 'Monthly deep dives from LaunchAndLift operators on GTM, people, and product excellence.',
-    type: 'Webinar',
+    id: 9,
+    title: 'The $412B VC Market: Opportunities and Challenges in 2025',
+    description: 'Comprehensive analysis of the global VC market, emerging trends, and what founders and investors need to know for the year ahead.',
+    type: 'Report',
+    category: 'Market Research',
+    date: '2024-12-22',
+    readTime: '15 min read',
     link: '#',
+    featured: true,
+  },
+  {
+    id: 10,
+    title: 'From Pre-Seed to Series A: Fundraising Strategy for Each Stage',
+    description: 'Complete guide to fundraising at different stages. Learn what investors look for, how to prepare, and when to raise your next round.',
+    type: 'Guide',
+    category: 'Fundraising',
+    date: '2024-12-20',
+    readTime: '11 min read',
+    link: '#',
+    featured: true,
+  },
+  {
+    id: 11,
+    title: 'Operator Guild Webinar: GTM Excellence for Startups',
+    description: 'Monthly deep dives from Launch & Lift operators on GTM, people, and product excellence. Watch recordings and access exclusive content.',
+    type: 'Webinar',
+    category: 'Growth',
+    date: '2024-12-18',
+    readTime: '45 min watch',
+    link: '#',
+    featured: true,
+  },
+  {
+    id: 12,
+    title: 'Legal Essentials for Startups: Cap Tables, Equity, and Compliance',
+    description: 'Navigate the complex world of startup legal requirements. Essential guide to cap tables, equity distribution, and regulatory compliance.',
+    type: 'Guide',
+    category: 'Legal',
+    date: '2024-12-15',
+    readTime: '8 min read',
+    link: '#',
+    featured: true,
+  },
+  {
+    id: 13,
+    title: 'Building Scalable Tech Infrastructure: A Founder\'s Guide',
+    description: 'Learn how to build cloud infrastructure that scales with your startup. Best practices, tools, and architecture patterns from successful startups.',
+    type: 'Guide',
+    category: 'Technical',
+    date: '2024-12-12',
+    readTime: '10 min read',
+    link: '#',
+    featured: false,
+  },
+  {
+    id: 14,
+    title: 'Product-Market Fit: Signs You\'re Ready to Scale',
+    description: 'Identify the key indicators of product-market fit and learn when it\'s time to scale your startup. Real examples and actionable frameworks.',
+    type: 'Article',
+    category: 'Growth',
+    date: '2024-12-10',
+    readTime: '7 min read',
+    link: '#',
+    featured: false,
+  },
+  {
+    id: 15,
+    title: 'Investor Relations: Building Strong Relationships with Your Backers',
+    description: 'Best practices for maintaining strong relationships with investors. Communication strategies, reporting frameworks, and board management tips.',
+    type: 'Guide',
+    category: 'Founder Growth',
+    date: '2024-12-08',
+    readTime: '6 min read',
+    link: '#',
+    featured: false,
+  },
+  {
+    id: 16,
+    title: 'Growth Marketing Playbook: Customer Acquisition That Works',
+    description: 'Proven strategies for customer acquisition and retention. Channel optimization, performance marketing, and growth hacking techniques.',
+    type: 'Playbook',
+    category: 'Growth',
+    date: '2024-12-05',
+    readTime: '9 min read',
+    link: '#',
+    featured: false,
+  },
+  {
+    id: 17,
+    title: 'Financial Modeling for Startups: Building Investor-Ready Projections',
+    description: 'Learn how to create financial models that impress investors. Templates, best practices, and common mistakes to avoid.',
+    type: 'Toolkit',
+    category: 'Fundraising',
+    date: '2024-12-03',
+    readTime: '12 min read',
+    link: '#',
+    featured: false,
+  },
+  {
+    id: 18,
+    title: 'Due Diligence Preparation: What Investors Really Look For',
+    description: 'Prepare for investor due diligence with this comprehensive guide. Documents, metrics, and processes that speed up the investment process.',
+    type: 'Guide',
+    category: 'Fundraising',
+    date: '2024-12-01',
+    readTime: '8 min read',
+    link: '#',
+    featured: false,
+  },
+  {
+    id: 19,
+    title: 'Team Building: Hiring Your First 10 Employees',
+    description: 'Strategic approach to building your early team. Hiring frameworks, cultural considerations, and retention strategies for startups.',
+    type: 'Guide',
+    category: 'Operations',
+    date: '2024-11-28',
+    readTime: '7 min read',
+    link: '#',
+    featured: false,
+  },
+  {
+    id: 20,
+    title: 'SaaS Metrics That Matter: KPIs for Early-Stage Startups',
+    description: 'Focus on the right metrics that drive investor confidence. Essential KPIs, benchmarks, and how to track and report them effectively.',
+    type: 'Article',
+    category: 'Operations',
+    date: '2024-11-25',
+    readTime: '6 min read',
+    link: '#',
+    featured: false,
+  },
+  {
+    id: 21,
+    title: 'Network Effects in Startup Ecosystems: Building Your Community',
+    description: 'How to build and leverage network effects in your startup ecosystem. Community building, partnerships, and platform strategies.',
+    type: 'Article',
+    category: 'Growth',
+    date: '2024-11-22',
+    readTime: '5 min read',
+    link: '#',
+    featured: false,
+  },
+  {
+    id: 22,
+    title: 'Term Sheet Negotiation: Key Terms Every Founder Should Know',
+    description: 'Navigate term sheet negotiations with confidence. Understanding valuation, liquidation preferences, and other critical terms.',
+    type: 'Guide',
+    category: 'Legal',
+    date: '2024-11-20',
+    readTime: '10 min read',
+    link: '#',
+    featured: false,
   },
 ];
 
@@ -650,7 +868,7 @@ export const outcomeStats = [
 export const homeTestimonials = [
   {
     quote:
-      'LaunchAndLift rebuilt our story, recalibrated our numbers, and had us in front of the right investors within 30 days. We closed a ₹28 Cr round in record time.',
+      'Launch & Lift rebuilt our story, recalibrated our numbers, and had us in front of the right investors within 30 days. We closed a ₹28 Cr round in record time.',
     name: 'Anika Sharma',
     role: 'Founder, FluxGrid | Series A',
   },
@@ -670,36 +888,64 @@ export const homeTestimonials = [
 
 export const faqItems = [
   {
-    question: 'What stages does LaunchAndLift support?',
-    answer: 'We partner with founders from seed through Series A, with select support for pre-seed and Series B extensions.',
+    question: 'What stages does Launch & Lift support?',
+    answer: 'We partner with founders from seed through Series A, with select support for pre-seed and Series B extensions. Our AI-powered matching engine works best for startups that have achieved product-market fit or have strong early traction, but we also support exceptional pre-revenue teams with compelling validation and market opportunity.',
+  },
+  {
+    question: 'How does the AI-powered matching work?',
+    answer: 'Our proprietary matching engine analyzes 100+ data signals including founder background, market opportunity, business model, growth trajectory, team composition, investment stage, and investor thesis alignment. Machine learning models assess compatibility probability and surface high-probability matches that would be missed through manual research. We evaluate factors like founder experience, execution capability, network strength, market understanding, and resilience to create the most accurate matches possible.',
   },
   {
     question: 'How long does the process take?',
-    answer: 'Most founders move from onboarding to closed funding within 8–16 weeks, depending on round size and complexity.',
+    answer: 'Most founders move from onboarding to closed funding within 8–16 weeks, depending on round size and complexity. The process typically includes 1-2 weeks for profile creation and pitch optimization, 2-4 weeks for investor matching and introductions, and 4-10 weeks for investor conversations, due diligence, and closing. Our AI-powered matching reduces time-to-qualified-investor-conversation from weeks to days compared to traditional cold outreach.',
   },
   {
     question: 'What is your success rate?',
-    answer: '87% of teams that complete our full program secure term sheets, with the majority closing above target.',
+    answer: '87% of teams that complete our full program secure term sheets, with the majority closing above target. Founders using our platform see 3-5x higher conversion rates compared to cold outreach (which averages <10% response rates). The key is our intelligent matching, which ensures you only spend time with investors who are actively deploying capital in your stage, sector, and geography.',
   },
   {
     question: 'How do investor introductions work?',
-    answer: 'We shortlist aligned investors, provide warm context, and prepare you for each conversation with tailored briefs.',
+    answer: 'We shortlist aligned investors based on our AI matching analysis, provide warm context about your startup and why it fits their thesis, and prepare you for each conversation with tailored briefs covering investor background, investment patterns, and conversation topics. Unlike cold outreach, our warm introductions command significantly higher response rates because investors trust our curation and understand the relevance before the first conversation.',
+  },
+  {
+    question: 'How much does it cost?',
+    answer: 'We offer flexible pricing models to align with your stage and needs. Our freemium model provides basic matching at no cost. Premium tiers ($49-199/month) include advanced features like pitch deck analysis, founder profiling, warm introductions, and priority support. For our success-fee program, we charge an upfront engagement fee (₹2-3L) to assemble your deal squad, with a success fee applied only on capital actually closed. This ensures our incentives stay perfectly aligned with your outcomes.',
   },
   {
     question: 'What if I do not raise funding?',
-    answer: 'Your upfront investment covers program delivery; our performance fee is only triggered when you close.',
+    answer: 'Your upfront investment covers program delivery and ensures we stay committed to your success; our performance fee is only triggered when you close. For premium subscriptions, you pay monthly for access to our platform and services regardless of outcome. For our success-fee program, if you don\'t raise, you only pay the engagement fee—no success fee is charged. We\'re committed to your success and work hard to ensure positive outcomes.',
   },
   {
     question: 'Do you take equity?',
-    answer: 'No. We operate on fees tied to outcomes, so your cap table stays intact.',
+    answer: 'No. We operate on fees tied to outcomes, so your cap table stays intact. We believe in keeping founders\' equity ownership maximized while providing the support and connections needed to raise capital successfully. Our business model is built on subscription fees and success-based compensation, not equity dilution.',
+  },
+  {
+    question: 'What services are included in the platform?',
+    answer: 'Launch & Lift provides four core services: (1) AI-powered investor matching with warm introductions, (2) comprehensive founder profiling and assessment with actionable insights, (3) pitch deck refinement and optimization with real-time AI feedback, and (4) integrated business services including legal compliance, technical solutions, growth marketing, and operational support. All services are accessible through one unified platform, eliminating the need to coordinate with multiple vendors.',
   },
   {
     question: 'Can you help with pitch deck creation?',
-    answer: 'Yes—our pitch studio co-builds your deck, data room, and financial models with feedback loops baked in.',
+    answer: 'Yes—our pitch studio co-builds your deck, data room, and financial models with feedback loops baked in. We provide AI-powered analysis comparing your pitch against investor expectations and successful funding benchmarks, real-time feedback on market validation and narrative coherence, design optimization recommendations, and financial projection analysis. Our goal is to help you reach investor-quality standards 70% faster than traditional methods.',
   },
   {
     question: 'Do I need traction to use the platform?',
-    answer: 'Traction helps, but we also work with pre-revenue teams that have strong validation and a credible path to market.',
+    answer: 'Traction helps, but we also work with pre-revenue teams that have strong validation and a credible path to market. Our AI matching considers multiple factors beyond revenue, including founder experience, market opportunity, product validation, team strength, and business model clarity. If you have compelling validation, a clear value proposition, and a credible path to market, we can help connect you with the right investors.',
+  },
+  {
+    question: 'What makes Launch & Lift different from other platforms?',
+    answer: 'We\'re the only platform combining intelligent matching + comprehensive founder profiling + AI-powered pitch optimization + integrated business services. Rather than coordinating separately with lawyers, developers, and marketers, everything you need is available through one platform with data-backed insights. Our AI analyzes 100+ signals to surface matches that would be impossible to find manually, and our integrated services eliminate the 60-80 hours typically wasted on vendor coordination.',
+  },
+  {
+    question: 'Do you provide actual funding?',
+    answer: 'Launch & Lift connects you with aligned investors—from angel investors to institutional VCs—who are actively deploying capital. We facilitate the matching and provide support services, but the actual investment comes from our network of investors who use our platform to source quality deal flow. We help you prepare, match, and connect, but investors make their own independent investment decisions.',
+  },
+  {
+    question: 'What geographic regions do you cover?',
+    answer: 'We primarily serve founders and investors in India and are expanding to select global markets including the US, EU, and APAC regions. Our platform supports remote collaboration, so founders and investors can connect regardless of location. However, our strongest network and service coverage is currently in India, where we have deep relationships with 300+ mapped investors and a robust ecosystem of service providers.',
+  },
+  {
+    question: 'How do you ensure investor quality and alignment?',
+    answer: 'We maintain a curated network of 300+ investors who are actively deploying capital. Each investor profile includes their investment thesis, stage focus, sector expertise, geographic preference, ticket size, and past investment patterns. Our AI matching engine analyzes these factors along with your startup profile to surface only the most relevant, high-probability matches. We also track investor activity and engagement to ensure our network consists of active, responsive capital partners.',
   },
 ];
 
@@ -715,8 +961,8 @@ export const blogIdeas = [
 ];
 
 export const brandStory = {
-  mission:
-    'LaunchAndLift was founded by entrepreneurs who experienced the frustrations of fundraising firsthand. We combined technology, expertise, and a relentless focus on outcomes to build the partner we always needed.',
+    mission:
+    'Launch & Lift was founded by entrepreneurs who experienced the frustrations of fundraising firsthand. We combined technology, expertise, and a relentless focus on outcomes to build the partner we always needed.',
   teamHighlights: [
     'Former VCs who understand how decisions get made in committee rooms.',
     'Founders who have raised multiple rounds and navigated acquisitions.',
@@ -727,7 +973,7 @@ export const brandStory = {
 
 export const finalCta = {
   headline: 'Ready to unlock momentum?',
-  subheadline: 'Join LaunchAndLift and turn fundraising from a grind into a guided, data-backed process.',
+  subheadline: 'Join Launch & Lift and turn fundraising from a grind into a guided, data-backed process.',
   primary: { label: 'Start Your Fundraising Journey', to: '/signup/founder' },
   secondary: { label: 'See Success Stories', to: '/portfolio' },
 };

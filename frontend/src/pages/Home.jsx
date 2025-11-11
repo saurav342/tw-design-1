@@ -2,7 +2,6 @@ import { Link } from 'react-router-dom';
 import { motion, useScroll, useSpring, useTransform } from 'framer-motion';
 import Hero from '../components/Hero';
 import CTASection from '../components/CTASection';
-import Footer from '../components/Footer';
 import FAQAccordion from '../components/FAQAccordion';
 import Testimonials from '../components/Testimonials';
 import { faqItems, homeTestimonials } from '../data/content';
@@ -352,7 +351,7 @@ const Home = () => {
                 The Market Gaps We're Solving
               </h2>
               <p className="mx-auto max-w-3xl text-base text-[#3b2a57]">
-                Fundraising friction costs the ecosystem billions. Here's how Launch and Lift transforms the process.
+                Fundraising friction costs the ecosystem billions. Here's how <span className="font-bold text-[#8b5cf6]">Launch & Lift</span> transforms the process.
               </p>
             </div>
 
@@ -489,7 +488,7 @@ const Home = () => {
                 >
                   <h3 className="text-lg font-bold text-[#1a1030] mb-2">The Result</h3>
                   <p className="text-sm text-[#2e7d32] font-medium leading-relaxed">
-                    Launch and Lift turns noise into signal, where data speaks truth and decisions move at the speed of AI. Founders connect with aligned investors in days, not months.
+                    <span className="font-bold text-[#8b5cf6]">Launch & Lift</span> turns noise into signal, where data speaks truth and decisions move at the speed of AI. Founders connect with aligned investors in days, not months.
                   </p>
                 </MotionDiv>
               </div>
@@ -506,7 +505,7 @@ const Home = () => {
                   The Market Gaps We're Solving
                 </h2>
                 <p className="mx-auto max-w-3xl text-base text-[#3b2a57]">
-                  Fundraising friction costs the ecosystem billions. Here's how Launch and Lift transforms the process.
+                  Fundraising friction costs the ecosystem billions. Here's how <span className="font-bold text-[#8b5cf6]">Launch & Lift</span> transforms the process.
                 </p>
               </div>
 
@@ -641,7 +640,7 @@ const Home = () => {
                 >
                   <h3 className="text-lg font-bold text-[#1a1030] mb-2">The Result</h3>
                   <p className="text-sm text-[#2e7d32] font-medium leading-relaxed">
-                    Launch and Lift turns noise into signal, where data speaks truth and decisions move at the speed of AI. Founders connect with aligned investors in days, not months.
+                    <span className="font-bold text-[#8b5cf6]">Launch & Lift</span> turns noise into signal, where data speaks truth and decisions move at the speed of AI. Founders connect with aligned investors in days, not months.
                   </p>
                 </MotionDiv>
                 </div>
@@ -1338,7 +1337,7 @@ const Home = () => {
                 Numbers That Speak for Themselves
               </h2>
               <p className="mx-auto max-w-2xl text-base text-[#3b2a57]">
-                Real outcomes from founders who chose Launch and Lift. Join the success story.
+                Real outcomes from founders who chose <span className="font-bold text-[#8b5cf6]">Launch & Lift</span>. Join the success story.
                 </p>
               </div>
 
@@ -1438,7 +1437,7 @@ const Home = () => {
               </span>
             </h2>
             <p className="mx-auto max-w-3xl text-base leading-relaxed text-[#3b2a57] lg:text-lg">
-              Founders who transformed their fundraising journey with Launch and Lift. From pitch to close, faster.
+              Founders who transformed their fundraising journey with <span className="font-bold text-[#8b5cf6]">Launch & Lift</span>. From pitch to close, faster.
             </p>
           </div>
           <Testimonials items={homeTestimonials} />
@@ -1449,20 +1448,32 @@ const Home = () => {
           whileInView="visible"
           viewport={{ once: true, amount: 0.3 }}
           variants={fadeUp}
-          className="mx-auto max-w-7xl space-y-10 px-4 lg:px-8"
+          className="relative mx-auto max-w-7xl space-y-10 px-4 py-16 lg:px-8"
         >
-          <div className="space-y-3 text-center">
-            <span className="inline-flex items-center justify-center rounded-full bg-[#e9e1ff] px-4 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.35em] text-[#8b5cf6]">
+          {/* Background decorative elements */}
+          <div className="pointer-events-none absolute inset-0 overflow-hidden">
+            <div className="absolute left-1/4 top-0 h-64 w-64 rounded-full bg-gradient-to-br from-[#ff4fa3]/8 to-transparent blur-3xl" />
+            <div className="absolute right-1/4 bottom-0 h-64 w-64 rounded-full bg-gradient-to-br from-[#8b5cf6]/8 to-transparent blur-3xl" />
+          </div>
+
+          <div className="relative space-y-4 text-center">
+            <span className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-[#f9e4ff] to-[#f0e9ff] px-5 py-1.5 text-[0.65rem] font-semibold uppercase tracking-[0.35em] text-[#8b5cf6] shadow-sm">
               FAQ
             </span>
-            <h2 className="text-3xl font-semibold text-[#1a1030] md:text-4xl">Your next questions, already answered</h2>
+            <h2 className="text-3xl font-semibold text-[#1a1030] md:text-4xl lg:text-5xl">
+              Got Questions?
+            </h2>
+            <p className="mx-auto max-w-2xl text-base text-[#3b2a57] leading-relaxed">
+              Everything you need to know about <span className="font-bold text-[#8b5cf6]">Launch & Lift</span>'s platform, services, and how we help founders raise capital faster.
+            </p>
           </div>
-          <FAQAccordion items={faqItems} />
+          <div className="relative">
+            <FAQAccordion items={faqItems} initialVisibleCount={6} />
+          </div>
         </MotionSection>
 
         <CTASection />
       </div>
-      {/* <Footer /> */}
     </>
   );
 };

@@ -483,7 +483,7 @@ const requestPasswordReset = (req, res) => {
     const reset = createResetToken(email);
     const resetLink = `${process.env.APP_URL ?? 'http://localhost:5173'}/reset-password?token=${reset.token}`;
 
-    console.log('[LaunchAndLift] Password reset requested:', {
+    console.log('[Launch & Lift] Password reset requested:', {
       email: reset.email,
       resetLink,
     });

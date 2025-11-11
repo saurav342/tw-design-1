@@ -23,11 +23,11 @@ const seedDatabase = async () => {
     console.log('Creating admin user...');
     const adminPasswordHash = await bcrypt.hash('LaunchAndLiftAdmin!23', 10);
     const adminUser = new User({
-      fullName: 'LaunchAndLift Admin',
+      fullName: 'Launch & Lift Admin',
       email: 'admin@launchandlift.com',
       passwordHash: adminPasswordHash,
       role: 'admin',
-      organization: 'LaunchAndLift',
+      organization: 'Launch & Lift',
       adminDetails: { department: 'Operations' },
     });
     await adminUser.save();
@@ -83,13 +83,13 @@ const seedDatabase = async () => {
       {
         name: 'Avery Cole',
         title: 'Managing Partner',
-        bio: 'Leading capital strategy and governance for LaunchAndLift vehicles.',
+        bio: 'Leading capital strategy and governance for Launch & Lift vehicles.',
         linkedin: 'https://www.linkedin.com/',
       },
       {
         name: 'Riya Deshmukh',
         title: 'Head of Founder Platform',
-        bio: 'Architects LaunchAndLift's operator guild and founder experience.',
+        bio: 'Architects Launch & Lift's operator guild and founder experience.',
         linkedin: 'https://www.linkedin.com/',
       },
       {
@@ -108,13 +108,13 @@ const seedDatabase = async () => {
     const testimonials = [
       {
         quote:
-          'LaunchAndLift is more than capital; the operator guild rebuilt our revenue engine and doubled ARR within nine months.',
+          'Launch & Lift is more than capital; the operator guild rebuilt our revenue engine and doubled ARR within nine months.',
         name: 'Maya Chen',
         role: 'Co-founder & CEO, Arcadia Freight',
       },
       {
         quote:
-          'Mission Control drives conviction quickly. LaunchAndLift's diligence packs are the benchmark for private market investing.',
+          'Mission Control drives conviction quickly. Launch & Lift's diligence packs are the benchmark for private market investing.',
         name: 'Aidan Fox',
         role: 'Principal, Foxbridge Family Office',
       },
@@ -128,7 +128,7 @@ const seedDatabase = async () => {
     const faqs = [
       {
         audience: 'investor',
-        question: 'How does LaunchAndLift source opportunities?',
+        question: 'How does Launch & Lift source opportunities?',
         answer:
           'Our operator guild and research lab maintain proactive theses across climate, infrastructure, health, and applied AI to source mission-aligned founders.',
       },
@@ -148,11 +148,11 @@ const seedDatabase = async () => {
     const newsItems = [
       {
         outlet: 'Growth Weekly',
-        headline: 'LaunchAndLift unveils $400M opportunity fund for late-stage secondaries',
+        headline: 'Launch & Lift unveils $400M opportunity fund for late-stage secondaries',
       },
       {
         outlet: 'Private Markets Today',
-        headline: 'LaunchAndLift Mission Control adds benchmarking for family offices',
+        headline: 'Launch & Lift Mission Control adds benchmarking for family offices',
       },
     ];
 

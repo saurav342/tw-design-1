@@ -8,7 +8,13 @@ const {
   getCouponByCode,
   incrementCouponUsage,
   getDefaultAmount,
+  getCouponEnabled,
 } = require('../models/paymentModel');
+
+// Validate Razorpay credentials
+if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
+  console.error('⚠️  Razorpay credentials not configured. Please set RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET in your .env file.');
+}
 
 // Initialize Razorpay
 const razorpay = new Razorpay({
@@ -43,6 +49,14 @@ const getPaymentAmount = async (req, res) => {
 // Create Razorpay order
 const createOrder = async (req, res) => {
   try {
+    // Check if Razorpay is configured
+    if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
+      console.error('Razorpay credentials not configured');
+      return res.status(500).json({ 
+        message: 'Payment gateway is not configured. Please contact support.' 
+      });
+    }
+
     const { amount, email, couponCode } = req.body;
     // Authentication is optional - founders may not be logged in yet
     const userId = req.user?.id || null;
@@ -87,7 +101,24 @@ const createOrder = async (req, res) => {
       },
     };
 
-    const razorpayOrder = await razorpay.orders.create(options);
+    console.log('[Payment] Creating Razorpay order with options:', {
+      ...options,
+      key_id: process.env.RAZORPAY_KEY_ID ? '***configured***' : 'missing',
+    });
+
+    let razorpayOrder;
+    try {
+      razorpayOrder = await razorpay.orders.create(options);
+      console.log('[Payment] Razorpay order created:', razorpayOrder.id);
+    } catch (razorpayError) {
+      console.error('[Payment] Razorpay order creation failed:', razorpayError);
+      if (razorpayError.error && razorpayError.error.description) {
+        return res.status(500).json({ 
+          message: `Failed to create payment order: ${razorpayError.error.description}` 
+        });
+      }
+      throw razorpayError;
+    }
 
     // Save payment record
     const payment = await createPayment({

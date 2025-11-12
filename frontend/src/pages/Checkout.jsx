@@ -9,11 +9,70 @@ import { paymentApi } from '../services/api.js';
 import { useAuth } from '../context/useAuth.js';
 
 const loadRazorpay = () => {
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
+    // Check if Razorpay is already loaded
+    if (window.Razorpay) {
+      console.log('[Razorpay] Already loaded');
+      resolve(window.Razorpay);
+      return;
+    }
+
+    // Check if script is already being loaded
+    const existingScript = document.querySelector('script[src="https://checkout.razorpay.com/v1/checkout.js"]');
+    if (existingScript) {
+      // If script exists, check if it's already loaded
+      if (existingScript.complete && window.Razorpay) {
+        console.log('[Razorpay] Loaded from existing script');
+        resolve(window.Razorpay);
+        return;
+      }
+      
+      // Wait for existing script to load
+      const checkInterval = setInterval(() => {
+        if (window.Razorpay) {
+          clearInterval(checkInterval);
+          console.log('[Razorpay] Loaded from existing script (after wait)');
+          resolve(window.Razorpay);
+        }
+      }, 100);
+      
+      // Timeout after 10 seconds
+      setTimeout(() => {
+        clearInterval(checkInterval);
+        if (!window.Razorpay) {
+          reject(new Error('Timeout waiting for Razorpay to load'));
+        }
+      }, 10000);
+      
+      existingScript.addEventListener('error', () => {
+        clearInterval(checkInterval);
+        reject(new Error('Failed to load Razorpay script'));
+      });
+      return;
+    }
+
+    // Create and load script
     const script = document.createElement('script');
     script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-    script.onload = () => resolve(window.Razorpay);
-    script.onerror = () => resolve(null);
+    script.async = true;
+    
+    script.onload = () => {
+      // Give it a moment for Razorpay to be available
+      setTimeout(() => {
+        if (window.Razorpay) {
+          console.log('[Razorpay] Script loaded successfully');
+          resolve(window.Razorpay);
+        } else {
+          reject(new Error('Razorpay script loaded but Razorpay object not found'));
+        }
+      }, 100);
+    };
+    
+    script.onerror = () => {
+      console.error('[Razorpay] Failed to load script');
+      reject(new Error('Failed to load Razorpay payment gateway. Please check your internet connection and try again.'));
+    };
+    
     document.body.appendChild(script);
   });
 };
@@ -124,36 +183,44 @@ const Checkout = () => {
 
     setProcessing(true);
     try {
+      console.log('[Payment] Starting payment flow...');
+      
       // Load Razorpay
+      console.log('[Payment] Loading Razorpay script...');
       const Razorpay = await loadRazorpay();
-      if (!Razorpay) {
-        showError('Failed to load payment gateway. Please try again.');
-        setProcessing(false);
-        return;
-      }
+      console.log('[Payment] Razorpay loaded successfully');
 
       // Create order
+      console.log('[Payment] Creating order...', { amount, email, couponCode: appliedCoupon?.code || null });
       const orderResponse = await paymentApi.createOrder({
         amount: amount,
         email: email,
         couponCode: appliedCoupon?.code || null,
       });
+      console.log('[Payment] Order created:', orderResponse);
+
+      if (!orderResponse.key || !orderResponse.orderId) {
+        throw new Error('Invalid order response from server');
+      }
 
       const options = {
         key: orderResponse.key,
         amount: orderResponse.amount,
-        currency: orderResponse.currency,
+        currency: orderResponse.currency || 'INR',
         name: 'Launch & Lift',
         description: 'Founder Onboarding Activation Fee',
         order_id: orderResponse.orderId,
         handler: async (response) => {
+          console.log('[Payment] Payment handler called:', response);
           try {
             // Verify payment
+            console.log('[Payment] Verifying payment...');
             const verifyResponse = await paymentApi.verifyPayment({
               razorpay_order_id: response.razorpay_order_id,
               razorpay_payment_id: response.razorpay_payment_id,
               razorpay_signature: response.razorpay_signature,
             });
+            console.log('[Payment] Payment verified:', verifyResponse);
 
             if (verifyResponse.payment) {
               showSuccess('Payment successful!');
@@ -167,31 +234,46 @@ const Checkout = () => {
               });
             }
           } catch (error) {
-            console.error('Payment verification error:', error);
-            showError('Payment verification failed. Please contact support.');
+            console.error('[Payment] Verification error:', error);
+            showError(error.message || 'Payment verification failed. Please contact support.');
           } finally {
             setProcessing(false);
           }
         },
         prefill: {
           email: email,
-          name: user?.fullName || '',
+          name: user?.fullName || user?.founderFullName || '',
+          contact: user?.phone || '',
         },
         theme: {
           color: '#5B21D1',
         },
         modal: {
           ondismiss: () => {
+            console.log('[Payment] Payment modal dismissed');
             setProcessing(false);
           },
         },
+        retry: {
+          enabled: true,
+          max_count: 3,
+        },
       };
 
+      console.log('[Payment] Opening Razorpay checkout with options:', options);
       const razorpay = new Razorpay(options);
+      razorpay.on('payment.failed', function (response) {
+        console.error('[Payment] Payment failed:', response.error);
+        showError(`Payment failed: ${response.error.description || 'Unknown error'}`);
+        setProcessing(false);
+      });
+      
       razorpay.open();
+      console.log('[Payment] Razorpay checkout opened');
     } catch (error) {
-      console.error('Payment error:', error);
-      showError(error.message || 'Failed to initiate payment. Please try again.');
+      console.error('[Payment] Payment error:', error);
+      const errorMessage = error.message || 'Failed to initiate payment. Please try again.';
+      showError(errorMessage);
       setProcessing(false);
     }
   };

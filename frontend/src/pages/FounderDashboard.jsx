@@ -70,9 +70,25 @@ const DashboardLayout = () => {
     loadData();
   }, [token, syncFoundersFromBackend, syncFounderExtrasFromBackend]);
 
+  // Set activeId from sessionStorage after founders are loaded
   useEffect(() => {
-    setActiveId(readActiveFounderId());
-  }, []);
+    if (!isLoading && founders.length > 0) {
+      const persistedId = readActiveFounderId();
+      if (persistedId) {
+        // Verify the persisted ID exists in the loaded founders
+        const found = founders.find((founder) => founder.id === persistedId);
+        if (found) {
+          setActiveId(persistedId);
+        } else {
+          // If persisted ID doesn't exist, use first founder
+          setActiveId(founders[0]?.id ?? null);
+        }
+      } else {
+        // No persisted ID, use first founder
+        setActiveId(founders[0]?.id ?? null);
+      }
+    }
+  }, [isLoading, founders]);
 
   const activeFounder = useMemo(() => {
     if (activeId) {

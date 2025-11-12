@@ -193,22 +193,7 @@ const Login = () => {
               <p className="text-sm sm:text-base text-gray-600">Access your <span className="font-semibold text-[#8b5cf6]">Launch & Lift</span> dashboard</p>
             </div>
 
-            {/* Demo Credentials Banner */}
-            <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-xl">
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-blue-900 mb-1">🎯 Quick Demo</p>
-                  <p className="text-xs text-blue-700">fe@fe.com • Password: 123</p>
-                </div>
-                <button
-                  onClick={fillDemoCredentials}
-                  className="text-xs font-medium text-blue-600 hover:text-blue-700 underline"
-                  type="button"
-                >
-                  Auto-fill
-                </button>
-              </div>
-            </div>
+
 
             {/* Error Alert */}
             {error && (
@@ -346,9 +331,9 @@ const Login = () => {
                   <option value="founder">Founder</option>
                   <option value="investor">Investor</option>
                 </select>
-                <p className="mt-2 text-xs text-gray-500">
+                {/* <p className="mt-2 text-xs text-gray-500">
                   Admin access? <Link to="/admin/login" className="text-indigo-600 hover:text-indigo-700 font-medium">Use admin portal</Link>
-                </p>
+                </p> */}
               </div>
 
               {/* Forgot Password Link */}

@@ -91,8 +91,8 @@ const Hero = () => {
             comprehensive profiling, and integrated growth support.
           </p>
           <div className="hero-cta">
-            <Link to="/founder" className="btn btn-primary btn-large">For Founders</Link>
-            <Link to="/investor" className="btn btn-outline btn-large">For Investors</Link>
+            <Link to="/founders" className="btn btn-primary btn-large">For Founders</Link>
+            <Link to="/investors" className="btn btn-outline btn-large">For Investors</Link>
           </div>
           <div className="hero-stats" ref={statsRef}>
             <div className="stat-item">

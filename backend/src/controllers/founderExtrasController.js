@@ -5,10 +5,11 @@ const {
   recordSuccessFeeRequest,
   upsertMarketplaceListing,
 } = require('../models/founderExtrasModel');
+const { getFounderIntakesByEmail } = require('../models/founderIntakeModel');
 
 const userHasFounderAccess = (user) => user && (user.role === 'admin' || user.role === 'founder');
 
-const canAccessFounderExtras = (req, founderId) => {
+const canAccessFounderExtras = async (req, founderId) => {
   if (!userHasFounderAccess(req.user)) {
     return false;
   }
@@ -18,7 +19,11 @@ const canAccessFounderExtras = (req, founderId) => {
   }
 
   if (req.user.role === 'founder') {
-    return true;
+    // Founders can only access their own founders' extras
+    // Check if the founderId belongs to a founder with the user's email
+    const userFounders = await getFounderIntakesByEmail(req.user.email);
+    const userFounderIds = userFounders.map((founder) => founder.id);
+    return userFounderIds.includes(founderId);
   }
 
   return false;
@@ -26,7 +31,21 @@ const canAccessFounderExtras = (req, founderId) => {
 
 const listExtras = async (req, res) => {
   try {
-    const items = await listFounderExtras();
+    let items;
+    
+    // If user is a founder, only return extras for their own founders
+    if (req.user?.role === 'founder') {
+      // Get all founders for this user's email
+      const userFounders = await getFounderIntakesByEmail(req.user.email);
+      const founderIds = userFounders.map((founder) => founder.id);
+      
+      // Get extras only for these founder IDs
+      items = await listFounderExtras(founderIds);
+    } else {
+      // Admin can see all extras
+      items = await listFounderExtras();
+    }
+    
     return res.status(200).json({ items });
   } catch (error) {
     return res.status(500).json({ message: error.message || 'Unable to list founder extras.' });
@@ -35,7 +54,8 @@ const listExtras = async (req, res) => {
 
 const getExtras = async (req, res) => {
   const { founderId } = req.params;
-  if (!canAccessFounderExtras(req, founderId)) {
+  const canAccess = await canAccessFounderExtras(req, founderId);
+  if (!canAccess) {
     return res.status(403).json({ message: 'You do not have permission to view these records.' });
   }
 
@@ -49,7 +69,8 @@ const getExtras = async (req, res) => {
 
 const upsertMarketplace = async (req, res) => {
   const { founderId } = req.params;
-  if (!canAccessFounderExtras(req, founderId)) {
+  const canAccess = await canAccessFounderExtras(req, founderId);
+  if (!canAccess) {
     return res.status(403).json({ message: 'You do not have permission to update this listing.' });
   }
 
@@ -63,7 +84,8 @@ const upsertMarketplace = async (req, res) => {
 
 const upsertSuccessFee = async (req, res) => {
   const { founderId } = req.params;
-  if (!canAccessFounderExtras(req, founderId)) {
+  const canAccess = await canAccessFounderExtras(req, founderId);
+  if (!canAccess) {
     return res.status(403).json({ message: 'You do not have permission to update this request.' });
   }
 
@@ -77,7 +99,8 @@ const upsertSuccessFee = async (req, res) => {
 
 const createServiceRequest = async (req, res) => {
   const { founderId } = req.params;
-  if (!canAccessFounderExtras(req, founderId)) {
+  const canAccess = await canAccessFounderExtras(req, founderId);
+  if (!canAccess) {
     return res.status(403).json({ message: 'You do not have permission to submit this brief.' });
   }
 

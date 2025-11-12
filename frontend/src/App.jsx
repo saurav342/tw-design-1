@@ -1,4 +1,4 @@
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, useLocation } from 'react-router-dom';
 import Footer from './components/Footer';
 import Navbar from './components/Navbar';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -35,6 +35,22 @@ import LegalCompliance from './pages/services/LegalCompliance';
 import TechEnhancementSupport from './pages/services/TechEnhancementSupport';
 import GrowthMarketing from './pages/services/GrowthMarketing';
 
+const LayoutWrapper = ({ children }) => {
+  const location = useLocation();
+  const isDashboardRoute = location.pathname.startsWith('/dashboard/investor') || 
+                          location.pathname.startsWith('/dashboard/founder');
+  
+  return (
+    <>
+      {!isDashboardRoute && <Navbar />}
+      <main className="flex-1">
+        {children}
+      </main>
+      {!isDashboardRoute && <Footer />}
+    </>
+  );
+};
+
 const AppContent = () => {
   return (
     <div className="flex min-h-screen flex-col bg-white">
@@ -42,90 +58,86 @@ const AppContent = () => {
         {/* Admin login route without navbar */}
         <Route path="/admin/login" element={<AdminLogin />} />
         
-        {/* All other routes with navbar */}
+        {/* All other routes */}
         <Route
           path="*"
           element={
-            <>
-              <Navbar />
-              <main className="flex-1">
-                <Routes>
-                  <Route path="/" element={<Home />} />
-                  <Route path="/investors" element={<Investors />} />
-                  <Route path="/founders" element={<Founders />} />
-                  <Route path="/portfolio" element={<Portfolio />} />
-                  <Route path="/resources" element={<Resources />} />
-                  <Route path="/login" element={<Login />} />
-                  <Route path="/signup" element={<Signup />} />
-                  <Route path="/signup/email" element={<EmailEntry />} />
-                  <Route path="/signup/:role/verify-otp" element={<OTPVerification />} />
-                  <Route path="/signup/investor" element={<InvestorSignup />} />
-                  <Route path="/signup/founder" element={<FounderSignup />} />
-                  <Route path="/payment-details" element={<PaymentDetails />} />
-                  <Route path="/checkout" element={<Checkout />} />
-                  <Route path="/payment-confirmation" element={<PaymentConfirmation />} />
-                  <Route
-                    path="/dashboard/investor"
-                    element={
-                      <ProtectedRoute roles={['investor']}>
-                        <InvestorDashboard />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/dashboard/founder"
-                    element={
-                      <ProtectedRoute roles={['founder']}>
-                        <FounderDashboard />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/dashboard/founder/marketplace"
-                    element={
-                      <ProtectedRoute roles={['founder']}>
-                        <FounderMarketplace />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/dashboard/founder/success-fee"
-                    element={
-                      <ProtectedRoute roles={['founder']}>
-                        <FounderSuccessFee />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/dashboard/founder/services"
-                    element={
-                      <ProtectedRoute roles={['founder']}>
-                        <FounderServices />
-                      </ProtectedRoute>
-                    }
-                  />
-                  {/* Public service landing pages - must come BEFORE dynamic route */}
-                  <Route path="/services/pitch-deck-preparation" element={<PitchDeckPreparation />} />
-                  <Route path="/services/mentorship-advisory" element={<MentorshipAdvisory />} />
-                  <Route path="/services/financial-projections" element={<FinancialProjections />} />
-                  <Route path="/services/legal-compliance" element={<LegalCompliance />} />
-                  <Route path="/services/tech-enhancement-support" element={<TechEnhancementSupport />} />
-                  <Route path="/services/growth-marketing" element={<GrowthMarketing />} />
-                  {/* Dynamic route for old service story pages - must come AFTER specific routes */}
-                  <Route path="/services/:serviceId" element={<FounderServiceStory />} />
-                  <Route
-                    path="/dashboard/admin"
-                    element={
-                      <ProtectedRoute roles={['admin']}>
-                        <AdminDashboard />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </main>
-              <Footer />
-            </>
+            <LayoutWrapper>
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/investors" element={<Investors />} />
+                <Route path="/founders" element={<Founders />} />
+                <Route path="/portfolio" element={<Portfolio />} />
+                <Route path="/resources" element={<Resources />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/signup" element={<Signup />} />
+                <Route path="/signup/email" element={<EmailEntry />} />
+                <Route path="/signup/:role/verify-otp" element={<OTPVerification />} />
+                <Route path="/signup/investor" element={<InvestorSignup />} />
+                <Route path="/signup/founder" element={<FounderSignup />} />
+                <Route path="/payment-details" element={<PaymentDetails />} />
+                <Route path="/checkout" element={<Checkout />} />
+                <Route path="/payment-confirmation" element={<PaymentConfirmation />} />
+                <Route
+                  path="/dashboard/investor"
+                  element={
+                    <ProtectedRoute roles={['investor']}>
+                      <InvestorDashboard />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/dashboard/founder"
+                  element={
+                    <ProtectedRoute roles={['founder']}>
+                      <FounderDashboard />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/dashboard/founder/marketplace"
+                  element={
+                    <ProtectedRoute roles={['founder']}>
+                      <FounderMarketplace />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/dashboard/founder/success-fee"
+                  element={
+                    <ProtectedRoute roles={['founder']}>
+                      <FounderSuccessFee />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/dashboard/founder/services"
+                  element={
+                    <ProtectedRoute roles={['founder']}>
+                      <FounderServices />
+                    </ProtectedRoute>
+                  }
+                />
+                {/* Public service landing pages - must come BEFORE dynamic route */}
+                <Route path="/services/pitch-deck-preparation" element={<PitchDeckPreparation />} />
+                <Route path="/services/mentorship-advisory" element={<MentorshipAdvisory />} />
+                <Route path="/services/financial-projections" element={<FinancialProjections />} />
+                <Route path="/services/legal-compliance" element={<LegalCompliance />} />
+                <Route path="/services/tech-enhancement-support" element={<TechEnhancementSupport />} />
+                <Route path="/services/growth-marketing" element={<GrowthMarketing />} />
+                {/* Dynamic route for old service story pages - must come AFTER specific routes */}
+                <Route path="/services/:serviceId" element={<FounderServiceStory />} />
+                <Route
+                  path="/dashboard/admin"
+                  element={
+                    <ProtectedRoute roles={['admin']}>
+                      <AdminDashboard />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </LayoutWrapper>
           }
         />
       </Routes>

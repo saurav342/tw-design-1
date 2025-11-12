@@ -14,8 +14,9 @@ const sanitizeIntake = (record) => {
   return recordObj;
 };
 
-const listFounderIntakes = async () => {
-  const intakes = await FounderIntake.find({}).sort({ createdAt: -1 });
+const listFounderIntakes = async (emailFilter = null) => {
+  const query = emailFilter ? { email: emailFilter.toLowerCase() } : {};
+  const intakes = await FounderIntake.find(query).sort({ createdAt: -1 });
   return intakes.map(sanitizeIntake);
 };
 
@@ -57,7 +58,14 @@ const createFounderIntake = async (input = {}) => {
   return sanitizeIntake(intake);
 };
 
+const getFounderIntakesByEmail = async (email) => {
+  if (!email) return [];
+  const intakes = await FounderIntake.find({ email: email.toLowerCase() }).sort({ createdAt: -1 });
+  return intakes.map(sanitizeIntake);
+};
+
 module.exports = {
   createFounderIntake,
   listFounderIntakes,
+  getFounderIntakesByEmail,
 };

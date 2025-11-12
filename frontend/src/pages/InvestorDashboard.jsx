@@ -8,6 +8,7 @@ import { cn } from '../lib/utils.js';
 import { useNotification } from '../context/NotificationContext';
 import { useAppStore } from '../store/useAppStore.js';
 import { formatCurrency } from '../lib/formatters.js';
+import DashboardHeader from '../components/DashboardHeader.jsx';
 
 const initialFilters = {
   stage: 'All',
@@ -154,6 +155,9 @@ const InvestorDashboard = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30">
+      {/* Dashboard Header */}
+      <DashboardHeader role="investor" />
+      
       {/* Decorative background elements */}
       <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-100/40 to-purple-100/40 rounded-full blur-3xl" />

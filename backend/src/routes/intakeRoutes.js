@@ -5,6 +5,6 @@ const { authenticate, requireRole } = require('../middleware/auth');
 const router = express.Router();
 
 router.post('/founders', submitFounderIntake);
-router.get('/founders', authenticate, requireRole('admin'), getFounderIntakes);
+router.get('/founders', authenticate, requireRole('admin', 'founder'), getFounderIntakes);
 
 module.exports = router;

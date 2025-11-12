@@ -12,7 +12,7 @@ const router = express.Router();
 
 router.use(authenticate);
 
-router.get('/', requireRole('admin'), listExtras);
+router.get('/', requireRole('admin', 'founder'), listExtras);
 router.get('/:founderId', requireRole('admin', 'founder'), getExtras);
 router.put('/:founderId/marketplace', requireRole('admin', 'founder'), upsertMarketplace);
 router.put('/:founderId/success-fee', requireRole('admin', 'founder'), upsertSuccessFee);

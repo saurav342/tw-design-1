@@ -53,8 +53,11 @@ const persistExtras = async (founderId, extrasData) => {
   return cloneExtras(extras);
 };
 
-const listFounderExtras = async () => {
-  const allExtras = await FounderExtras.find({});
+const listFounderExtras = async (founderIds = null) => {
+  const query = founderIds && Array.isArray(founderIds) && founderIds.length > 0
+    ? { founderId: { $in: founderIds } }
+    : {};
+  const allExtras = await FounderExtras.find(query);
   return allExtras.map((extras) => {
     const extrasObj = extras.toObject ? extras.toObject() : extras;
     return {

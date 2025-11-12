@@ -154,7 +154,10 @@ const submitFounderIntake = async (req, res) => {
 
 const getFounderIntakes = async (req, res) => {
   try {
-    const items = await listFounderIntakes();
+    // If user is a founder, only return their own founders (filter by email)
+    // If user is an admin, return all founders
+    const emailFilter = req.user?.role === 'founder' ? req.user.email : null;
+    const items = await listFounderIntakes(emailFilter);
     return res.status(200).json({ items });
   } catch (error) {
     return res.status(500).json({ message: error.message || 'Unable to fetch founder intakes.' });

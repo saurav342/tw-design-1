@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '../components/ui/button.jsx';
 import { paymentApi } from '../services/api.js';
 import { useAuth } from '../context/useAuth.js';
 
 const PaymentDetails = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const { user } = useAuth();
   const [amount, setAmount] = useState(4999); // Default amount in INR
   const [loading, setLoading] = useState(true);
@@ -13,9 +14,15 @@ const PaymentDetails = () => {
 
   // Get email from location state, sessionStorage, or auth context
   const getEmail = () => {
-    if (location.state?.email) return location.state.email;
+    if (location.state?.email) {
+      sessionStorage.setItem('signup.email', location.state.email);
+      return location.state.email;
+    }
     if (sessionStorage.getItem('signup.email')) return sessionStorage.getItem('signup.email');
-    if (user?.email) return user.email;
+    if (user?.email) {
+      sessionStorage.setItem('signup.email', user.email);
+      return user.email;
+    }
     return null;
   };
 
@@ -120,8 +127,20 @@ const PaymentDetails = () => {
 
         <footer className="mt-10 flex flex-col gap-4 border-t border-night/10 pt-6 text-sm text-night/70 md:flex-row md:items-center md:justify-between">
           <p>When you continue, you will be redirected to our secure checkout page.</p>
-          <Button asChild className="px-8" disabled={loading}>
-            <Link to="/checkout">Continue to checkout</Link>
+          <Button 
+            className="px-8" 
+            disabled={loading}
+            onClick={() => {
+              const email = getEmail();
+              if (email) {
+                sessionStorage.setItem('signup.email', email);
+                navigate('/checkout', { state: { email } });
+              } else {
+                navigate('/checkout');
+              }
+            }}
+          >
+            Continue to checkout
           </Button>
         </footer>
       </div>

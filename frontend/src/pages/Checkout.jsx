@@ -92,17 +92,45 @@ const Checkout = () => {
   const [validatingCoupon, setValidatingCoupon] = useState(false);
   const [couponEnabled, setCouponEnabled] = useState(true);
 
-  // Get email from location state, sessionStorage, or auth context
-  const getEmail = () => {
-    if (location.state?.email) return location.state.email;
-    if (sessionStorage.getItem('signup.email')) return sessionStorage.getItem('signup.email');
-    if (user?.email) return user.email;
+  // Get email from multiple sources: location state, sessionStorage, payment record, or auth context
+  const getEmail = async () => {
+    // Priority 1: location.state (from navigation)
+    if (location.state?.email) {
+      sessionStorage.setItem('signup.email', location.state.email);
+      return location.state.email;
+    }
+    
+    // Priority 2: sessionStorage
+    const storedEmail = sessionStorage.getItem('signup.email');
+    if (storedEmail) return storedEmail;
+    
+    // Priority 3: Try to get email from payment record if we have an orderId
+    const storedOrderId = sessionStorage.getItem('payment.orderId');
+    if (storedOrderId) {
+      try {
+        const paymentResponse = await paymentApi.getPaymentStatus(storedOrderId);
+        if (paymentResponse?.payment?.founderEmail) {
+          const email = paymentResponse.payment.founderEmail;
+          sessionStorage.setItem('signup.email', email);
+          return email;
+        }
+      } catch (error) {
+        console.log('[Checkout] Could not fetch email from payment record:', error);
+      }
+    }
+    
+    // Priority 4: auth context
+    if (user?.email) {
+      sessionStorage.setItem('signup.email', user.email);
+      return user.email;
+    }
+    
     return null;
   };
 
   useEffect(() => {
     const initializeCheckout = async () => {
-      const email = getEmail();
+      const email = await getEmail();
       if (!email) {
         showInfo('Please complete signup first');
         navigate('/signup/founder');
@@ -175,11 +203,15 @@ const Checkout = () => {
   };
 
   const handlePayment = async () => {
-    const email = getEmail();
+    const email = await getEmail();
     if (!email) {
       showError('Email not found. Please complete signup first.');
+      navigate('/signup/founder');
       return;
     }
+    
+    // Ensure email is stored in sessionStorage
+    sessionStorage.setItem('signup.email', email);
 
     setProcessing(true);
     try {

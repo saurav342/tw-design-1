@@ -77,6 +77,11 @@ const PaymentConfirmation = () => {
         setPayment(paymentResponse.payment);
         setCouponEnabled(couponSettingsResponse.couponEnabled !== false); // Default to enabled
         setErrorMessage(null);
+        
+        // Store email from payment record in sessionStorage for persistence
+        if (paymentResponse.payment?.founderEmail) {
+          sessionStorage.setItem('signup.email', paymentResponse.payment.founderEmail);
+        }
       } catch (error) {
         console.error('[PaymentConfirmation] Error fetching payment details:', error);
         const errorMsg = error.message || 'Failed to load payment details. Please try refreshing the page or contact support.';

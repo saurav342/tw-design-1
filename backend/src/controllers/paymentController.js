@@ -161,12 +161,24 @@ const verifyPayment = async (req, res) => {
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature, couponCode } = req.body;
 
     if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
+      console.error('[Payment] Missing verification data:', {
+        hasOrderId: !!razorpay_order_id,
+        hasPaymentId: !!razorpay_payment_id,
+        hasSignature: !!razorpay_signature,
+      });
       return res.status(400).json({ message: 'Missing payment verification data.' });
+    }
+
+    // Check if Razorpay secret is configured
+    if (!process.env.RAZORPAY_KEY_SECRET) {
+      console.error('[Payment] Razorpay key secret not configured');
+      return res.status(500).json({ message: 'Payment gateway configuration error. Please contact support.' });
     }
 
     // Get payment record
     const payment = await getPaymentByOrderId(razorpay_order_id);
     if (!payment) {
+      console.error('[Payment] Payment order not found:', razorpay_order_id);
       return res.status(404).json({ message: 'Payment order not found.' });
     }
 
@@ -178,18 +190,39 @@ const verifyPayment = async (req, res) => {
       .digest('hex');
 
     if (generatedSignature !== razorpay_signature) {
+      console.error('[Payment] Signature verification failed:', {
+        orderId: razorpay_order_id,
+        expected: generatedSignature.substring(0, 10) + '...',
+        received: razorpay_signature.substring(0, 10) + '...',
+      });
+      
       // Update payment status to failed
       await updatePayment(razorpay_order_id, {
         status: 'failed',
         razorpayPaymentId: razorpay_payment_id,
         razorpaySignature: razorpay_signature,
+        verificationError: 'Signature mismatch',
       });
-      return res.status(400).json({ message: 'Payment verification failed.' });
+      return res.status(400).json({ message: 'Payment verification failed. Signature mismatch.' });
+    }
+
+    // If payment is already completed, return the existing payment
+    if (payment.status === 'completed') {
+      console.log('[Payment] Payment already verified:', razorpay_order_id);
+      return res.status(200).json({
+        message: 'Payment already verified.',
+        payment: payment,
+      });
     }
 
     // Increment coupon usage if coupon was used
     if (payment.couponCode) {
-      await incrementCouponUsage(payment.couponCode);
+      try {
+        await incrementCouponUsage(payment.couponCode);
+      } catch (couponError) {
+        console.error('[Payment] Error incrementing coupon usage:', couponError);
+        // Don't fail the payment verification if coupon increment fails
+      }
     }
 
     // Update payment status to completed
@@ -197,14 +230,21 @@ const verifyPayment = async (req, res) => {
       status: 'completed',
       razorpayPaymentId: razorpay_payment_id,
       razorpaySignature: razorpay_signature,
+      completedAt: new Date(),
     });
 
+    if (!updatedPayment) {
+      console.error('[Payment] Failed to update payment status:', razorpay_order_id);
+      return res.status(500).json({ message: 'Failed to update payment status. Please contact support.' });
+    }
+
+    console.log('[Payment] Payment verified successfully:', razorpay_order_id);
     return res.status(200).json({
       message: 'Payment verified successfully.',
       payment: updatedPayment,
     });
   } catch (error) {
-    console.error('Error verifying payment:', error);
+    console.error('[Payment] Error verifying payment:', error);
     return res.status(500).json({ 
       message: error.message || 'Unable to verify payment.' 
     });
@@ -220,14 +260,23 @@ const getPaymentStatus = async (req, res) => {
       return res.status(400).json({ message: 'Order ID is required.' });
     }
 
+    console.log('[Payment] Fetching payment status for orderId:', orderId);
+    
     const payment = await getPaymentByOrderId(orderId);
     if (!payment) {
+      console.log('[Payment] Payment not found for orderId:', orderId);
       return res.status(404).json({ message: 'Payment not found.' });
     }
 
+    console.log('[Payment] Payment status retrieved:', {
+      orderId: payment.razorpayOrderId,
+      status: payment.status,
+      email: payment.founderEmail,
+    });
+
     return res.status(200).json({ payment });
   } catch (error) {
-    console.error('Error getting payment status:', error);
+    console.error('[Payment] Error getting payment status:', error);
     return res.status(500).json({ message: 'Unable to fetch payment status.' });
   }
 };

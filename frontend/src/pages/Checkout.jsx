@@ -244,37 +244,77 @@ const Checkout = () => {
         order_id: orderResponse.orderId,
         handler: async (response) => {
           console.log('[Payment] Payment handler called:', response);
+          
+          // Validate response data
+          if (!response.razorpay_order_id || !response.razorpay_payment_id || !response.razorpay_signature) {
+            console.error('[Payment] Invalid payment response:', response);
+            showError('Invalid payment response. Please contact support with your payment ID.');
+            setProcessing(false);
+            return;
+          }
+
           try {
+            // Store payment info immediately in sessionStorage for persistence
+            sessionStorage.setItem('payment.orderId', response.razorpay_order_id);
+            sessionStorage.setItem('payment.paymentId', response.razorpay_payment_id);
+            sessionStorage.setItem('payment.completed', 'true');
+            sessionStorage.setItem('payment.signature', response.razorpay_signature);
+            
+            // Ensure email is stored
+            const email = await getEmail();
+            if (email) {
+              sessionStorage.setItem('signup.email', email);
+            }
+
             // Verify payment
-            console.log('[Payment] Verifying payment...');
+            console.log('[Payment] Verifying payment...', {
+              orderId: response.razorpay_order_id,
+              paymentId: response.razorpay_payment_id,
+            });
+            
             const verifyResponse = await paymentApi.verifyPayment({
               razorpay_order_id: response.razorpay_order_id,
               razorpay_payment_id: response.razorpay_payment_id,
               razorpay_signature: response.razorpay_signature,
             });
+            
             console.log('[Payment] Payment verified:', verifyResponse);
 
-            if (verifyResponse.payment) {
-              showSuccess('Payment successful!');
+            if (verifyResponse && verifyResponse.payment) {
+              showSuccess('Payment successful! Redirecting...');
               
-              // Store payment info in sessionStorage for persistence
-              sessionStorage.setItem('payment.orderId', response.razorpay_order_id);
-              sessionStorage.setItem('payment.paymentId', response.razorpay_payment_id);
-              sessionStorage.setItem('payment.completed', 'true');
-              
-              // Redirect to payment confirmation page
-              navigate('/payment-confirmation', {
-                state: {
-                  payment: verifyResponse.payment,
-                  orderId: response.razorpay_order_id,
-                  paymentId: response.razorpay_payment_id,
-                },
-                replace: true, // Replace history to prevent back navigation to checkout
-              });
+              // Small delay to ensure state is saved
+              setTimeout(() => {
+                // Redirect to payment confirmation page
+                navigate('/payment-confirmation', {
+                  state: {
+                    payment: verifyResponse.payment,
+                    orderId: response.razorpay_order_id,
+                    paymentId: response.razorpay_payment_id,
+                  },
+                  replace: true, // Replace history to prevent back navigation to checkout
+                });
+              }, 500);
+            } else {
+              throw new Error('Payment verification response is invalid');
             }
           } catch (error) {
             console.error('[Payment] Verification error:', error);
-            showError(error.message || 'Payment verification failed. Please contact support.');
+            const errorMessage = error.message || 'Payment verification failed. Please contact support.';
+            showError(errorMessage);
+            
+            // Even if verification fails, redirect to confirmation page with orderId
+            // The confirmation page can handle the error state
+            setTimeout(() => {
+              navigate('/payment-confirmation', {
+                state: {
+                  orderId: response.razorpay_order_id,
+                  paymentId: response.razorpay_payment_id,
+                  error: errorMessage,
+                },
+                replace: true,
+              });
+            }, 1500);
           } finally {
             setProcessing(false);
           }

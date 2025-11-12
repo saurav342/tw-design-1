@@ -53,23 +53,63 @@ const PaymentConfirmation = () => {
   const paymentId = location.state?.paymentId || searchParams.get('paymentId') || sessionStorage.getItem('payment.paymentId');
 
   useEffect(() => {
-    const fetchPaymentDetails = async () => {
+    const fetchPaymentDetails = async (retryCount = 0) => {
       if (!orderId) {
-        const errorMsg = 'Payment order ID not found. Please contact support if you completed a payment.';
-        setErrorMessage(errorMsg);
-        showError(errorMsg);
+        // Check if we have error in location state
+        if (location.state?.error) {
+          setErrorMessage(location.state.error);
+          showError(location.state.error);
+        } else {
+          const errorMsg = 'Payment order ID not found. Please contact support if you completed a payment.';
+          setErrorMessage(errorMsg);
+          showError(errorMsg);
+        }
         setLoading(false);
         return;
       }
 
       try {
-        console.log('[PaymentConfirmation] Fetching payment details for orderId:', orderId);
+        console.log('[PaymentConfirmation] Fetching payment details for orderId:', orderId, `(attempt ${retryCount + 1})`);
+        
+        // Check if we have payment data in location state first
+        if (location.state?.payment && location.state?.orderId === orderId) {
+          console.log('[PaymentConfirmation] Using payment data from location state');
+          setPayment(location.state.payment);
+          setCouponEnabled(true); // Default to enabled
+          setErrorMessage(null);
+          
+          // Also fetch coupon settings
+          try {
+            const couponSettingsResponse = await paymentApi.getCouponSettings();
+            setCouponEnabled(couponSettingsResponse.couponEnabled !== false);
+          } catch (e) {
+            console.log('[PaymentConfirmation] Could not fetch coupon settings, using default');
+          }
+          
+          // Store email from payment record in sessionStorage for persistence
+          if (location.state.payment?.founderEmail) {
+            sessionStorage.setItem('signup.email', location.state.payment.founderEmail);
+          }
+          
+          setLoading(false);
+          return;
+        }
+
+        // Fetch from API
         const [paymentResponse, couponSettingsResponse] = await Promise.all([
           paymentApi.getPaymentStatus(orderId),
           paymentApi.getCouponSettings().catch(() => ({ couponEnabled: true })), // Default to enabled if fetch fails
         ]);
         
         if (!paymentResponse || !paymentResponse.payment) {
+          // If payment not found and we haven't retried, wait and retry once
+          if (retryCount === 0) {
+            console.log('[PaymentConfirmation] Payment not found, retrying after 2 seconds...');
+            setTimeout(() => {
+              fetchPaymentDetails(1);
+            }, 2000);
+            return; // Don't set loading to false, we're retrying
+          }
           throw new Error('Payment record not found');
         }
         
@@ -82,23 +122,42 @@ const PaymentConfirmation = () => {
         if (paymentResponse.payment?.founderEmail) {
           sessionStorage.setItem('signup.email', paymentResponse.payment.founderEmail);
         }
+        
+        setLoading(false);
       } catch (error) {
         console.error('[PaymentConfirmation] Error fetching payment details:', error);
-        const errorMsg = error.message || 'Failed to load payment details. Please try refreshing the page or contact support.';
-        setErrorMessage(errorMsg);
-        showError(errorMsg);
         
-        // If it's a 404, the payment might not exist yet - show helpful message
-        if (error.message?.includes('not found') || error.message?.includes('404')) {
-          setErrorMessage('Payment record not found. If you just completed payment, please wait a moment and refresh the page.');
+        // Check if we have error in location state
+        if (location.state?.error) {
+          setErrorMessage(location.state.error);
+          showError(location.state.error);
+          setLoading(false);
+        } else {
+          // If it's a 404 and we haven't retried, retry once
+          if ((error.message?.includes('not found') || error.message?.includes('404')) && retryCount === 0) {
+            console.log('[PaymentConfirmation] Payment not found (404), retrying after 2 seconds...');
+            setTimeout(() => {
+              fetchPaymentDetails(1);
+            }, 2000);
+            return; // Don't set loading to false, we're retrying
+          }
+          
+          const errorMsg = error.message || 'Failed to load payment details. Please try refreshing the page or contact support.';
+          setErrorMessage(errorMsg);
+          showError(errorMsg);
+          
+          // If it's a 404, the payment might not exist yet - show helpful message
+          if (error.message?.includes('not found') || error.message?.includes('404')) {
+            setErrorMessage('Payment record not found. If you just completed payment, please wait a moment and refresh the page. Otherwise, please contact support with your Order ID: ' + orderId);
+          }
+          
+          setLoading(false);
         }
-      } finally {
-        setLoading(false);
       }
     };
 
     fetchPaymentDetails();
-  }, [orderId, showError]);
+  }, [orderId, showError, location.state]);
 
   const formatAmount = (amt) => {
     return new Intl.NumberFormat('en-IN', {

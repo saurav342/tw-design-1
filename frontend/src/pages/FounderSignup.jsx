@@ -282,8 +282,11 @@ const FounderSignup = () => {
         return; // Stop here, don't redirect
       }
 
-      // Clear signup flow sessionStorage
-      sessionStorage.removeItem('signup.email');
+      // Store email before clearing other sessionStorage items (needed for payment flow)
+      const founderEmail = form.email.trim().toLowerCase();
+      sessionStorage.setItem('signup.email', founderEmail);
+      
+      // Clear other signup flow sessionStorage items
       sessionStorage.removeItem('signup.role');
       sessionStorage.removeItem('signup.emailVerified');
       
@@ -292,7 +295,10 @@ const FounderSignup = () => {
       
       // Redirect to payment details page after successful submission
       setTimeout(() => {
-        navigate('/payment-details', { replace: true });
+        navigate('/payment-details', { 
+          replace: true,
+          state: { email: founderEmail }
+        });
       }, 1500);
     } catch (error) {
       // eslint-disable-next-line no-console

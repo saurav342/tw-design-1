@@ -39,7 +39,7 @@ const featureHighlights = [
     title: 'Investor Intelligence Hub',
     description: 'Curated investor data. Warm intros. Weekly pulse.',
     benefits: [
-      '300+ mapped investors',
+      '2200+ mapped investors',
       'Active deployment tracking',
       'Context-rich intro briefs',
     ],
@@ -339,156 +339,186 @@ const Home = () => {
           whileInView="visible"
           viewport={{ once: true, amount: 0.2 }}
           variants={fadeUp}
-          className="relative mx-auto max-w-7xl overflow-hidden px-4 py-16 lg:px-8"
+          className="relative mx-auto max-w-7xl overflow-hidden px-4 py-20 lg:px-8"
         >
-          <div className="relative space-y-10">
+          <div className="relative space-y-12">
             {/* Section Header */}
-            <div className="space-y-3 text-center">
-              <span className="inline-flex items-center justify-center rounded-full bg-[#f9e4ff] px-5 py-1 text-xs font-semibold uppercase tracking-[0.35em] text-[#8b5cf6]">
+            <div className="space-y-4 text-center">
+              <span className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-[#f0f4ff] to-[#f5f3ff] px-5 py-1.5 text-xs font-semibold uppercase tracking-[0.35em] text-[#8b5cf6] border border-[#8b5cf6]/20">
                 Problem & Solution
               </span>
-              <h2 className="text-3xl font-semibold text-[#1a1030] md:text-4xl">
+              <h2 className="text-4xl font-bold text-[#1a1030] md:text-5xl">
                 The Market Gaps We're Solving
               </h2>
-              <p className="mx-auto max-w-3xl text-base text-[#3b2a57]">
-                Fundraising friction costs the ecosystem billions. Here's how <span className="font-bold text-[#8b5cf6]">Launch & Lift</span> transforms the process.
+              <p className="mx-auto max-w-3xl text-lg text-[#3b2a57] leading-relaxed">
+                Fundraising friction costs the ecosystem billions annually. Here's how <span className="font-bold text-[#8b5cf6]">Launch & Lift</span> transforms the process with AI-powered intelligence and integrated support.
               </p>
             </div>
 
             {/* Desktop Two-Column Layout */}
-            <div className="hidden lg:grid lg:grid-cols-2 gap-8">
+            <div className="hidden lg:grid lg:grid-cols-2 gap-10">
               {/* The Problem Column */}
               <div className="space-y-6">
-                <h2 className="text-4xl font-bold text-[#1a1030] mb-6">The Problem</h2>
+                <div className="flex items-center gap-3 mb-8">
+                  <div className="h-1 w-12 bg-gradient-to-r from-[#ef4444] to-[#f97316] rounded-full" />
+                  <h2 className="text-4xl font-bold text-[#1a1030]">The Problem</h2>
+                </div>
                 
                 <MotionDiv
                   variants={scaleIn}
-                  whileHover={{ y: -4 }}
+                  whileHover={{ y: -6, scale: 1.02 }}
                   transition={{ type: 'spring', stiffness: 230, damping: 22 }}
-                  className="relative rounded-2xl bg-gradient-to-br from-[#fff4e6] to-[#ffe8cc] p-6 border border-[#ffd699]/40"
+                  className="group relative rounded-2xl bg-gradient-to-br from-[#fef2f2] via-white to-[#fff7ed] p-7 border-2 border-[#fee2e2] shadow-[0_4px_20px_rgba(239,68,68,0.08)] hover:shadow-[0_8px_30px_rgba(239,68,68,0.15)] transition-all"
                 >
-                  <div className="absolute top-4 left-4 flex h-8 w-8 items-center justify-center rounded-full bg-[#ff9500] text-sm font-bold text-white">
+                  <div className="absolute top-5 left-5 flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#ef4444] to-[#dc2626] text-base font-bold text-white shadow-lg">
                     1
-            </div>
-                  <div className="pl-10">
-                    <h3 className="text-lg font-bold text-[#1a1030] mb-2">Inefficient Discovery</h3>
-                    <p className="text-sm text-[#3b2a57] leading-relaxed">
-                      Founders spend 30-40 hours/month on unfocused outreach. <span className="font-semibold text-[#dc2626]">&lt;10% cold outreach response rate.</span>
+                  </div>
+                  <div className="pl-14">
+                    <h3 className="text-xl font-bold text-[#1a1030] mb-3">Inefficient Discovery</h3>
+                    <p className="text-sm text-[#3b2a57] leading-relaxed mb-2">
+                      Founders spend <span className="font-bold text-[#ef4444]">30-40 hours/month</span> on unfocused investor outreach with minimal results.
                     </p>
+                    <div className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#fee2e2] border border-[#fecaca]">
+                      <span className="text-xs font-bold text-[#dc2626]">&lt;10%</span>
+                      <span className="text-xs text-[#991b1b]">cold outreach response rate</span>
+                    </div>
                   </div>
                 </MotionDiv>
 
                 <MotionDiv
                   variants={scaleIn}
-                  whileHover={{ y: -4 }}
+                  whileHover={{ y: -6, scale: 1.02 }}
                   transition={{ type: 'spring', stiffness: 230, damping: 22 }}
-                  className="relative rounded-2xl bg-gradient-to-br from-[#fff4e6] to-[#ffe8cc] p-6 border border-[#ffd699]/40"
+                  className="group relative rounded-2xl bg-gradient-to-br from-[#fef2f2] via-white to-[#fff7ed] p-7 border-2 border-[#fee2e2] shadow-[0_4px_20px_rgba(239,68,68,0.08)] hover:shadow-[0_8px_30px_rgba(239,68,68,0.15)] transition-all"
                 >
-                  <div className="absolute top-4 left-4 flex h-8 w-8 items-center justify-center rounded-full bg-[#ff9500] text-sm font-bold text-white">
+                  <div className="absolute top-5 left-5 flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#f97316] to-[#ea580c] text-base font-bold text-white shadow-lg">
                     2
                   </div>
-                  <div className="pl-10">
-                    <h3 className="text-lg font-bold text-[#1a1030] mb-2">Network Dependency</h3>
-                    <p className="text-sm text-[#3b2a57] leading-relaxed">
-                      Success depends on existing connections. <span className="font-semibold text-[#dc2626]">70% of capital goes through warm networks.</span>
+                  <div className="pl-14">
+                    <h3 className="text-xl font-bold text-[#1a1030] mb-3">Network Dependency</h3>
+                    <p className="text-sm text-[#3b2a57] leading-relaxed mb-2">
+                      Fundraising success heavily depends on existing connections, creating systemic inequity.
                     </p>
-                </div>
+                    <div className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#fee2e2] border border-[#fecaca]">
+                      <span className="text-xs font-bold text-[#dc2626]">70%</span>
+                      <span className="text-xs text-[#991b1b]">of capital flows through warm networks</span>
+                    </div>
+                  </div>
                 </MotionDiv>
 
                 <MotionDiv
                   variants={scaleIn}
-                  whileHover={{ y: -4 }}
+                  whileHover={{ y: -6, scale: 1.02 }}
                   transition={{ type: 'spring', stiffness: 230, damping: 22 }}
-                  className="relative rounded-2xl bg-gradient-to-br from-[#fff4e6] to-[#ffe8cc] p-6 border border-[#ffd699]/40"
+                  className="group relative rounded-2xl bg-gradient-to-br from-[#fef2f2] via-white to-[#fff7ed] p-7 border-2 border-[#fee2e2] shadow-[0_4px_20px_rgba(239,68,68,0.08)] hover:shadow-[0_8px_30px_rgba(239,68,68,0.15)] transition-all"
                 >
-                  <div className="absolute top-4 left-4 flex h-8 w-8 items-center justify-center rounded-full bg-[#ff9500] text-sm font-bold text-white">
+                  <div className="absolute top-5 left-5 flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#f59e0b] to-[#d97706] text-base font-bold text-white shadow-lg">
                     3
                   </div>
-                  <div className="pl-10">
-                    <h3 className="text-lg font-bold text-[#1a1030] mb-2">Fragmented Services</h3>
-                    <p className="text-sm text-[#3b2a57] leading-relaxed">
-                      Founders coordinate separately with 5-10 vendors. <span className="font-semibold text-[#dc2626]">60-80 hours wasted on coordination.</span>
+                  <div className="pl-14">
+                    <h3 className="text-xl font-bold text-[#1a1030] mb-3">Fragmented Services</h3>
+                    <p className="text-sm text-[#3b2a57] leading-relaxed mb-2">
+                      Founders coordinate separately with <span className="font-bold text-[#ef4444]">5-10 different vendors</span> for legal, tech, marketing, and operations.
                     </p>
+                    <div className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#fee2e2] border border-[#fecaca]">
+                      <span className="text-xs font-bold text-[#dc2626]">60-80 hours</span>
+                      <span className="text-xs text-[#991b1b]">wasted on coordination monthly</span>
+                    </div>
                   </div>
                 </MotionDiv>
 
                 <MotionDiv
                   variants={scaleIn}
-                  whileHover={{ y: -4 }}
+                  whileHover={{ y: -6, scale: 1.02 }}
                   transition={{ type: 'spring', stiffness: 230, damping: 22 }}
-                  className="relative rounded-2xl bg-gradient-to-br from-[#ffebee] to-[#ffcdd2] p-6 border border-[#ef9a9a]/40"
+                  className="relative rounded-2xl bg-gradient-to-br from-[#dc2626] to-[#991b1b] p-7 border-2 border-[#b91c1c] shadow-[0_8px_30px_rgba(220,38,38,0.25)]"
                 >
-                  <h3 className="text-lg font-bold text-[#1a1030] mb-2">The Outcome</h3>
-                  <p className="text-sm text-[#dc2626] font-medium leading-relaxed">
-                    Missed opportunities. Wasted time. A broken feedback loop that slows innovation and leaves brilliant founders unfunded.
+                  <h3 className="text-xl font-bold text-white mb-3">The Cost</h3>
+                  <p className="text-sm text-white/90 font-medium leading-relaxed">
+                    Missed opportunities. Wasted time. A broken feedback loop that slows innovation and leaves brilliant founders unfunded—costing the ecosystem billions annually.
                   </p>
                 </MotionDiv>
               </div>
 
               {/* The Solution Column */}
               <div className="space-y-6">
-                <h2 className="text-4xl font-bold text-[#1a1030] mb-6">The Solution</h2>
+                <div className="flex items-center gap-3 mb-8">
+                  <div className="h-1 w-12 bg-gradient-to-r from-[#34d399] to-[#10b981] rounded-full" />
+                  <h2 className="text-4xl font-bold text-[#1a1030]">The Solution</h2>
+                </div>
                 
                 <MotionDiv
                   variants={scaleIn}
-                  whileHover={{ y: -4 }}
+                  whileHover={{ y: -6, scale: 1.02 }}
                   transition={{ type: 'spring', stiffness: 230, damping: 22 }}
-                  className="relative rounded-2xl bg-gradient-to-br from-[#e8f5e9] to-[#c8e6c9] p-6 border border-[#81c784]/40"
+                  className="group relative rounded-2xl bg-gradient-to-br from-[#f0fdf4] via-white to-[#ecfdf5] p-7 border-2 border-[#d1fae5] shadow-[0_4px_20px_rgba(52,211,153,0.08)] hover:shadow-[0_8px_30px_rgba(52,211,153,0.15)] transition-all"
                 >
-                  <div className="absolute top-4 left-4 flex h-8 w-8 items-center justify-center rounded-full bg-[#2e7d32] text-sm font-bold text-white">
+                  <div className="absolute top-5 left-5 flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#34d399] to-[#10b981] text-base font-bold text-white shadow-lg">
                     1
                   </div>
-                  <div className="pl-10">
-                    <h3 className="text-lg font-bold text-[#1a1030] mb-2">Intelligent Matching Engine</h3>
-                    <p className="text-sm text-[#3b2a57] leading-relaxed">
-                      Analyzes 100+ signals for founder-investor alignment. <span className="font-semibold text-[#2e7d32]">3-5x higher conversion rates.</span>
+                  <div className="pl-14">
+                    <h3 className="text-xl font-bold text-[#1a1030] mb-3">AI-Powered Matching Engine</h3>
+                    <p className="text-sm text-[#3b2a57] leading-relaxed mb-2">
+                      Analyzes <span className="font-bold text-[#10b981]">100+ data signals</span> for founder-investor alignment, including experience, market fit, and investment thesis.
                     </p>
+                    <div className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#d1fae5] border border-[#a7f3d0]">
+                      <span className="text-xs font-bold text-[#059669]">3-5x</span>
+                      <span className="text-xs text-[#047857]">higher conversion rates vs. cold outreach</span>
+                    </div>
                   </div>
                 </MotionDiv>
 
                 <MotionDiv
                   variants={scaleIn}
-                  whileHover={{ y: -4 }}
+                  whileHover={{ y: -6, scale: 1.02 }}
                   transition={{ type: 'spring', stiffness: 230, damping: 22 }}
-                  className="relative rounded-2xl bg-gradient-to-br from-[#e8f5e9] to-[#c8e6c9] p-6 border border-[#81c784]/40"
+                  className="group relative rounded-2xl bg-gradient-to-br from-[#f0fdf4] via-white to-[#ecfdf5] p-7 border-2 border-[#d1fae5] shadow-[0_4px_20px_rgba(52,211,153,0.08)] hover:shadow-[0_8px_30px_rgba(52,211,153,0.15)] transition-all"
                 >
-                  <div className="absolute top-4 left-4 flex h-8 w-8 items-center justify-center rounded-full bg-[#2e7d32] text-sm font-bold text-white">
+                  <div className="absolute top-5 left-5 flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#10b981] to-[#059669] text-base font-bold text-white shadow-lg">
                     2
                   </div>
-                  <div className="pl-10">
-                    <h3 className="text-lg font-bold text-[#1a1030] mb-2">Founder Profiling & Pitch Optimization</h3>
-                    <p className="text-sm text-[#3b2a57] leading-relaxed">
-                      AI-powered assessment and real-time feedback. <span className="font-semibold text-[#2e7d32]">70% faster pitch readiness.</span>
+                  <div className="pl-14">
+                    <h3 className="text-xl font-bold text-[#1a1030] mb-3">Founder Profiling & Pitch Optimization</h3>
+                    <p className="text-sm text-[#3b2a57] leading-relaxed mb-2">
+                      AI-powered multi-dimensional assessment with real-time feedback on pitch quality, financial models, and investor-readiness.
                     </p>
+                    <div className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#d1fae5] border border-[#a7f3d0]">
+                      <span className="text-xs font-bold text-[#059669]">70%</span>
+                      <span className="text-xs text-[#047857]">faster pitch readiness (weeks → days)</span>
+                    </div>
                   </div>
                 </MotionDiv>
 
                 <MotionDiv
                   variants={scaleIn}
-                  whileHover={{ y: -4 }}
+                  whileHover={{ y: -6, scale: 1.02 }}
                   transition={{ type: 'spring', stiffness: 230, damping: 22 }}
-                  className="relative rounded-2xl bg-gradient-to-br from-[#e8f5e9] to-[#c8e6c9] p-6 border border-[#81c784]/40"
+                  className="group relative rounded-2xl bg-gradient-to-br from-[#f0fdf4] via-white to-[#ecfdf5] p-7 border-2 border-[#d1fae5] shadow-[0_4px_20px_rgba(52,211,153,0.08)] hover:shadow-[0_8px_30px_rgba(52,211,153,0.15)] transition-all"
                 >
-                  <div className="absolute top-4 left-4 flex h-8 w-8 items-center justify-center rounded-full bg-[#2e7d32] text-sm font-bold text-white">
+                  <div className="absolute top-5 left-5 flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#059669] to-[#047857] text-base font-bold text-white shadow-lg">
                     3
                   </div>
-                  <div className="pl-10">
-                    <h3 className="text-lg font-bold text-[#1a1030] mb-2">Business Services Suite</h3>
-                    <p className="text-sm text-[#3b2a57] leading-relaxed">
-                      Integrated legal, tech, marketing, and operational support. <span className="font-semibold text-[#2e7d32]">360° startup growth support.</span>
+                  <div className="pl-14">
+                    <h3 className="text-xl font-bold text-[#1a1030] mb-3">Integrated Business Services</h3>
+                    <p className="text-sm text-[#3b2a57] leading-relaxed mb-2">
+                      One platform for legal compliance, tech enhancement, growth marketing, and operational support—eliminating vendor coordination.
                     </p>
+                    <div className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#d1fae5] border border-[#a7f3d0]">
+                      <span className="text-xs font-bold text-[#059669]">360°</span>
+                      <span className="text-xs text-[#047857]">startup growth support in one place</span>
+                    </div>
                   </div>
                 </MotionDiv>
 
                 <MotionDiv
                   variants={scaleIn}
-                  whileHover={{ y: -4 }}
+                  whileHover={{ y: -6, scale: 1.02 }}
                   transition={{ type: 'spring', stiffness: 230, damping: 22 }}
-                  className="relative rounded-2xl bg-gradient-to-br from-[#c8e6c9] to-[#a5d6a7] p-6 border border-[#66bb6a]/40"
+                  className="relative rounded-2xl bg-gradient-to-br from-[#10b981] to-[#059669] p-7 border-2 border-[#047857] shadow-[0_8px_30px_rgba(16,185,129,0.25)]"
                 >
-                  <h3 className="text-lg font-bold text-[#1a1030] mb-2">The Result</h3>
-                  <p className="text-sm text-[#2e7d32] font-medium leading-relaxed">
-                    <span className="font-bold text-[#8b5cf6]">Launch & Lift</span> turns noise into signal, where data speaks truth and decisions move at the speed of AI. Founders connect with aligned investors in days, not months.
+                  <h3 className="text-xl font-bold text-white mb-3">The Impact</h3>
+                  <p className="text-sm text-white/90 font-medium leading-relaxed">
+                    <span className="font-bold text-white">Launch & Lift</span> transforms fundraising from months to days. Founders connect with aligned investors faster, while investors access pre-qualified, high-quality deal flow. Data-driven decisions replace guesswork.
                   </p>
                 </MotionDiv>
               </div>
@@ -497,36 +527,43 @@ const Home = () => {
             {/* Mobile/Tablet Stacked Layout */}
             <div className="lg:hidden space-y-12">
               {/* Section Header for Mobile */}
-              <div className="space-y-3 text-center">
-                <span className="inline-flex items-center justify-center rounded-full bg-[#f9e4ff] px-5 py-1 text-xs font-semibold uppercase tracking-[0.35em] text-[#8b5cf6]">
+              <div className="space-y-4 text-center">
+                <span className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-[#f0f4ff] to-[#f5f3ff] px-5 py-1.5 text-xs font-semibold uppercase tracking-[0.35em] text-[#8b5cf6] border border-[#8b5cf6]/20">
                   Problem & Solution
                 </span>
-                <h2 className="text-3xl font-semibold text-[#1a1030]">
+                <h2 className="text-3xl font-bold text-[#1a1030]">
                   The Market Gaps We're Solving
                 </h2>
-                <p className="mx-auto max-w-3xl text-base text-[#3b2a57]">
-                  Fundraising friction costs the ecosystem billions. Here's how <span className="font-bold text-[#8b5cf6]">Launch & Lift</span> transforms the process.
+                <p className="mx-auto max-w-3xl text-base text-[#3b2a57] leading-relaxed">
+                  Fundraising friction costs the ecosystem billions annually. Here's how <span className="font-bold text-[#8b5cf6]">Launch & Lift</span> transforms the process with AI-powered intelligence and integrated support.
                 </p>
               </div>
 
               {/* The Problem Section */}
               <div className="space-y-6">
-                <h2 className="text-3xl font-bold text-[#1a1030]">The Problem</h2>
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="h-1 w-10 bg-gradient-to-r from-[#ef4444] to-[#f97316] rounded-full" />
+                  <h2 className="text-3xl font-bold text-[#1a1030]">The Problem</h2>
+                </div>
                 
                 <MotionDiv
                   variants={scaleIn}
                   whileHover={{ y: -4 }}
                   transition={{ type: 'spring', stiffness: 230, damping: 22 }}
-                  className="relative rounded-2xl bg-gradient-to-br from-[#fff4e6] to-[#ffe8cc] p-6 border border-[#ffd699]/40"
+                  className="group relative rounded-2xl bg-gradient-to-br from-[#fef2f2] via-white to-[#fff7ed] p-6 border-2 border-[#fee2e2] shadow-[0_4px_20px_rgba(239,68,68,0.08)]"
                 >
-                  <div className="absolute top-4 left-4 flex h-8 w-8 items-center justify-center rounded-full bg-[#ff9500] text-sm font-bold text-white">
+                  <div className="absolute top-4 left-4 flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-[#ef4444] to-[#dc2626] text-sm font-bold text-white shadow-lg">
                     1
                   </div>
-                  <div className="pl-10">
+                  <div className="pl-12">
                     <h3 className="text-lg font-bold text-[#1a1030] mb-2">Inefficient Discovery</h3>
-                    <p className="text-sm text-[#3b2a57] leading-relaxed">
-                      Founders spend 30-40 hours/month on unfocused outreach. <span className="font-semibold text-[#dc2626]">&lt;10% cold outreach response rate.</span>
+                    <p className="text-sm text-[#3b2a57] leading-relaxed mb-2">
+                      Founders spend <span className="font-bold text-[#ef4444]">30-40 hours/month</span> on unfocused investor outreach with minimal results.
                     </p>
+                    <div className="mt-2 inline-flex items-center gap-2 px-2.5 py-1 rounded-lg bg-[#fee2e2] border border-[#fecaca]">
+                      <span className="text-xs font-bold text-[#dc2626]">&lt;10%</span>
+                      <span className="text-xs text-[#991b1b]">cold outreach response rate</span>
+                    </div>
                   </div>
                 </MotionDiv>
 
@@ -534,16 +571,20 @@ const Home = () => {
                   variants={scaleIn}
                   whileHover={{ y: -4 }}
                   transition={{ type: 'spring', stiffness: 230, damping: 22 }}
-                  className="relative rounded-2xl bg-gradient-to-br from-[#fff4e6] to-[#ffe8cc] p-6 border border-[#ffd699]/40"
+                  className="group relative rounded-2xl bg-gradient-to-br from-[#fef2f2] via-white to-[#fff7ed] p-6 border-2 border-[#fee2e2] shadow-[0_4px_20px_rgba(239,68,68,0.08)]"
                 >
-                  <div className="absolute top-4 left-4 flex h-8 w-8 items-center justify-center rounded-full bg-[#ff9500] text-sm font-bold text-white">
+                  <div className="absolute top-4 left-4 flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-[#f97316] to-[#ea580c] text-sm font-bold text-white shadow-lg">
                     2
                   </div>
-                  <div className="pl-10">
+                  <div className="pl-12">
                     <h3 className="text-lg font-bold text-[#1a1030] mb-2">Network Dependency</h3>
-                    <p className="text-sm text-[#3b2a57] leading-relaxed">
-                      Success depends on existing connections. <span className="font-semibold text-[#dc2626]">70% of capital goes through warm networks.</span>
+                    <p className="text-sm text-[#3b2a57] leading-relaxed mb-2">
+                      Fundraising success heavily depends on existing connections, creating systemic inequity.
                     </p>
+                    <div className="mt-2 inline-flex items-center gap-2 px-2.5 py-1 rounded-lg bg-[#fee2e2] border border-[#fecaca]">
+                      <span className="text-xs font-bold text-[#dc2626]">70%</span>
+                      <span className="text-xs text-[#991b1b]">of capital flows through warm networks</span>
+                    </div>
                   </div>
                 </MotionDiv>
 
@@ -551,16 +592,20 @@ const Home = () => {
                   variants={scaleIn}
                   whileHover={{ y: -4 }}
                   transition={{ type: 'spring', stiffness: 230, damping: 22 }}
-                  className="relative rounded-2xl bg-gradient-to-br from-[#fff4e6] to-[#ffe8cc] p-6 border border-[#ffd699]/40"
+                  className="group relative rounded-2xl bg-gradient-to-br from-[#fef2f2] via-white to-[#fff7ed] p-6 border-2 border-[#fee2e2] shadow-[0_4px_20px_rgba(239,68,68,0.08)]"
                 >
-                  <div className="absolute top-4 left-4 flex h-8 w-8 items-center justify-center rounded-full bg-[#ff9500] text-sm font-bold text-white">
+                  <div className="absolute top-4 left-4 flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-[#f59e0b] to-[#d97706] text-sm font-bold text-white shadow-lg">
                     3
                   </div>
-                  <div className="pl-10">
+                  <div className="pl-12">
                     <h3 className="text-lg font-bold text-[#1a1030] mb-2">Fragmented Services</h3>
-                    <p className="text-sm text-[#3b2a57] leading-relaxed">
-                      Founders coordinate separately with 5-10 vendors. <span className="font-semibold text-[#dc2626]">60-80 hours wasted on coordination.</span>
+                    <p className="text-sm text-[#3b2a57] leading-relaxed mb-2">
+                      Founders coordinate separately with <span className="font-bold text-[#ef4444]">5-10 different vendors</span> for legal, tech, marketing, and operations.
                     </p>
+                    <div className="mt-2 inline-flex items-center gap-2 px-2.5 py-1 rounded-lg bg-[#fee2e2] border border-[#fecaca]">
+                      <span className="text-xs font-bold text-[#dc2626]">60-80 hours</span>
+                      <span className="text-xs text-[#991b1b]">wasted on coordination monthly</span>
+                    </div>
                   </div>
                 </MotionDiv>
 
@@ -568,33 +613,40 @@ const Home = () => {
                   variants={scaleIn}
                   whileHover={{ y: -4 }}
                   transition={{ type: 'spring', stiffness: 230, damping: 22 }}
-                  className="relative rounded-2xl bg-gradient-to-br from-[#ffebee] to-[#ffcdd2] p-6 border border-[#ef9a9a]/40"
+                  className="relative rounded-2xl bg-gradient-to-br from-[#dc2626] to-[#991b1b] p-6 border-2 border-[#b91c1c] shadow-[0_8px_30px_rgba(220,38,38,0.25)]"
                 >
-                  <h3 className="text-lg font-bold text-[#1a1030] mb-2">The Outcome</h3>
-                  <p className="text-sm text-[#dc2626] font-medium leading-relaxed">
-                    Missed opportunities. Wasted time. A broken feedback loop that slows innovation and leaves brilliant founders unfunded.
+                  <h3 className="text-lg font-bold text-white mb-2">The Cost</h3>
+                  <p className="text-sm text-white/90 font-medium leading-relaxed">
+                    Missed opportunities. Wasted time. A broken feedback loop that slows innovation and leaves brilliant founders unfunded—costing the ecosystem billions annually.
                   </p>
                 </MotionDiv>
               </div>
 
               {/* The Solution Section */}
               <div className="space-y-6">
-                <h2 className="text-3xl font-bold text-[#1a1030]">The Solution</h2>
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="h-1 w-10 bg-gradient-to-r from-[#34d399] to-[#10b981] rounded-full" />
+                  <h2 className="text-3xl font-bold text-[#1a1030]">The Solution</h2>
+                </div>
                 
                 <MotionDiv
                   variants={scaleIn}
                   whileHover={{ y: -4 }}
                   transition={{ type: 'spring', stiffness: 230, damping: 22 }}
-                  className="relative rounded-2xl bg-gradient-to-br from-[#e8f5e9] to-[#c8e6c9] p-6 border border-[#81c784]/40"
+                  className="group relative rounded-2xl bg-gradient-to-br from-[#f0fdf4] via-white to-[#ecfdf5] p-6 border-2 border-[#d1fae5] shadow-[0_4px_20px_rgba(52,211,153,0.08)]"
                 >
-                  <div className="absolute top-4 left-4 flex h-8 w-8 items-center justify-center rounded-full bg-[#2e7d32] text-sm font-bold text-white">
+                  <div className="absolute top-4 left-4 flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-[#34d399] to-[#10b981] text-sm font-bold text-white shadow-lg">
                     1
                   </div>
-                  <div className="pl-10">
-                    <h3 className="text-lg font-bold text-[#1a1030] mb-2">Intelligent Matching Engine</h3>
-                    <p className="text-sm text-[#3b2a57] leading-relaxed">
-                      Analyzes 100+ signals for founder-investor alignment. <span className="font-semibold text-[#2e7d32]">3-5x higher conversion rates.</span>
+                  <div className="pl-12">
+                    <h3 className="text-lg font-bold text-[#1a1030] mb-2">AI-Powered Matching Engine</h3>
+                    <p className="text-sm text-[#3b2a57] leading-relaxed mb-2">
+                      Analyzes <span className="font-bold text-[#10b981]">100+ data signals</span> for founder-investor alignment, including experience, market fit, and investment thesis.
                     </p>
+                    <div className="mt-2 inline-flex items-center gap-2 px-2.5 py-1 rounded-lg bg-[#d1fae5] border border-[#a7f3d0]">
+                      <span className="text-xs font-bold text-[#059669]">3-5x</span>
+                      <span className="text-xs text-[#047857]">higher conversion rates vs. cold outreach</span>
+                    </div>
                   </div>
                 </MotionDiv>
 
@@ -602,16 +654,20 @@ const Home = () => {
                   variants={scaleIn}
                   whileHover={{ y: -4 }}
                   transition={{ type: 'spring', stiffness: 230, damping: 22 }}
-                  className="relative rounded-2xl bg-gradient-to-br from-[#e8f5e9] to-[#c8e6c9] p-6 border border-[#81c784]/40"
+                  className="group relative rounded-2xl bg-gradient-to-br from-[#f0fdf4] via-white to-[#ecfdf5] p-6 border-2 border-[#d1fae5] shadow-[0_4px_20px_rgba(52,211,153,0.08)]"
                 >
-                  <div className="absolute top-4 left-4 flex h-8 w-8 items-center justify-center rounded-full bg-[#2e7d32] text-sm font-bold text-white">
+                  <div className="absolute top-4 left-4 flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-[#10b981] to-[#059669] text-sm font-bold text-white shadow-lg">
                     2
                   </div>
-                  <div className="pl-10">
+                  <div className="pl-12">
                     <h3 className="text-lg font-bold text-[#1a1030] mb-2">Founder Profiling & Pitch Optimization</h3>
-                    <p className="text-sm text-[#3b2a57] leading-relaxed">
-                      AI-powered assessment and real-time feedback. <span className="font-semibold text-[#2e7d32]">70% faster pitch readiness.</span>
+                    <p className="text-sm text-[#3b2a57] leading-relaxed mb-2">
+                      AI-powered multi-dimensional assessment with real-time feedback on pitch quality, financial models, and investor-readiness.
                     </p>
+                    <div className="mt-2 inline-flex items-center gap-2 px-2.5 py-1 rounded-lg bg-[#d1fae5] border border-[#a7f3d0]">
+                      <span className="text-xs font-bold text-[#059669]">70%</span>
+                      <span className="text-xs text-[#047857]">faster pitch readiness (weeks → days)</span>
+                    </div>
                   </div>
                 </MotionDiv>
 
@@ -619,16 +675,20 @@ const Home = () => {
                   variants={scaleIn}
                   whileHover={{ y: -4 }}
                   transition={{ type: 'spring', stiffness: 230, damping: 22 }}
-                  className="relative rounded-2xl bg-gradient-to-br from-[#e8f5e9] to-[#c8e6c9] p-6 border border-[#81c784]/40"
+                  className="group relative rounded-2xl bg-gradient-to-br from-[#f0fdf4] via-white to-[#ecfdf5] p-6 border-2 border-[#d1fae5] shadow-[0_4px_20px_rgba(52,211,153,0.08)]"
                 >
-                  <div className="absolute top-4 left-4 flex h-8 w-8 items-center justify-center rounded-full bg-[#2e7d32] text-sm font-bold text-white">
+                  <div className="absolute top-4 left-4 flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-[#059669] to-[#047857] text-sm font-bold text-white shadow-lg">
                     3
                   </div>
-                  <div className="pl-10">
-                    <h3 className="text-lg font-bold text-[#1a1030] mb-2">Business Services Suite</h3>
-                    <p className="text-sm text-[#3b2a57] leading-relaxed">
-                      Integrated legal, tech, marketing, and operational support. <span className="font-semibold text-[#2e7d32]">360° startup growth support.</span>
+                  <div className="pl-12">
+                    <h3 className="text-lg font-bold text-[#1a1030] mb-2">Integrated Business Services</h3>
+                    <p className="text-sm text-[#3b2a57] leading-relaxed mb-2">
+                      One platform for legal compliance, tech enhancement, growth marketing, and operational support—eliminating vendor coordination.
                     </p>
+                    <div className="mt-2 inline-flex items-center gap-2 px-2.5 py-1 rounded-lg bg-[#d1fae5] border border-[#a7f3d0]">
+                      <span className="text-xs font-bold text-[#059669]">360°</span>
+                      <span className="text-xs text-[#047857]">startup growth support in one place</span>
+                    </div>
                   </div>
                 </MotionDiv>
 
@@ -636,14 +696,14 @@ const Home = () => {
                   variants={scaleIn}
                   whileHover={{ y: -4 }}
                   transition={{ type: 'spring', stiffness: 230, damping: 22 }}
-                  className="relative rounded-2xl bg-gradient-to-br from-[#c8e6c9] to-[#a5d6a7] p-6 border border-[#66bb6a]/40"
+                  className="relative rounded-2xl bg-gradient-to-br from-[#10b981] to-[#059669] p-6 border-2 border-[#047857] shadow-[0_8px_30px_rgba(16,185,129,0.25)]"
                 >
-                  <h3 className="text-lg font-bold text-[#1a1030] mb-2">The Result</h3>
-                  <p className="text-sm text-[#2e7d32] font-medium leading-relaxed">
-                    <span className="font-bold text-[#8b5cf6]">Launch & Lift</span> turns noise into signal, where data speaks truth and decisions move at the speed of AI. Founders connect with aligned investors in days, not months.
+                  <h3 className="text-lg font-bold text-white mb-2">The Impact</h3>
+                  <p className="text-sm text-white/90 font-medium leading-relaxed">
+                    <span className="font-bold text-white">Launch & Lift</span> transforms fundraising from months to days. Founders connect with aligned investors faster, while investors access pre-qualified, high-quality deal flow. Data-driven decisions replace guesswork.
                   </p>
                 </MotionDiv>
-                </div>
+              </div>
             </div>
           </div>
         </MotionSection>
@@ -700,7 +760,7 @@ const Home = () => {
                   {/* Bottom: Stats Grid */}
                   <div className="grid grid-cols-2 gap-4 pt-4">
                     <div className="rounded-2xl bg-white/10 p-4 backdrop-blur-sm border border-white/20">
-                      <div className="text-2xl font-bold mb-1">300+</div>
+                      <div className="text-2xl font-bold mb-1">2200+</div>
                       <div className="text-xs text-white/80 font-medium">Mapped Investors</div>
                     </div>
                     <div className="rounded-2xl bg-white/10 p-4 backdrop-blur-sm border border-white/20">
@@ -803,7 +863,7 @@ const Home = () => {
                   {/* Stats Grid for Mobile */}
                   <div className="grid grid-cols-2 gap-3 pt-2">
                     <div className="rounded-xl bg-white/10 p-3 backdrop-blur-sm border border-white/20">
-                      <div className="text-xl font-bold mb-1">300+</div>
+                      <div className="text-xl font-bold mb-1">2200+</div>
                       <div className="text-xs text-white/80 font-medium">Mapped Investors</div>
                     </div>
                     <div className="rounded-xl bg-white/10 p-3 backdrop-blur-sm border border-white/20">

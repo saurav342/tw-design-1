@@ -182,7 +182,7 @@ const Investors = () => {
   ];
 
   const stats = [
-    { value: '200+', label: 'Active Investors' },
+    { value: '2200+', label: 'Active Investors' },
     { value: '3-5x', label: 'Better Deal Quality' },
     { value: '100+', label: 'Data Signals Analyzed' },
     { value: '80%+', label: 'Time Saved' },
@@ -322,7 +322,7 @@ const Investors = () => {
                 Better Deal Flow, Better Outcomes
               </h2>
               <p className="mx-auto max-w-2xl text-base text-[#3b2a57]">
-                Join 200+ investors using {highlightBrandName('Launch & Lift')} to source quality deals with improved conversion rates.
+                Join 2200+ investors using {highlightBrandName('Launch & Lift')} to source quality deals with improved conversion rates.
               </p>
             </div>
 
@@ -488,7 +488,7 @@ const Investors = () => {
                   <p className="text-xs font-semibold uppercase tracking-[0.3em] text-white/90">Ready to improve your deal flow?</p>
                 </div>
                 <h3 className="text-3xl font-bold sm:text-4xl">
-                  Join 200+ investors using {highlightBrandName('Launch & Lift')}
+                  Join 2200+ investors using {highlightBrandName('Launch & Lift')}
                 </h3>
                 <p className="text-lg text-white/90">
                   Access quality deal flow sourced intelligently. Get objective founder assessment. Make better investment decisions faster.

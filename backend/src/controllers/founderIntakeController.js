@@ -1,4 +1,4 @@
-const { createFounderIntake, listFounderIntakes } = require('../models/founderIntakeModel');
+const { createFounderIntake, listFounderIntakes, getFounderIntakesByEmail } = require('../models/founderIntakeModel');
 const { addPortfolioItem } = require('../models/portfolioModel');
 const { sendFounderIntakeNotification, sendFounderWelcomeEmail } = require('../utils/email');
 
@@ -39,6 +39,17 @@ const submitFounderIntake = async (req, res) => {
       return res.status(400).json({
         message: `Missing founder intake fields: ${missing.join(', ')}`,
       });
+    }
+
+    // Check if email already exists to prevent duplicate submissions
+    const normalizedEmail = payload.email?.trim().toLowerCase();
+    if (normalizedEmail) {
+      const existingIntakes = await getFounderIntakesByEmail(normalizedEmail);
+      if (existingIntakes && existingIntakes.length > 0) {
+        return res.status(400).json({
+          message: 'An application with this email address already exists. Please use a different email or contact support if you need to update your application.',
+        });
+      }
     }
 
     if (payload.matches && !Array.isArray(payload.matches)) {

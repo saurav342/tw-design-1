@@ -941,11 +941,11 @@ export const faqItems = [
   },
   {
     question: 'What geographic regions do you cover?',
-    answer: 'We primarily serve founders and investors in India and are expanding to select global markets including the US, EU, and APAC regions. Our platform supports remote collaboration, so founders and investors can connect regardless of location. However, our strongest network and service coverage is currently in India, where we have deep relationships with 300+ mapped investors and a robust ecosystem of service providers.',
+    answer: 'We primarily serve founders and investors in India and are expanding to select global markets including the US, EU, and APAC regions. Our platform supports remote collaboration, so founders and investors can connect regardless of location. However, our strongest network and service coverage is currently in India, where we have deep relationships with 2200+ mapped investors and a robust ecosystem of service providers.',
   },
   {
     question: 'How do you ensure investor quality and alignment?',
-    answer: 'We maintain a curated network of 300+ investors who are actively deploying capital. Each investor profile includes their investment thesis, stage focus, sector expertise, geographic preference, ticket size, and past investment patterns. Our AI matching engine analyzes these factors along with your startup profile to surface only the most relevant, high-probability matches. We also track investor activity and engagement to ensure our network consists of active, responsive capital partners.',
+    answer: 'We maintain a curated network of 2200+ investors who are actively deploying capital. Each investor profile includes their investment thesis, stage focus, sector expertise, geographic preference, ticket size, and past investment patterns. Our AI matching engine analyzes these factors along with your startup profile to surface only the most relevant, high-probability matches. We also track investor activity and engagement to ensure our network consists of active, responsive capital partners.',
   },
 ];
 

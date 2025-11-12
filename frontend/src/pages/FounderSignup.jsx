@@ -175,6 +175,22 @@ const FounderSignup = () => {
       return;
     }
 
+    // Validate cofounder fields if checkbox is checked
+    if (includeSecondFounder) {
+      const cofounderRequiredFields = [
+        { key: 'fullName', label: "Co-founder's full name" },
+        { key: 'email', label: "Co-founder's email" },
+      ];
+      const missingCofounder = cofounderRequiredFields.filter(
+        (item) => !form.secondFounder[item.key]?.trim()
+      );
+      if (missingCofounder.length) {
+        const fieldsList = missingCofounder.map((item) => item.label).join(', ');
+        showInfo(`Please complete the following co-founder fields: ${fieldsList}.`);
+        return;
+      }
+    }
+
     // Validate pitch deck: either file or URL must be provided (optional but recommended)
     let pitchDeckUrl = form.pitchDeck.trim();
     if (pitchDeckFile && !pitchDeckUrl) {
@@ -185,10 +201,6 @@ const FounderSignup = () => {
         return;
       }
     }
-
-    const shouldAttachSecondFounder =
-      includeSecondFounder &&
-      Object.values(form.secondFounder).some((value) => typeof value === 'string' && value.trim());
 
     const payload = {
       fullName: form.founderFullName.trim(),
@@ -226,12 +238,13 @@ const FounderSignup = () => {
       },
     };
 
-    if (shouldAttachSecondFounder) {
+    // Add second founder if checkbox is checked (validation already done above)
+    if (includeSecondFounder) {
       payload.secondFounder = {
         fullName: form.secondFounder.fullName.trim(),
         email: form.secondFounder.email.trim(),
-        phoneNumber: form.secondFounder.phoneNumber.trim(),
-        linkedInUrl: form.secondFounder.linkedInUrl.trim(),
+        phoneNumber: form.secondFounder.phoneNumber.trim() || '',
+        linkedInUrl: form.secondFounder.linkedInUrl.trim() || '',
       };
     }
 
@@ -255,7 +268,7 @@ const FounderSignup = () => {
           coFounder: includeSecondFounder ? {
             name: form.secondFounder.fullName.trim(),
             email: form.secondFounder.email.trim(),
-            linkedinUrl: form.secondFounder.linkedInUrl.trim(),
+            linkedinUrl: form.secondFounder.linkedInUrl.trim() || '',
             gender: 'prefer-not-to-say',
           } : {},
           startupDetails: {
@@ -304,7 +317,9 @@ const FounderSignup = () => {
       // eslint-disable-next-line no-console
       console.error('Founder submission failed', error);
       setIsSubmitting(false);
-      showInfo('We could not submit your information. Please try again.');
+      // Show the actual error message from the backend if available
+      const errorMessage = error.message || error.data?.message || 'We could not submit your information. Please try again.';
+      showInfo(errorMessage);
     }
   };
 

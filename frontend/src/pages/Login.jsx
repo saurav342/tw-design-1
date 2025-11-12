@@ -151,7 +151,7 @@ const Login = () => {
           <div className="relative z-10">
             <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-sm font-medium mb-6">
               <CheckCircle2 className="w-4 h-4" />
-              Trusted by 500+ founders
+              Trusted by 400+ founders
             </div>
             <h1 className="text-4xl font-bold mb-4 leading-tight">
               Welcome back to<br /><span className="font-bold text-[#8b5cf6]">Launch & Lift</span>

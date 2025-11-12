@@ -4,7 +4,8 @@ const PaymentSchema = new mongoose.Schema({
   userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: true,
+    required: false, // Optional - founders may not be logged in during payment
+    default: null,
   },
   founderEmail: {
     type: String,
@@ -58,7 +59,7 @@ const PaymentSchema = new mongoose.Schema({
   timestamps: true,
 });
 
-PaymentSchema.index({ userId: 1 });
+PaymentSchema.index({ userId: 1 }, { sparse: true }); // Sparse index since userId can be null
 PaymentSchema.index({ founderEmail: 1 });
 PaymentSchema.index({ razorpayOrderId: 1 });
 PaymentSchema.index({ status: 1 });

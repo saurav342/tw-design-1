@@ -138,9 +138,7 @@ const DashboardHeader = ({ role }) => {
             </div>
             <div className="hidden sm:block">
               <div className="flex items-center gap-2">
-                <span className="text-lg font-bold bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent">
-                  Launch & Lift
-                </span>
+               
                 <span className="px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider rounded-full bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700">
                   {role === 'investor' ? 'Investor' : 'Founder'}
                 </span>

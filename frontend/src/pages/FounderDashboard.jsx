@@ -529,34 +529,22 @@ const MarketplacePresence = ({ listing, activeFounder }) => {
         )}
       </div>
 
-      <div className="rounded-xl border border-slate-200 bg-gradient-to-br from-blue-50/50 to-sky-50/50 p-5">
-        <div className="flex items-start justify-between gap-4">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              {hasListing ? (
+      {hasListing && (
+        <div className="rounded-xl border border-slate-200 bg-gradient-to-br from-blue-50/50 to-sky-50/50 p-5">
+          <div className="flex items-start justify-between gap-4">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
                 <CheckCircle2 className="h-5 w-5 text-emerald-600" />
-              ) : (
-                <Clock className="h-5 w-5 text-amber-600" />
-              )}
-              <p className="text-base font-semibold text-slate-900">
-                {hasListing ? 'Active listing' : 'No listing yet'}
-              </p>
+                <p className="text-base font-semibold text-slate-900">Active listing</p>
+              </div>
+              <p className="text-sm text-slate-600">Last updated: {lastUpdated}</p>
             </div>
-            <p className="text-sm text-slate-600">
-              {hasListing ? `Last updated: ${lastUpdated}` : 'Publish your raise profile to go live.'}
-            </p>
+            <span className="shrink-0 rounded-full bg-emerald-100 px-3 py-1.5 text-xs font-semibold text-emerald-700">
+              Active
+            </span>
           </div>
-          <span
-            className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold ${
-              hasListing
-                ? 'bg-emerald-100 text-emerald-700'
-                : 'bg-amber-100 text-amber-700'
-            }`}
-          >
-            {hasListing ? 'Active' : 'Draft'}
-          </span>
         </div>
-      </div>
+      )}
 
       {isEditing ? (
         <div className="space-y-6 rounded-xl border border-slate-200 bg-white p-5">

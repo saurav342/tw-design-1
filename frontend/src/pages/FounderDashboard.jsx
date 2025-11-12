@@ -1,7 +1,19 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { motion as Motion } from 'framer-motion';
-import { ArrowUpRight, BarChart3, Briefcase, Building2, Menu, Rocket, Users } from 'lucide-react';
+import { motion as Motion, AnimatePresence } from 'framer-motion';
+import {
+  ArrowUpRight,
+  BarChart3,
+  Briefcase,
+  Building2,
+  ChevronDown,
+  Menu,
+  Rocket,
+  Users,
+  CheckCircle2,
+  Clock,
+  Sparkles,
+} from 'lucide-react';
 import { useAuth } from '../context/useAuth.js';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card.jsx';
 import { Button } from '../components/ui/button.jsx';
@@ -14,12 +26,39 @@ import { persistActiveFounderId, readActiveFounderId } from '../lib/founderSessi
 const MotionDiv = Motion.div;
 
 const DashboardLayout = () => {
-  const { user } = useAuth();
+  const { user, token } = useAuth();
   const founders = useAppStore((state) => state.founders);
   const investors = useAppStore((state) => state.investors);
+  const syncFoundersFromBackend = useAppStore((state) => state.syncFoundersFromBackend);
+  const syncFounderExtrasFromBackend = useAppStore((state) => state.syncFounderExtrasFromBackend);
 
   const [activeId, setActiveId] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Load founder data from backend on mount
+  useEffect(() => {
+    if (!token) {
+      setIsLoading(false);
+      return;
+    }
+
+    const loadData = async () => {
+      try {
+        setIsLoading(true);
+        await Promise.all([
+          syncFoundersFromBackend(token),
+          syncFounderExtrasFromBackend(token),
+        ]);
+      } catch (error) {
+        console.error('Failed to load founder data:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadData();
+  }, [token, syncFoundersFromBackend, syncFounderExtrasFromBackend]);
 
   useEffect(() => {
     setActiveId(readActiveFounderId());
@@ -43,6 +82,14 @@ const DashboardLayout = () => {
       persistActiveFounderId(null);
     }
   }, [activeFounder]);
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gray-50">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+      </div>
+    );
+  }
 
   if (!activeFounder) {
     return (
@@ -91,12 +138,12 @@ const DashboardLayout = () => {
       </header>
 
       {/* Main Content */}
-      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <div className="space-y-8">
+      <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+        <div className="space-y-6">
           {/* Page Title */}
           <PageTitle />
 
-          {/* Dashboard Tiles */}
+          {/* Dashboard Tiles - Redesigned */}
           <DashboardTiles
             listing={listing}
             successRequest={successRequest}
@@ -104,11 +151,12 @@ const DashboardLayout = () => {
             serviceRequests={serviceRequests}
           />
 
-          {/* Dashboard Sections */}
-          <MarketplacePresence listing={listing} />
-          <SuccessFeeSupport successRequest={successRequest} />
-          <InvestorIntroductions matches={matches} investors={investors} />
-          <FounderServices
+          {/* Dashboard Sections - Collapsible */}
+          <DashboardSections
+            listing={listing}
+            successRequest={successRequest}
+            matches={matches}
+            investors={investors}
             latestServiceRequest={latestServiceRequest}
             totalRequests={serviceRequests.length}
           />
@@ -119,9 +167,9 @@ const DashboardLayout = () => {
 };
 
 const PageTitle = () => (
-  <div>
-    <h1 className="text-3xl font-semibold text-slate-900">Founder Dashboard</h1>
-    <p className="mt-2 text-sm text-slate-600">
+  <div className="mb-2">
+    <h1 className="text-4xl font-bold tracking-tight text-slate-900">Founder Dashboard</h1>
+    <p className="mt-3 text-base text-slate-600 max-w-2xl">
       Manage your fundraising journey and access expert support to keep momentum across every part
       of your raise.
     </p>
@@ -137,9 +185,14 @@ const DashboardTiles = ({ listing, successRequest, matches, serviceRequests }) =
         ? 'Listing live and investor-ready.'
         : 'Publish your raise details to go live.',
       href: '#marketplace-presence',
+      sectionId: 'marketplace-presence',
       status: listing ? 'Active' : 'Draft',
-      bg: 'from-sky-500 to-blue-600',
+      statusColor: listing ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700',
+      bg: 'from-blue-50 to-sky-50',
+      borderColor: 'border-blue-200',
       icon: BarChart3,
+      iconColor: 'text-blue-600',
+      iconBg: 'bg-blue-100',
     },
     {
       id: 'success-fee',
@@ -148,9 +201,14 @@ const DashboardTiles = ({ listing, successRequest, matches, serviceRequests }) =
         ? 'Brief submitted to the capital team.'
         : 'Share your traction for hands-on support.',
       href: '#success-fee-support',
+      sectionId: 'success-fee-support',
       status: successRequest ? 'In review' : 'Get started',
-      bg: 'from-violet-500 to-indigo-600',
+      statusColor: successRequest ? 'bg-purple-100 text-purple-700' : 'bg-indigo-100 text-indigo-700',
+      bg: 'from-purple-50 to-indigo-50',
+      borderColor: 'border-purple-200',
       icon: Rocket,
+      iconColor: 'text-purple-600',
+      iconBg: 'bg-purple-100',
     },
     {
       id: 'investor-intros',
@@ -160,9 +218,14 @@ const DashboardTiles = ({ listing, successRequest, matches, serviceRequests }) =
           ? `Warm intros queued for ${matches.length} investors.`
           : 'Line up curated intros matched to your round.',
       href: '#investor-introductions',
+      sectionId: 'investor-introductions',
       status: matches.length > 0 ? 'Ready' : 'Pending',
-      bg: 'from-emerald-500 to-green-600',
+      statusColor: matches.length > 0 ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-700',
+      bg: 'from-emerald-50 to-green-50',
+      borderColor: 'border-emerald-200',
       icon: Users,
+      iconColor: 'text-emerald-600',
+      iconBg: 'bg-emerald-100',
     },
     {
       id: 'services',
@@ -172,40 +235,144 @@ const DashboardTiles = ({ listing, successRequest, matches, serviceRequests }) =
           ? `${serviceRequests.length} request${serviceRequests.length > 1 ? 's' : ''} in motion.`
           : 'Spin up support for pitch, diligence, and GTM.',
       href: '#founder-services',
+      sectionId: 'founder-services',
       status: 'Available',
-      bg: 'from-indigo-500 to-purple-600',
+      statusColor: 'bg-indigo-100 text-indigo-700',
+      bg: 'from-indigo-50 to-violet-50',
+      borderColor: 'border-indigo-200',
       icon: Briefcase,
+      iconColor: 'text-indigo-600',
+      iconBg: 'bg-indigo-100',
     },
   ];
 
   return (
-    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+    <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
       {tiles.map((tile, index) => {
         const Icon = tile.icon;
         return (
           <MotionDiv
             key={tile.id}
-            initial={{ opacity: 0, y: 16 }}
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: index * 0.05 }}
-            className={`relative overflow-hidden rounded-3xl bg-gradient-to-br ${tile.bg} p-6 text-white shadow-lg`}
+            transition={{ duration: 0.3, delay: index * 0.05 }}
+            className={`group relative overflow-hidden rounded-2xl border-2 ${tile.borderColor} bg-gradient-to-br ${tile.bg} p-6 transition-all duration-300 hover:shadow-xl hover:-translate-y-1`}
           >
-            <div className="flex items-center justify-between">
-              <div className="rounded-2xl bg-white/15 p-2">
-                <Icon className="h-6 w-6 text-white" />
+            <div className="flex items-start justify-between">
+              <div className={`rounded-xl ${tile.iconBg} p-3 transition-transform duration-300 group-hover:scale-110`}>
+                <Icon className={`h-5 w-5 ${tile.iconColor}`} />
               </div>
-              <span className="rounded-full bg-white/20 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em]">
+              <span className={`rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider ${tile.statusColor}`}>
                 {tile.status}
               </span>
             </div>
-            <h2 className="mt-6 text-lg font-semibold">{tile.title}</h2>
-            <p className="mt-2 text-sm text-white/80">{tile.description}</p>
-            <Button asChild variant="secondary" className="mt-6 w-full bg-white text-slate-900 hover:bg-white/90">
-              <Link className="flex items-center justify-center gap-2" to={tile.href}>
+            <h2 className="mt-5 text-lg font-bold text-slate-900">{tile.title}</h2>
+            <p className="mt-2 text-sm leading-relaxed text-slate-600">{tile.description}</p>
+            <Button
+              asChild
+              variant="ghost"
+              size="sm"
+              className="mt-5 w-full justify-start text-slate-700 hover:bg-white/80 hover:text-slate-900"
+            >
+              <Link className="flex items-center gap-2" to={tile.href}>
                 View details
-                <ArrowUpRight className="h-4 w-4" />
+                <ArrowUpRight className="h-3.5 w-3.5" />
               </Link>
             </Button>
+          </MotionDiv>
+        );
+      })}
+    </div>
+  );
+};
+
+const DashboardSections = ({
+  listing,
+  successRequest,
+  matches,
+  investors,
+  latestServiceRequest,
+  totalRequests,
+}) => {
+  const [expandedSection, setExpandedSection] = useState('marketplace-presence');
+
+  const sections = [
+    {
+      id: 'marketplace-presence',
+      title: 'Marketplace Presence',
+      icon: BarChart3,
+      component: <MarketplacePresence listing={listing} />,
+    },
+    {
+      id: 'success-fee-support',
+      title: 'Success-Fee Raise Support',
+      icon: Rocket,
+      component: <SuccessFeeSupport successRequest={successRequest} />,
+    },
+    {
+      id: 'investor-introductions',
+      title: 'Investor Introductions',
+      icon: Users,
+      component: <InvestorIntroductions matches={matches} investors={investors} />,
+    },
+    {
+      id: 'founder-services',
+      title: 'Founder Services Studio',
+      icon: Briefcase,
+      component: (
+        <FounderServices
+          latestServiceRequest={latestServiceRequest}
+          totalRequests={totalRequests}
+        />
+      ),
+    },
+  ];
+
+  return (
+    <div className="space-y-4">
+      {sections.map((section, index) => {
+        const Icon = section.icon;
+        const isExpanded = expandedSection === section.id;
+
+        return (
+          <MotionDiv
+            key={section.id}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: index * 0.05 }}
+            className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-all duration-300 hover:shadow-md"
+          >
+            <button
+              onClick={() => setExpandedSection(isExpanded ? '' : section.id)}
+              className="w-full px-6 py-5 text-left transition-colors hover:bg-slate-50/50"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="rounded-xl bg-slate-100 p-2.5">
+                    <Icon className="h-5 w-5 text-slate-700" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-slate-900">{section.title}</h3>
+                </div>
+                <ChevronDown
+                  className={`h-5 w-5 text-slate-500 transition-transform duration-300 ${
+                    isExpanded ? 'rotate-180' : ''
+                  }`}
+                />
+              </div>
+            </button>
+            <AnimatePresence>
+              {isExpanded && (
+                <MotionDiv
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="overflow-hidden"
+                >
+                  <div className="border-t border-slate-100 px-6 py-6">{section.component}</div>
+                </MotionDiv>
+              )}
+            </AnimatePresence>
           </MotionDiv>
         );
       })}
@@ -219,199 +386,204 @@ const MarketplacePresence = ({ listing }) => {
     hasListing && listing?.lastUpdated ? formatDateDisplay(listing.lastUpdated) : 'Not updated';
 
   return (
-    <MotionDiv
-      id="marketplace-presence"
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, delay: 0.08 }}
-    >
-      <Card className="overflow-hidden border border-slate-200 bg-white shadow-sm">
-        <CardHeader className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-          <div className="space-y-2">
-            <CardTitle className="text-2xl text-slate-900">Marketplace presence</CardTitle>
-            <p className="text-sm text-slate-600">
-              Keep your raise details polished before we surface you to Launch &amp; Lift investors.
-            </p>
-          </div>
-          <Button
-            asChild
-            variant="outline"
-            size="sm"
-            className="w-full text-slate-700 hover:text-slate-900 lg:w-auto"
-          >
-            <Link to="/dashboard/founder/marketplace">Edit listing</Link>
-          </Button>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="flex flex-col gap-3 rounded-3xl border border-slate-200 bg-slate-50/70 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
-            <div>
+    <div className="space-y-5">
+      <div className="flex items-start justify-between gap-4">
+        <div className="space-y-1">
+          <p className="text-sm text-slate-600">
+            Keep your raise details polished before we surface you to Launch &amp; Lift investors.
+          </p>
+        </div>
+        <Button
+          asChild
+          variant="outline"
+          size="sm"
+          className="shrink-0"
+        >
+          <Link to="/dashboard/founder/marketplace">Edit listing</Link>
+        </Button>
+      </div>
+
+      <div className="rounded-xl border border-slate-200 bg-gradient-to-br from-blue-50/50 to-sky-50/50 p-5">
+        <div className="flex items-start justify-between gap-4">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              {hasListing ? (
+                <CheckCircle2 className="h-5 w-5 text-emerald-600" />
+              ) : (
+                <Clock className="h-5 w-5 text-amber-600" />
+              )}
               <p className="text-base font-semibold text-slate-900">
                 {hasListing ? 'Active listing' : 'No listing yet'}
               </p>
-              <p className="text-xs text-slate-500">
-                {hasListing ? `Last updated: ${lastUpdated}` : 'Publish your raise profile to go live.'}
-              </p>
             </div>
-            <span
-              className={`flex h-8 items-center rounded-full px-4 text-xs font-semibold uppercase tracking-[0.2em] ${
-                hasListing
-                  ? 'bg-emerald-100 text-emerald-600'
-                  : 'bg-slate-200 text-slate-600'
-              }`}
-            >
-              {hasListing ? 'Active' : 'Draft'}
-            </span>
-          </div>
-
-          {hasListing ? (
-            <div className="grid gap-4 rounded-3xl border border-slate-200 bg-white px-6 py-5 text-sm text-slate-700 shadow-sm sm:grid-cols-2">
-              <div>
-                <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Raise amount</p>
-                <p className="mt-2 text-lg font-semibold text-slate-900">
-                  {formatCurrencyInr(listing.raiseAmount)}
-                </p>
-              </div>
-              <div>
-                <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Min. ticket</p>
-                <p className="mt-2 text-lg font-semibold text-slate-900">
-                  {formatCurrencyInr(listing.minTicket)}
-                </p>
-              </div>
-              <div className="sm:col-span-2">
-                <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Use of funds</p>
-                <p className="mt-2 text-sm text-slate-700">{listing.useOfFunds}</p>
-              </div>
-              <div>
-                <p className="text-xs uppercase tracking-[0.18em] text-slate-500">
-                  Industry / category
-                </p>
-                <p className="mt-2 text-sm font-semibold text-slate-900">
-                  {listing.industry || 'Not set'}
-                </p>
-              </div>
-            </div>
-          ) : (
-            <div className="rounded-3xl border border-dashed border-slate-300 bg-slate-50 px-6 py-5 text-sm text-slate-600">
-              Share headline metrics, use of funds, and industry tags to go live in the marketplace.
-            </div>
-          )}
-
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-xs text-slate-500">
-              You can maintain one live listing at a time. Drafts are saved on the dedicated page.
+            <p className="text-sm text-slate-600">
+              {hasListing ? `Last updated: ${lastUpdated}` : 'Publish your raise profile to go live.'}
             </p>
-            <Button asChild variant="secondary" className="w-full sm:w-auto">
-              <Link
-                className="flex items-center justify-center gap-2"
-                to="/dashboard/founder/marketplace"
-              >
-                View marketplace listing
-                <ArrowUpRight className="h-4 w-4" />
-              </Link>
-            </Button>
           </div>
-        </CardContent>
-      </Card>
-    </MotionDiv>
+          <span
+            className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold ${
+              hasListing
+                ? 'bg-emerald-100 text-emerald-700'
+                : 'bg-amber-100 text-amber-700'
+            }`}
+          >
+            {hasListing ? 'Active' : 'Draft'}
+          </span>
+        </div>
+      </div>
+
+      {hasListing ? (
+        <div className="grid gap-4 rounded-xl border border-slate-200 bg-white p-5 sm:grid-cols-2">
+          <div className="space-y-1">
+            <p className="text-xs font-medium uppercase tracking-wider text-slate-500">Raise amount</p>
+            <p className="text-xl font-bold text-slate-900">
+              {formatCurrencyInr(listing.raiseAmount)}
+            </p>
+          </div>
+          <div className="space-y-1">
+            <p className="text-xs font-medium uppercase tracking-wider text-slate-500">Min. ticket</p>
+            <p className="text-xl font-bold text-slate-900">
+              {formatCurrencyInr(listing.minTicket)}
+            </p>
+          </div>
+          <div className="space-y-1 sm:col-span-2">
+            <p className="text-xs font-medium uppercase tracking-wider text-slate-500">Use of funds</p>
+            <p className="text-sm text-slate-700 leading-relaxed">{listing.useOfFunds}</p>
+          </div>
+          <div className="space-y-1">
+            <p className="text-xs font-medium uppercase tracking-wider text-slate-500">
+              Industry / category
+            </p>
+            <p className="text-sm font-semibold text-slate-900">
+              {listing.industry || 'Not set'}
+            </p>
+          </div>
+        </div>
+      ) : (
+        <div className="rounded-xl border-2 border-dashed border-slate-300 bg-slate-50/50 p-6 text-center">
+          <p className="text-sm text-slate-600">
+            Share headline metrics, use of funds, and industry tags to go live in the marketplace.
+          </p>
+        </div>
+      )}
+
+      <div className="flex flex-col gap-3 border-t border-slate-100 pt-5 sm:flex-row sm:items-center sm:justify-between">
+        <p className="text-xs text-slate-500">
+          You can maintain one live listing at a time. Drafts are saved on the dedicated page.
+        </p>
+        <Button asChild variant="secondary" size="sm" className="w-full sm:w-auto">
+          <Link
+            className="flex items-center justify-center gap-2"
+            to="/dashboard/founder/marketplace"
+          >
+            View marketplace listing
+            <ArrowUpRight className="h-4 w-4" />
+          </Link>
+        </Button>
+      </div>
+    </div>
   );
 };
 
 const SuccessFeeSupport = ({ successRequest }) => {
   const hasRequest = Boolean(successRequest);
   return (
-    <MotionDiv
-      id="success-fee-support"
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, delay: 0.12 }}
-    >
-      <Card className="border border-slate-200 bg-white shadow-sm">
-        <CardHeader className="space-y-2">
-          <CardTitle className="text-2xl text-slate-900">Success-fee raise support</CardTitle>
-          <p className="text-sm text-slate-600">
-            Walk through a guided brief so our capital team can champion your round.
-          </p>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
-            <div className="space-y-4 rounded-3xl border border-indigo-200 bg-indigo-50/60 px-6 py-5 text-sm text-indigo-900">
-              <div>
-                <p className="flex items-center gap-2 text-base font-semibold">
-                  <Rocket className="h-4 w-4" />
-                  Onboarding: ₹2–3L
-                </p>
-                <p className="mt-1 text-sm text-indigo-800/80">
-                  Initial onboarding fee to get started with our capital team.
-                </p>
-              </div>
-              <div>
-                <p className="flex items-center gap-2 text-base font-semibold">
-                  <BarChart3 className="h-4 w-4" />
-                  Success fee on final raise
-                </p>
-                <p className="mt-1 text-sm text-indigo-800/80">
-                  Performance-based fee aligned with your fundraising success.
-                </p>
-              </div>
-            </div>
+    <div className="space-y-5">
+      <p className="text-sm text-slate-600">
+        Walk through a guided brief so our capital team can champion your round.
+      </p>
 
-            <div className="flex flex-col justify-between gap-4 rounded-3xl border border-slate-200 bg-slate-50 px-6 py-5 text-sm text-slate-700">
-              {hasRequest ? (
-                <>
-                  <div>
-                    <p className="text-sm font-semibold text-slate-900">
-                      Request submitted — our team is reviewing.
-                    </p>
-                    <p className="mt-2 text-xs text-slate-500">
-                      Round: {successRequest.round || 'Not specified'} • Target:{' '}
-                      {successRequest.targetAmount
-                        ? formatCurrencyInr(successRequest.targetAmount)
-                        : 'Not shared'}
-                    </p>
-                    <p className="mt-2 text-xs text-slate-500">
-                      Updated {formatDateDisplay(successRequest.createdAt)} • Edit details anytime.
-                    </p>
-                  </div>
-                  <Button asChild className="w-full">
-                    <Link
-                      className="flex items-center justify-center gap-2"
-                      to="/dashboard/founder/success-fee"
-                    >
-                      Update success-fee request
-                      <ArrowUpRight className="h-4 w-4" />
-                    </Link>
-                  </Button>
-                </>
-              ) : (
-                <>
-                  <div>
-                    <p className="text-sm font-semibold text-slate-900">
-                      Investor introductions
-                    </p>
-                    <p className="mt-2 text-sm text-slate-600">
-                      Share stage, traction, and committed capital so the success team can spin up
-                      outreach.
-                    </p>
-                  </div>
-                  <Button asChild className="w-full">
-                    <Link
-                      className="flex items-center justify-center gap-2"
-                      to="/dashboard/founder/success-fee"
-                    >
-                      Request success-fee plan
-                      <ArrowUpRight className="h-4 w-4" />
-                    </Link>
-                  </Button>
-                  <p className="text-xs text-slate-500">
-                    Requests surface instantly on the admin console for Launch &amp; Lift operators.
-                  </p>
-                </>
-              )}
+      <div className="grid gap-5 lg:grid-cols-[1.5fr_1fr]">
+        <div className="space-y-4 rounded-xl border border-purple-200 bg-gradient-to-br from-purple-50/80 to-indigo-50/80 p-5">
+          <div className="flex items-start gap-3">
+            <div className="rounded-lg bg-purple-100 p-2">
+              <Rocket className="h-4 w-4 text-purple-600" />
+            </div>
+            <div>
+              <p className="text-base font-semibold text-slate-900">Onboarding: ₹2–3L</p>
+              <p className="mt-1 text-sm text-slate-600">
+                Initial onboarding fee to get started with our capital team.
+              </p>
             </div>
           </div>
-        </CardContent>
-      </Card>
-    </MotionDiv>
+          <div className="flex items-start gap-3">
+            <div className="rounded-lg bg-purple-100 p-2">
+              <BarChart3 className="h-4 w-4 text-purple-600" />
+            </div>
+            <div>
+              <p className="text-base font-semibold text-slate-900">Success fee on final raise</p>
+              <p className="mt-1 text-sm text-slate-600">
+                Performance-based fee aligned with your fundraising success.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex flex-col justify-between gap-4 rounded-xl border border-slate-200 bg-white p-5">
+          {hasRequest ? (
+            <>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="h-5 w-5 text-emerald-600" />
+                  <p className="text-sm font-semibold text-slate-900">
+                    Request submitted — our team is reviewing.
+                  </p>
+                </div>
+                <div className="space-y-1 text-xs text-slate-600">
+                  <p>
+                    <span className="font-medium">Round:</span> {successRequest.round || 'Not specified'}
+                  </p>
+                  <p>
+                    <span className="font-medium">Target:</span>{' '}
+                    {successRequest.targetAmount
+                      ? formatCurrencyInr(successRequest.targetAmount)
+                      : 'Not shared'}
+                  </p>
+                  <p className="text-slate-500">
+                    Updated {formatDateDisplay(successRequest.createdAt)}
+                  </p>
+                </div>
+              </div>
+              <Button asChild size="sm" className="w-full">
+                <Link
+                  className="flex items-center justify-center gap-2"
+                  to="/dashboard/founder/success-fee"
+                >
+                  Update request
+                  <ArrowUpRight className="h-4 w-4" />
+                </Link>
+              </Button>
+            </>
+          ) : (
+            <>
+              <div className="space-y-2">
+                <p className="text-sm font-semibold text-slate-900">
+                  Get started with success-fee support
+                </p>
+                <p className="text-sm text-slate-600">
+                  Share stage, traction, and committed capital so the success team can spin up
+                  outreach.
+                </p>
+              </div>
+              <div className="space-y-3">
+                <Button asChild size="sm" className="w-full">
+                  <Link
+                    className="flex items-center justify-center gap-2"
+                    to="/dashboard/founder/success-fee"
+                  >
+                    Request success-fee plan
+                    <ArrowUpRight className="h-4 w-4" />
+                  </Link>
+                </Button>
+                <p className="text-xs text-slate-500">
+                  Requests surface instantly on the admin console for Launch &amp; Lift operators.
+                </p>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
   );
 };
 
@@ -433,94 +605,95 @@ const InvestorIntroductions = ({ matches, investors }) => {
   const topMatch = introductions[0] ?? null;
 
   return (
-    <MotionDiv
-      id="investor-introductions"
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, delay: 0.14 }}
-    >
-      <Card className="border border-slate-200 bg-white shadow-sm">
-        <CardHeader className="space-y-2">
-          <CardTitle className="text-2xl text-slate-900">Investor introductions</CardTitle>
-          <p className="text-sm text-slate-600">
-            Share stage, traction, and committed capital so the success team can spin up outreach.
-          </p>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="rounded-3xl border border-purple-200 bg-purple-50/70 px-6 py-6 text-purple-900">
-            <p className="text-base font-semibold">Get connected to the right investors</p>
-            <p className="mt-2 text-sm text-purple-900/80">
+    <div className="space-y-5">
+      <p className="text-sm text-slate-600">
+        Share stage, traction, and committed capital so the success team can spin up outreach.
+      </p>
+
+      <div className="rounded-xl border border-emerald-200 bg-gradient-to-br from-emerald-50/80 to-green-50/80 p-5">
+        <div className="flex items-start gap-3">
+          <div className="rounded-lg bg-emerald-100 p-2">
+            <Sparkles className="h-5 w-5 text-emerald-600" />
+          </div>
+          <div className="flex-1 space-y-2">
+            <p className="text-base font-semibold text-slate-900">
+              Get connected to the right investors
+            </p>
+            <p className="text-sm text-slate-600">
               Our team reviews your story and metrics to prioritize warm intros aligned with your
               round pace.
             </p>
             {topMatch ? (
-              <div className="mt-4 rounded-2xl border border-purple-200 bg-white/60 px-4 py-3 text-sm text-slate-700">
-                <p className="font-semibold text-slate-900">{topMatch.fundName}</p>
-                <p className="text-xs text-slate-500">
-                  Contact: {topMatch.contactName} • Match confidence{' '}
+              <div className="mt-3 rounded-lg border border-emerald-200 bg-white/80 p-3">
+                <p className="text-sm font-semibold text-slate-900">{topMatch.fundName}</p>
+                <p className="mt-1 text-xs text-slate-600">
+                  Contact: {topMatch.contactName} • Match:{' '}
                   {topMatch.matchScore !== null ? `${topMatch.matchScore}%` : 'Pending'}
                 </p>
               </div>
             ) : null}
           </div>
+        </div>
+      </div>
 
-          {hasIntroductions ? (
-            <ul className="space-y-3">
-              {introductions.map((intro) => (
-                <li
-                  key={intro.id}
-                  className="flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700"
-                >
-                  <div>
-                    <p className="font-semibold text-slate-900">{intro.fundName}</p>
-                    <p className="text-xs text-slate-500">Contact: {intro.contactName}</p>
-                  </div>
-                  <span className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
-                    {intro.matchScore !== null ? `${intro.matchScore}% match` : 'Pending'}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="text-sm text-slate-600">
-              When the next wave of investors is aligned, we will surface curated introductions here
-              with match confidence and context.
-            </p>
-          )}
+      {hasIntroductions ? (
+        <div className="space-y-3">
+          <p className="text-xs font-medium uppercase tracking-wider text-slate-500">
+            Top Matches ({introductions.length})
+          </p>
+          <ul className="space-y-2">
+            {introductions.map((intro) => (
+              <li
+                key={intro.id}
+                className="flex items-center justify-between rounded-lg border border-slate-200 bg-white p-4 transition-colors hover:bg-slate-50"
+              >
+                <div>
+                  <p className="text-sm font-semibold text-slate-900">{intro.fundName}</p>
+                  <p className="mt-0.5 text-xs text-slate-500">Contact: {intro.contactName}</p>
+                </div>
+                <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">
+                  {intro.matchScore !== null ? `${intro.matchScore}%` : 'Pending'}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : (
+        <div className="rounded-xl border-2 border-dashed border-slate-300 bg-slate-50/50 p-6 text-center">
+          <p className="text-sm text-slate-600">
+            When the next wave of investors is aligned, we will surface curated introductions here
+            with match confidence and context.
+          </p>
+        </div>
+      )}
 
-          <Button asChild className="w-full">
-            <Link className="flex items-center justify-center gap-2" to="/dashboard/founder/success-fee">
-              {hasIntroductions ? 'Manage investor introductions' : 'Request investor introductions'}
-              <ArrowUpRight className="h-4 w-4" />
-            </Link>
-          </Button>
-        </CardContent>
-      </Card>
-    </MotionDiv>
+      <Button asChild size="sm" className="w-full">
+        <Link className="flex items-center justify-center gap-2" to="/dashboard/founder/success-fee">
+          {hasIntroductions ? 'Manage introductions' : 'Request investor introductions'}
+          <ArrowUpRight className="h-4 w-4" />
+        </Link>
+      </Button>
+    </div>
   );
 };
 
 const FounderServices = ({ latestServiceRequest, totalRequests }) => (
-  <MotionDiv
-    id="founder-services"
-    initial={{ opacity: 0, y: 16 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.4, delay: 0.16 }}
-  >
-    <Card className="border border-slate-200 bg-white shadow-sm">
-      <CardHeader className="space-y-2">
-        <CardTitle className="text-2xl text-slate-900">Founder services studio</CardTitle>
-        <p className="text-sm text-slate-600">
-          Collaborate with vetted specialists on the assets that close your round faster.
-        </p>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        {latestServiceRequest ? (
-          <div className="rounded-3xl border border-emerald-200 bg-emerald-50 px-6 py-5 text-sm text-emerald-900">
-            <p className="text-sm font-semibold">
+  <div className="space-y-5">
+    <p className="text-sm text-slate-600">
+      Collaborate with vetted specialists on the assets that close your round faster.
+    </p>
+
+    {latestServiceRequest ? (
+      <div className="rounded-xl border border-indigo-200 bg-gradient-to-br from-indigo-50/80 to-violet-50/80 p-5">
+        <div className="flex items-start gap-3">
+          <div className="rounded-lg bg-indigo-100 p-2">
+            <Briefcase className="h-5 w-5 text-indigo-600" />
+          </div>
+          <div className="flex-1 space-y-1">
+            <p className="text-sm font-semibold text-slate-900">
               Latest request: {latestServiceRequest.serviceType}
             </p>
-            <p className="mt-2 text-xs text-emerald-900/70">
+            <p className="text-xs text-slate-600">
               Urgency {latestServiceRequest.urgency} • Updated{' '}
               {formatDateDisplay(latestServiceRequest.createdAt)} •{' '}
               {totalRequests > 1
@@ -528,57 +701,57 @@ const FounderServices = ({ latestServiceRequest, totalRequests }) => (
                 : 'Ready for next collaboration'}
             </p>
           </div>
-        ) : null}
-
-        <div className="grid gap-6 lg:grid-cols-3">
-          {FOUNDER_SERVICE_DETAILS.slice(0, 6).map((service) => (
-            <div
-              key={service.id}
-              className="flex h-full flex-col justify-between rounded-3xl border border-slate-200 bg-slate-50 px-5 py-5 text-sm text-slate-700"
-            >
-              <div>
-                <div className="flex items-center justify-between">
-                  <p className="text-base font-semibold text-slate-900">{service.title}</p>
-                  <span className="rounded-full bg-emerald-100 px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-emerald-600">
-                    Available
-                  </span>
-                </div>
-                <p className="mt-3 text-sm text-slate-600">{service.tagline}</p>
-              </div>
-              <div className="mt-5 flex gap-3">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="flex-1 border-slate-200 text-slate-700 hover:text-slate-900"
-                  asChild
-                >
-                  <Link to={`/services/${service.slug}`}>Learn more</Link>
-                </Button>
-                <Button size="sm" className="flex-1" asChild>
-                  <Link to="/dashboard/founder/services">Request</Link>
-                </Button>
-              </div>
-            </div>
-          ))}
         </div>
+      </div>
+    ) : null}
 
-        <div className="flex flex-col gap-3 rounded-3xl border border-slate-200 bg-white px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {FOUNDER_SERVICE_DETAILS.slice(0, 6).map((service) => (
+        <div
+          key={service.id}
+          className="group flex h-full flex-col justify-between rounded-xl border border-slate-200 bg-white p-5 transition-all duration-300 hover:border-indigo-300 hover:shadow-md"
+        >
           <div>
-            <p className="text-sm font-semibold text-slate-900">Need something custom?</p>
-            <p className="mt-1 text-sm text-slate-600">
-              Spin up a scoped brief for pitch decks, diligence deep dives, or GTM enablement.
-            </p>
+            <div className="flex items-start justify-between gap-2 mb-3">
+              <p className="text-base font-semibold text-slate-900">{service.title}</p>
+              <span className="shrink-0 rounded-full bg-emerald-100 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-emerald-700">
+                Available
+              </span>
+            </div>
+            <p className="text-sm leading-relaxed text-slate-600">{service.tagline}</p>
           </div>
-          <Button asChild className="w-full sm:w-auto">
-            <Link className="flex items-center justify-center gap-2" to="/dashboard/founder/services">
-              Create custom brief
-              <ArrowUpRight className="h-4 w-4" />
-            </Link>
-          </Button>
+          <div className="mt-5 flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex-1 border-slate-200 text-slate-700 hover:bg-slate-50"
+              asChild
+            >
+              <Link to={`/services/${service.slug}`}>Learn more</Link>
+            </Button>
+            <Button size="sm" className="flex-1" asChild>
+              <Link to="/dashboard/founder/services">Request</Link>
+            </Button>
+          </div>
         </div>
-      </CardContent>
-    </Card>
-  </MotionDiv>
+      ))}
+    </div>
+
+    <div className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-gradient-to-br from-slate-50/50 to-white p-5 sm:flex-row sm:items-center sm:justify-between">
+      <div className="space-y-1">
+        <p className="text-sm font-semibold text-slate-900">Need something custom?</p>
+        <p className="text-sm text-slate-600">
+          Spin up a scoped brief for pitch decks, diligence deep dives, or GTM enablement.
+        </p>
+      </div>
+      <Button asChild size="sm" className="w-full sm:w-auto">
+        <Link className="flex items-center justify-center gap-2" to="/dashboard/founder/services">
+          Create custom brief
+          <ArrowUpRight className="h-4 w-4" />
+        </Link>
+      </Button>
+    </div>
+  </div>
 );
 
 export { DashboardLayout };

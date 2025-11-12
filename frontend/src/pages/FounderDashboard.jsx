@@ -13,15 +13,25 @@ import {
   CheckCircle2,
   Clock,
   Sparkles,
+  Edit3,
+  Save,
+  X,
+  Loader2,
 } from 'lucide-react';
 import { useAuth } from '../context/useAuth.js';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card.jsx';
 import { Button } from '../components/ui/button.jsx';
+import { Input } from '../components/ui/input.jsx';
+import { Label } from '../components/ui/label.jsx';
+import { Textarea } from '../components/ui/textarea.jsx';
 import { formatCurrencyInr, formatDateDisplay } from '../lib/formatters.js';
 import { useFounderExtras } from '../hooks/useFounderExtras.js';
+import { useActiveFounder } from '../hooks/useActiveFounder.js';
 import { FOUNDER_SERVICE_DETAILS } from '../data/founderExtras.js';
 import { useAppStore } from '../store/useAppStore.js';
 import { persistActiveFounderId, readActiveFounderId } from '../lib/founderSession.js';
+import { toNumberOrNull } from '../lib/utils.js';
+import { useNotification } from '../context/NotificationContext';
 
 const MotionDiv = Motion.div;
 
@@ -159,6 +169,7 @@ const DashboardLayout = () => {
             investors={investors}
             latestServiceRequest={latestServiceRequest}
             totalRequests={serviceRequests.length}
+            activeFounder={activeFounder}
           />
         </div>
       </main>
@@ -293,6 +304,7 @@ const DashboardSections = ({
   investors,
   latestServiceRequest,
   totalRequests,
+  activeFounder,
 }) => {
   const [expandedSection, setExpandedSection] = useState('marketplace-presence');
 
@@ -301,7 +313,7 @@ const DashboardSections = ({
       id: 'marketplace-presence',
       title: 'Marketplace Presence',
       icon: BarChart3,
-      component: <MarketplacePresence listing={listing} />,
+      component: <MarketplacePresence listing={listing} activeFounder={activeFounder} />,
     },
     {
       id: 'success-fee-support',
@@ -380,10 +392,92 @@ const DashboardSections = ({
   );
 };
 
-const MarketplacePresence = ({ listing }) => {
+const MarketplacePresence = ({ listing, activeFounder }) => {
+  const founderId = activeFounder?.id ?? null;
+  const { extras, setMarketplaceListing } = useFounderExtras(founderId);
+  const { showSuccess, showInfo } = useNotification();
+  const [isEditing, setIsEditing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [formData, setFormData] = useState({
+    startupName: '',
+    raiseAmount: '',
+    minTicket: '',
+    industry: '',
+    useOfFunds: '',
+    companyWebsite: '',
+    sector: '',
+    currentStage: '',
+    brief: '',
+  });
+
   const hasListing = Boolean(listing);
   const lastUpdated =
     hasListing && listing?.lastUpdated ? formatDateDisplay(listing.lastUpdated) : 'Not updated';
+
+  // Initialize form data from listing and activeFounder
+  useEffect(() => {
+    if (activeFounder || listing) {
+      setFormData({
+        startupName: listing?.startupName || activeFounder?.startupName || activeFounder?.company?.brandName || '',
+        raiseAmount: listing?.raiseAmount ? String(listing.raiseAmount) : '',
+        minTicket: listing?.minTicket ? String(listing.minTicket) : '',
+        industry: listing?.industry || activeFounder?.sector || activeFounder?.company?.sector || '',
+        useOfFunds: listing?.useOfFunds || '',
+        companyWebsite: activeFounder?.company?.website || activeFounder?.companyWebsite || '',
+        sector: activeFounder?.sector || activeFounder?.company?.sector || '',
+        currentStage: activeFounder?.raiseStage || activeFounder?.company?.currentStage || '',
+        brief: activeFounder?.company?.brief || activeFounder?.tractionSummary || '',
+      });
+    }
+  }, [listing, activeFounder]);
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSave = async () => {
+    setIsSaving(true);
+    try {
+      const updatedListing = {
+        id: listing?.id || `marketplace-${Date.now()}`,
+        startupName: formData.startupName.trim() || activeFounder?.startupName || null,
+        raiseAmount: toNumberOrNull(formData.raiseAmount) ?? 0,
+        minTicket: toNumberOrNull(formData.minTicket) ?? 0,
+        industry: formData.industry.trim(),
+        useOfFunds: formData.useOfFunds.trim(),
+        status: listing?.status || 'active',
+        lastUpdated: new Date().toISOString(),
+      };
+
+      await setMarketplaceListing(updatedListing);
+      showSuccess('Startup details updated successfully');
+      setIsEditing(false);
+    } catch (error) {
+      console.error('Failed to save startup details', error);
+      showInfo('We could not update your details. Please try again in a moment.');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleCancel = () => {
+    // Reset form data
+    if (activeFounder || listing) {
+      setFormData({
+        startupName: listing?.startupName || activeFounder?.startupName || activeFounder?.company?.brandName || '',
+        raiseAmount: listing?.raiseAmount ? String(listing.raiseAmount) : '',
+        minTicket: listing?.minTicket ? String(listing.minTicket) : '',
+        industry: listing?.industry || activeFounder?.sector || activeFounder?.company?.sector || '',
+        useOfFunds: listing?.useOfFunds || '',
+        companyWebsite: activeFounder?.company?.website || activeFounder?.companyWebsite || '',
+        sector: activeFounder?.sector || activeFounder?.company?.sector || '',
+        currentStage: activeFounder?.raiseStage || activeFounder?.company?.currentStage || '',
+        brief: activeFounder?.company?.brief || activeFounder?.tractionSummary || '',
+      });
+    }
+    setIsEditing(false);
+  };
 
   return (
     <div className="space-y-5">
@@ -393,14 +487,46 @@ const MarketplacePresence = ({ listing }) => {
             Keep your raise details polished before we surface you to Launch &amp; Lift investors.
           </p>
         </div>
-        <Button
-          asChild
-          variant="outline"
-          size="sm"
-          className="shrink-0"
-        >
-          <Link to="/dashboard/founder/marketplace">Edit listing</Link>
-        </Button>
+        {!isEditing ? (
+          <Button
+            variant="outline"
+            size="sm"
+            className="shrink-0"
+            onClick={() => setIsEditing(true)}
+          >
+            <Edit3 className="mr-2 h-4 w-4" />
+            Edit details
+          </Button>
+        ) : (
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleCancel}
+              disabled={isSaving}
+            >
+              <X className="mr-2 h-4 w-4" />
+              Cancel
+            </Button>
+            <Button
+              size="sm"
+              onClick={handleSave}
+              disabled={isSaving}
+            >
+              {isSaving ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <Save className="mr-2 h-4 w-4" />
+                  Save changes
+                </>
+              )}
+            </Button>
+          </div>
+        )}
       </div>
 
       <div className="rounded-xl border border-slate-200 bg-gradient-to-br from-blue-50/50 to-sky-50/50 p-5">
@@ -432,39 +558,221 @@ const MarketplacePresence = ({ listing }) => {
         </div>
       </div>
 
-      {hasListing ? (
-        <div className="grid gap-4 rounded-xl border border-slate-200 bg-white p-5 sm:grid-cols-2">
-          <div className="space-y-1">
-            <p className="text-xs font-medium uppercase tracking-wider text-slate-500">Raise amount</p>
-            <p className="text-xl font-bold text-slate-900">
-              {formatCurrencyInr(listing.raiseAmount)}
-            </p>
-          </div>
-          <div className="space-y-1">
-            <p className="text-xs font-medium uppercase tracking-wider text-slate-500">Min. ticket</p>
-            <p className="text-xl font-bold text-slate-900">
-              {formatCurrencyInr(listing.minTicket)}
-            </p>
-          </div>
-          <div className="space-y-1 sm:col-span-2">
-            <p className="text-xs font-medium uppercase tracking-wider text-slate-500">Use of funds</p>
-            <p className="text-sm text-slate-700 leading-relaxed">{listing.useOfFunds}</p>
-          </div>
-          <div className="space-y-1">
-            <p className="text-xs font-medium uppercase tracking-wider text-slate-500">
-              Industry / category
-            </p>
-            <p className="text-sm font-semibold text-slate-900">
-              {listing.industry || 'Not set'}
-            </p>
+      {isEditing ? (
+        <div className="space-y-6 rounded-xl border border-slate-200 bg-white p-5">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="startupName" className="text-slate-700">
+                Startup name
+              </Label>
+              <Input
+                id="startupName"
+                name="startupName"
+                value={formData.startupName}
+                onChange={handleInputChange}
+                placeholder="Your startup name"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="companyWebsite" className="text-slate-700">
+                Company website
+              </Label>
+              <Input
+                id="companyWebsite"
+                name="companyWebsite"
+                type="url"
+                value={formData.companyWebsite}
+                onChange={handleInputChange}
+                placeholder="https://example.com"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="sector" className="text-slate-700">
+                Sector
+              </Label>
+              <Input
+                id="sector"
+                name="sector"
+                value={formData.sector}
+                onChange={handleInputChange}
+                placeholder="e.g., SaaS, FinTech"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="currentStage" className="text-slate-700">
+                Current stage
+              </Label>
+              <Input
+                id="currentStage"
+                name="currentStage"
+                value={formData.currentStage}
+                onChange={handleInputChange}
+                placeholder="e.g., Seed, Series A"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="raiseAmount" className="text-slate-700">
+                Raise amount (₹)
+              </Label>
+              <Input
+                id="raiseAmount"
+                name="raiseAmount"
+                type="number"
+                min="0"
+                value={formData.raiseAmount}
+                onChange={handleInputChange}
+                placeholder="25000000"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="minTicket" className="text-slate-700">
+                Minimum ticket size (₹)
+              </Label>
+              <Input
+                id="minTicket"
+                name="minTicket"
+                type="number"
+                min="0"
+                value={formData.minTicket}
+                onChange={handleInputChange}
+                placeholder="500000"
+              />
+            </div>
+            <div className="space-y-2 sm:col-span-2">
+              <Label htmlFor="industry" className="text-slate-700">
+                Industry / category
+              </Label>
+              <Input
+                id="industry"
+                name="industry"
+                value={formData.industry}
+                onChange={handleInputChange}
+                placeholder="SaaS / GTM enablement"
+              />
+            </div>
+            <div className="space-y-2 sm:col-span-2">
+              <Label htmlFor="useOfFunds" className="text-slate-700">
+                Use of funds
+              </Label>
+              <Textarea
+                id="useOfFunds"
+                name="useOfFunds"
+                value={formData.useOfFunds}
+                onChange={handleInputChange}
+                placeholder="Describe how you plan to use the funds..."
+                className="min-h-[120px]"
+              />
+            </div>
+            <div className="space-y-2 sm:col-span-2">
+              <Label htmlFor="brief" className="text-slate-700">
+                Company brief / Traction summary
+              </Label>
+              <Textarea
+                id="brief"
+                name="brief"
+                value={formData.brief}
+                onChange={handleInputChange}
+                placeholder="Brief description of your company and traction..."
+                className="min-h-[120px]"
+              />
+            </div>
           </div>
         </div>
       ) : (
-        <div className="rounded-xl border-2 border-dashed border-slate-300 bg-slate-50/50 p-6 text-center">
-          <p className="text-sm text-slate-600">
-            Share headline metrics, use of funds, and industry tags to go live in the marketplace.
-          </p>
-        </div>
+        <>
+          {/* Startup Details Section */}
+          <div className="rounded-xl border border-slate-200 bg-white p-5">
+            <h4 className="mb-4 text-sm font-semibold uppercase tracking-wider text-slate-500">
+              Startup information
+            </h4>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-1">
+                <p className="text-xs font-medium uppercase tracking-wider text-slate-500">Startup name</p>
+                <p className="text-base font-semibold text-slate-900">
+                  {activeFounder?.startupName || activeFounder?.company?.brandName || listing?.startupName || 'Not set'}
+                </p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-xs font-medium uppercase tracking-wider text-slate-500">Website</p>
+                <p className="text-sm text-slate-700">
+                  {activeFounder?.company?.website || activeFounder?.companyWebsite ? (
+                    <a
+                      href={activeFounder?.company?.website || activeFounder?.companyWebsite}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:underline"
+                    >
+                      {activeFounder?.company?.website || activeFounder?.companyWebsite}
+                    </a>
+                  ) : (
+                    'Not set'
+                  )}
+                </p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-xs font-medium uppercase tracking-wider text-slate-500">Sector</p>
+                <p className="text-sm font-semibold text-slate-900">
+                  {activeFounder?.sector || activeFounder?.company?.sector || 'Not set'}
+                </p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-xs font-medium uppercase tracking-wider text-slate-500">Stage</p>
+                <p className="text-sm font-semibold text-slate-900">
+                  {activeFounder?.raiseStage || activeFounder?.company?.currentStage || 'Not set'}
+                </p>
+              </div>
+              {(activeFounder?.company?.brief || activeFounder?.tractionSummary) && (
+                <div className="space-y-1 sm:col-span-2">
+                  <p className="text-xs font-medium uppercase tracking-wider text-slate-500">Brief</p>
+                  <p className="text-sm text-slate-700 leading-relaxed">
+                    {activeFounder?.company?.brief || activeFounder?.tractionSummary}
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Marketplace Listing Details */}
+          {hasListing ? (
+            <div className="rounded-xl border border-slate-200 bg-white p-5">
+              <h4 className="mb-4 text-sm font-semibold uppercase tracking-wider text-slate-500">
+                Marketplace listing
+              </h4>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-1">
+                  <p className="text-xs font-medium uppercase tracking-wider text-slate-500">Raise amount</p>
+                  <p className="text-xl font-bold text-slate-900">
+                    {formatCurrencyInr(listing.raiseAmount)}
+                  </p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-xs font-medium uppercase tracking-wider text-slate-500">Min. ticket</p>
+                  <p className="text-xl font-bold text-slate-900">
+                    {formatCurrencyInr(listing.minTicket)}
+                  </p>
+                </div>
+                <div className="space-y-1 sm:col-span-2">
+                  <p className="text-xs font-medium uppercase tracking-wider text-slate-500">Use of funds</p>
+                  <p className="text-sm text-slate-700 leading-relaxed">{listing.useOfFunds}</p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-xs font-medium uppercase tracking-wider text-slate-500">
+                    Industry / category
+                  </p>
+                  <p className="text-sm font-semibold text-slate-900">
+                    {listing.industry || 'Not set'}
+                  </p>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="rounded-xl border-2 border-dashed border-slate-300 bg-slate-50/50 p-6 text-center">
+              <p className="text-sm text-slate-600">
+                Share headline metrics, use of funds, and industry tags to go live in the marketplace.
+              </p>
+            </div>
+          )}
+        </>
       )}
 
       <div className="flex flex-col gap-3 border-t border-slate-100 pt-5 sm:flex-row sm:items-center sm:justify-between">

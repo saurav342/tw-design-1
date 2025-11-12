@@ -224,6 +224,12 @@ const Checkout = () => {
 
             if (verifyResponse.payment) {
               showSuccess('Payment successful!');
+              
+              // Store payment info in sessionStorage for persistence
+              sessionStorage.setItem('payment.orderId', response.razorpay_order_id);
+              sessionStorage.setItem('payment.paymentId', response.razorpay_payment_id);
+              sessionStorage.setItem('payment.completed', 'true');
+              
               // Redirect to payment confirmation page
               navigate('/payment-confirmation', {
                 state: {
@@ -231,6 +237,7 @@ const Checkout = () => {
                   orderId: response.razorpay_order_id,
                   paymentId: response.razorpay_payment_id,
                 },
+                replace: true, // Replace history to prevent back navigation to checkout
               });
             }
           } catch (error) {

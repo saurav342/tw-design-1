@@ -37,3 +37,26 @@ export const formatDateDisplay = (value) => {
     day: 'numeric',
   });
 };
+
+export const formatDateTimeIST = (value) => {
+  if (!value) return 'Not updated yet';
+  const safeDate = typeof value === 'string' || value instanceof Date ? new Date(value) : null;
+  if (!safeDate || Number.isNaN(safeDate.getTime())) return 'Not updated yet';
+  
+  // Format date and time in IST (Asia/Kolkata timezone)
+  const dateStr = safeDate.toLocaleDateString('en-IN', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    timeZone: 'Asia/Kolkata',
+  });
+  
+  const timeStr = safeDate.toLocaleTimeString('en-IN', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+    timeZone: 'Asia/Kolkata',
+  });
+  
+  return `${dateStr}, ${timeStr}`;
+};

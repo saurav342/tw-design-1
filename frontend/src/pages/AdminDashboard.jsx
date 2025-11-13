@@ -58,7 +58,7 @@ import {
 import { BenchmarkTable } from '../components/BenchmarkTable.jsx';
 import { MatchScoreBadge } from '../components/MatchScoreBadge.jsx';
 import { useNotification } from '../context/NotificationContext';
-import { formatCurrency, formatCurrencyInr, formatDateDisplay } from '../lib/formatters.js';
+import { formatCurrency, formatCurrencyInr, formatDateDisplay, formatDateTimeIST } from '../lib/formatters.js';
 import { useAppStore } from '../store/useAppStore.js';
 import { useAuth } from '../context/useAuth.js';
 import { createDefaultFounderExtras } from '../data/founderExtras.js';
@@ -336,32 +336,39 @@ const AdminDashboard = () => {
   ];
 
   return (
-    <div className="flex h-screen bg-gray-50">
-      {/* Sidebar */}
+    <div className="flex h-screen bg-gradient-to-br from-emerald-50 via-white to-green-50 relative overflow-hidden">
+      {/* Background decorative elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-200/20 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-green-200/20 rounded-full blur-3xl"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-emerald-100/10 rounded-full blur-3xl"></div>
+      </div>
+
+      {/* Sidebar - Glassmorphism */}
       <aside
         className={`${
           sidebarOpen ? 'w-64' : 'w-20'
-        } bg-[#3c4b64] text-white transition-all duration-300 flex flex-col`}
+        } relative z-10 transition-all duration-300 flex flex-col backdrop-blur-xl bg-white/70 border-r border-white/20 shadow-[0_8px_32px_0_rgba(16,185,129,0.1)]`}
       >
         {/* Logo Area */}
-        <div className="h-16 flex items-center justify-between px-4 border-b border-white/10">
+        <div className="h-16 flex items-center justify-between px-4 border-b border-emerald-100/50">
           {sidebarOpen && (
             <div className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
+              <div className="h-8 w-8 rounded-xl bg-gradient-to-br from-emerald-400 to-green-500 flex items-center justify-center shadow-lg shadow-emerald-200/50">
                 <Zap className="h-5 w-5 text-white" />
               </div>
-              <span className="font-bold text-lg text-[#8b5cf6]">Launch & Lift</span>
+              <span className="font-bold text-lg bg-gradient-to-r from-emerald-600 to-green-600 bg-clip-text text-transparent">Launch & Lift</span>
             </div>
           )}
           {!sidebarOpen && (
-            <div className="mx-auto h-8 w-8 rounded-lg bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
+            <div className="mx-auto h-8 w-8 rounded-xl bg-gradient-to-br from-emerald-400 to-green-500 flex items-center justify-center shadow-lg shadow-emerald-200/50">
               <Zap className="h-5 w-5 text-white" />
             </div>
           )}
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 py-4 overflow-y-auto">
+        <nav className="flex-1 py-4 overflow-y-auto px-2">
           {navigationItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeView === item.id;
@@ -376,16 +383,16 @@ const AdminDashboard = () => {
                 }}
                 className={`${
                   isActive
-                    ? 'bg-[#2c3a4f] text-white border-l-4 border-blue-400'
-                    : 'text-white/70 hover:bg-[#2c3a4f] hover:text-white'
-                } w-full flex items-center gap-3 px-4 py-3 transition-colors relative cursor-pointer`}
+                    ? 'bg-white/80 backdrop-blur-md text-emerald-700 shadow-lg shadow-emerald-100/50 border border-emerald-200/50'
+                    : 'text-gray-600 hover:bg-white/50 hover:text-emerald-600 backdrop-blur-sm'
+                } w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 relative cursor-pointer mb-1`}
               >
-                <Icon className="h-5 w-5 flex-shrink-0" />
+                <Icon className={`h-5 w-5 flex-shrink-0 ${isActive ? 'text-emerald-600' : ''}`} />
                 {sidebarOpen && (
                   <>
                     <span className="text-sm font-medium">{item.label}</span>
                     {item.badge && item.badge > 0 && (
-                      <span className="ml-auto bg-red-500 text-white text-xs rounded-full px-2 py-0.5">
+                      <span className="ml-auto bg-gradient-to-r from-red-400 to-red-500 text-white text-xs rounded-full px-2 py-0.5 shadow-md">
                         {item.badge}
                       </span>
                     )}
@@ -404,43 +411,49 @@ const AdminDashboard = () => {
             e.stopPropagation();
             setSidebarOpen(!sidebarOpen);
           }}
-          className="h-12 flex items-center justify-center border-t border-white/10 hover:bg-[#2c3a4f] transition-colors cursor-pointer"
+          className="h-12 flex items-center justify-center border-t border-emerald-100/50 hover:bg-white/50 backdrop-blur-sm rounded-t-xl transition-all duration-200 cursor-pointer m-2 mb-0"
         >
-          {sidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          {sidebarOpen ? <X className="h-5 w-5 text-gray-600" /> : <Menu className="h-5 w-5 text-gray-600" />}
         </button>
       </aside>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Top Header */}
-        <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6">
-          <div className="flex items-center gap-4">
-            <h1 className="text-xl font-semibold text-gray-800">
-              {navigationItems.find((item) => item.id === activeView)?.label || 'Dashboard'}
-            </h1>
-            <div className="flex items-center gap-2 text-sm text-gray-500">
-              <Home className="h-4 w-4" />
-              <ChevronRight className="h-4 w-4" />
-              <span className="text-gray-700">Admin</span>
-              <ChevronRight className="h-4 w-4" />
-              <span className="text-gray-700">{activeView}</span>
+      <div className="flex-1 flex flex-col overflow-hidden relative z-10">
+        {/* Top Header - Glassmorphism */}
+        <header className="h-20 backdrop-blur-xl bg-white/70 border-b border-white/20 shadow-sm flex items-center justify-between px-8">
+          <div className="flex items-center gap-6">
+            <div>
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
+                Hello, {user?.email?.split('@')[0] || 'Admin'}!
+              </h1>
+              <p className="text-sm text-gray-500 mt-0.5">Explore information and activity about your platform.</p>
             </div>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
+            {/* Search Bar */}
+            <div className="relative hidden md:block">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Search Anything..."
+                className="pl-10 pr-4 py-2.5 w-64 rounded-xl bg-white/60 backdrop-blur-md border border-white/40 focus:outline-none focus:ring-2 focus:ring-emerald-200/50 focus:border-emerald-300/50 text-sm text-gray-700 placeholder-gray-400 transition-all duration-200 shadow-sm"
+              />
+            </div>
+
             <button
               onClick={refreshData}
               disabled={isLoadingAnalytics}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              className="p-2.5 hover:bg-white/60 backdrop-blur-sm rounded-xl transition-all duration-200 hover:shadow-md"
             >
               <RefreshCw
                 className={`h-5 w-5 text-gray-600 ${isLoadingAnalytics ? 'animate-spin' : ''}`}
               />
             </button>
-            <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors relative">
+            <button className="p-2.5 hover:bg-white/60 backdrop-blur-sm rounded-xl transition-all duration-200 hover:shadow-md relative">
               <Bell className="h-5 w-5 text-gray-600" />
               {pendingFounders.length > 0 && (
-                <span className="absolute top-1 right-1 h-2 w-2 bg-red-500 rounded-full"></span>
+                <span className="absolute top-1.5 right-1.5 h-2.5 w-2.5 bg-gradient-to-r from-red-400 to-red-500 rounded-full shadow-md"></span>
               )}
             </button>
 
@@ -448,25 +461,25 @@ const AdminDashboard = () => {
             <div className="relative">
               <button
                 onClick={() => setUserMenuOpen(!userMenuOpen)}
-                className="flex items-center gap-2 hover:bg-gray-100 rounded-lg px-3 py-2 transition-colors"
+                className="flex items-center gap-2 hover:bg-white/60 backdrop-blur-sm rounded-xl px-3 py-2 transition-all duration-200 hover:shadow-md"
               >
-                <div className="h-8 w-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-sm font-semibold">
+                <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-emerald-400 to-green-500 flex items-center justify-center text-white text-sm font-semibold shadow-md shadow-emerald-200/50">
                   {user?.email?.[0]?.toUpperCase() || 'A'}
                 </div>
-                <ChevronDown className="h-4 w-4 text-gray-600" />
+                <ChevronDown className="h-4 w-4 text-gray-600 hidden md:block" />
               </button>
 
               {userMenuOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
-                  <div className="px-4 py-2 border-b border-gray-200">
+                <div className="absolute right-0 mt-2 w-56 backdrop-blur-xl bg-white/90 rounded-2xl shadow-xl border border-white/40 py-2 z-50">
+                  <div className="px-4 py-3 border-b border-gray-100/50">
                     <p className="text-sm font-semibold text-gray-800">Admin</p>
-                    <p className="text-xs text-gray-500">{user?.email}</p>
+                    <p className="text-xs text-gray-500 mt-0.5">{user?.email}</p>
                   </div>
-                  <button className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2">
+                  <button className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-white/60 backdrop-blur-sm flex items-center gap-2 transition-colors">
                     <Settings className="h-4 w-4" />
                     Settings
                   </button>
-                  <button className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-gray-50 flex items-center gap-2">
+                  <button className="w-full px-4 py-2.5 text-left text-sm text-red-600 hover:bg-red-50/50 backdrop-blur-sm flex items-center gap-2 transition-colors">
                     <User className="h-4 w-4" />
                     Sign out
                   </button>
@@ -481,41 +494,41 @@ const AdminDashboard = () => {
           {/* Dashboard View */}
           {activeView === 'dashboard' && (
             <div className="space-y-6">
-              {/* Stats Cards */}
+              {/* Stats Cards - Glassmorphism */}
               {analytics && (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                   {/* Total Users */}
-                  <div className="bg-white rounded-lg border border-gray-200 p-6">
+                  <div className="backdrop-blur-xl bg-white/70 rounded-2xl border border-white/40 shadow-lg shadow-emerald-100/20 p-6 hover:shadow-xl hover:shadow-emerald-100/30 transition-all duration-300 hover:-translate-y-1">
                     <div className="flex items-center justify-between mb-4">
-                      <div className="h-12 w-12 rounded-lg bg-blue-100 flex items-center justify-center">
-                        <Users className="h-6 w-6 text-blue-600" />
+                      <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-blue-400 to-blue-500 flex items-center justify-center shadow-md shadow-blue-200/50">
+                        <Users className="h-6 w-6 text-white" />
                       </div>
-                      <div className="flex items-center gap-1 text-green-600 text-sm font-medium">
-                        <ArrowUp className="h-4 w-4" />
+                      <div className="flex items-center gap-1 text-emerald-600 text-sm font-semibold bg-emerald-50/80 px-2 py-1 rounded-lg">
+                        <ArrowUp className="h-3.5 w-3.5" />
                         {analytics.users.growth.last30Days}
                       </div>
                     </div>
                     <h3 className="text-gray-600 text-sm font-medium mb-1">Total Users</h3>
-                    <p className="text-3xl font-bold text-gray-900">{analytics.users.total}</p>
+                    <p className="text-3xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">{analytics.users.total}</p>
                     <p className="text-xs text-gray-500 mt-2">
                       {analytics.users.founders} Founders • {analytics.users.investors} Investors
                     </p>
                   </div>
 
                   {/* Founder Intakes */}
-                  <div className="bg-white rounded-lg border border-gray-200 p-6">
+                  <div className="backdrop-blur-xl bg-white/70 rounded-2xl border border-white/40 shadow-lg shadow-emerald-100/20 p-6 hover:shadow-xl hover:shadow-emerald-100/30 transition-all duration-300 hover:-translate-y-1">
                     <div className="flex items-center justify-between mb-4">
-                      <div className="h-12 w-12 rounded-lg bg-purple-100 flex items-center justify-center">
-                        <Building2 className="h-6 w-6 text-purple-600" />
+                      <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-purple-400 to-purple-500 flex items-center justify-center shadow-md shadow-purple-200/50">
+                        <Building2 className="h-6 w-6 text-white" />
                       </div>
                       {analytics.founderIntakes.pending > 0 && (
-                        <span className="text-xs font-semibold bg-amber-100 text-amber-800 px-2 py-1 rounded">
+                        <span className="text-xs font-semibold bg-gradient-to-r from-amber-400 to-amber-500 text-white px-2.5 py-1 rounded-lg shadow-md">
                           {analytics.founderIntakes.pending} Pending
                         </span>
                       )}
                     </div>
                     <h3 className="text-gray-600 text-sm font-medium mb-1">Founder Intakes</h3>
-                    <p className="text-3xl font-bold text-gray-900">
+                    <p className="text-3xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
                       {analytics.founderIntakes.total}
                     </p>
                     <p className="text-xs text-gray-500 mt-2">
@@ -524,19 +537,19 @@ const AdminDashboard = () => {
                   </div>
 
                   {/* Service Requests */}
-                  <div className="bg-white rounded-lg border border-gray-200 p-6">
+                  <div className="backdrop-blur-xl bg-white/70 rounded-2xl border border-white/40 shadow-lg shadow-emerald-100/20 p-6 hover:shadow-xl hover:shadow-emerald-100/30 transition-all duration-300 hover:-translate-y-1">
                     <div className="flex items-center justify-between mb-4">
-                      <div className="h-12 w-12 rounded-lg bg-indigo-100 flex items-center justify-center">
-                        <ClipboardList className="h-6 w-6 text-indigo-600" />
+                      <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-indigo-400 to-indigo-500 flex items-center justify-center shadow-md shadow-indigo-200/50">
+                        <ClipboardList className="h-6 w-6 text-white" />
                       </div>
                       {analytics.services.highUrgency > 0 && (
-                        <span className="text-xs font-semibold bg-red-100 text-red-800 px-2 py-1 rounded">
+                        <span className="text-xs font-semibold bg-gradient-to-r from-red-400 to-red-500 text-white px-2.5 py-1 rounded-lg shadow-md">
                           {analytics.services.highUrgency} Urgent
                         </span>
                       )}
                     </div>
                     <h3 className="text-gray-600 text-sm font-medium mb-1">Service Requests</h3>
-                    <p className="text-3xl font-bold text-gray-900">
+                    <p className="text-3xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
                       {analytics.services.totalRequests}
                     </p>
                     <p className="text-xs text-gray-500 mt-2">
@@ -545,17 +558,17 @@ const AdminDashboard = () => {
                   </div>
 
                   {/* Revenue */}
-                  <div className="bg-white rounded-lg border border-gray-200 p-6">
+                  <div className="backdrop-blur-xl bg-white/70 rounded-2xl border border-white/40 shadow-lg shadow-emerald-100/20 p-6 hover:shadow-xl hover:shadow-emerald-100/30 transition-all duration-300 hover:-translate-y-1">
                     <div className="flex items-center justify-between mb-4">
-                      <div className="h-12 w-12 rounded-lg bg-emerald-100 flex items-center justify-center">
-                        <DollarSign className="h-6 w-6 text-emerald-600" />
+                      <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-emerald-400 to-green-500 flex items-center justify-center shadow-md shadow-emerald-200/50">
+                        <DollarSign className="h-6 w-6 text-white" />
                       </div>
-                      <div className="flex items-center gap-1 text-green-600 text-sm font-medium">
-                        <TrendingUp className="h-4 w-4" />
+                      <div className="flex items-center gap-1 text-emerald-600 text-sm font-semibold bg-emerald-50/80 px-2 py-1 rounded-lg">
+                        <TrendingUp className="h-3.5 w-3.5" />
                       </div>
                     </div>
                     <h3 className="text-gray-600 text-sm font-medium mb-1">Estimated Revenue</h3>
-                    <p className="text-3xl font-bold text-gray-900">
+                    <p className="text-3xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
                       {formatCurrency(analytics.revenue.estimated.total)}
                     </p>
                     <p className="text-xs text-gray-500 mt-2">
@@ -565,14 +578,14 @@ const AdminDashboard = () => {
                 </div>
               )}
 
-              {/* Charts Row */}
+              {/* Charts Row - Glassmorphism */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Revenue Breakdown */}
                 {analytics && (
-                  <div className="bg-white rounded-lg border border-gray-200 p-6">
+                  <div className="backdrop-blur-xl bg-white/70 rounded-2xl border border-white/40 shadow-lg shadow-emerald-100/20 p-6 hover:shadow-xl hover:shadow-emerald-100/30 transition-all duration-300">
                     <div className="flex items-center justify-between mb-6">
-                      <h3 className="text-lg font-semibold text-gray-900">Revenue Breakdown</h3>
-                      <button className="text-sm text-blue-600 hover:text-blue-700 font-medium">
+                      <h3 className="text-lg font-semibold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">Revenue Breakdown</h3>
+                      <button className="text-sm text-emerald-600 hover:text-emerald-700 font-semibold bg-emerald-50/80 px-3 py-1.5 rounded-lg hover:bg-emerald-100/80 transition-colors">
                         View Report
                       </button>
                     </div>
@@ -583,14 +596,14 @@ const AdminDashboard = () => {
                           100
                         ).toFixed(1);
                         const colors = [
-                          { bg: 'bg-blue-500', text: 'text-blue-700' },
-                          { bg: 'bg-emerald-500', text: 'text-emerald-700' },
-                          { bg: 'bg-amber-500', text: 'text-amber-700' },
-                          { bg: 'bg-rose-500', text: 'text-rose-700' },
+                          { bg: 'bg-gradient-to-r from-blue-400 to-blue-500', text: 'text-blue-700' },
+                          { bg: 'bg-gradient-to-r from-emerald-400 to-emerald-500', text: 'text-emerald-700' },
+                          { bg: 'bg-gradient-to-r from-amber-400 to-amber-500', text: 'text-amber-700' },
+                          { bg: 'bg-gradient-to-r from-rose-400 to-rose-500', text: 'text-rose-700' },
                         ];
                         const color = colors[index % colors.length];
                         return (
-                          <div key={index}>
+                          <div key={index} className="p-3 rounded-xl bg-white/40 backdrop-blur-sm hover:bg-white/60 transition-colors">
                             <div className="flex items-center justify-between mb-2">
                               <span className="text-sm font-medium text-gray-700">
                                 {item.category}
@@ -599,15 +612,15 @@ const AdminDashboard = () => {
                                 {formatCurrency(item.amount)}
                               </span>
                             </div>
-                            <div className="relative h-2 bg-gray-100 rounded-full overflow-hidden">
+                            <div className="relative h-2.5 bg-gray-100/80 rounded-full overflow-hidden backdrop-blur-sm">
                               <div
-                                className={`h-full ${color.bg} transition-all duration-500`}
+                                className={`h-full ${color.bg} transition-all duration-500 rounded-full shadow-sm`}
                                 style={{ width: `${percentage}%` }}
                               />
                             </div>
-                            <div className="flex items-center justify-between mt-1">
+                            <div className="flex items-center justify-between mt-1.5">
                               <span className="text-xs text-gray-500">{item.count} items</span>
-                              <span className={`text-xs font-medium ${color.text}`}>
+                              <span className={`text-xs font-semibold ${color.text}`}>
                                 {percentage}%
                               </span>
                             </div>
@@ -619,10 +632,10 @@ const AdminDashboard = () => {
                 )}
 
                 {/* Recent Activity */}
-                <div className="bg-white rounded-lg border border-gray-200 p-6">
+                <div className="backdrop-blur-xl bg-white/70 rounded-2xl border border-white/40 shadow-lg shadow-emerald-100/20 p-6 hover:shadow-xl hover:shadow-emerald-100/30 transition-all duration-300">
                   <div className="flex items-center justify-between mb-6">
-                    <h3 className="text-lg font-semibold text-gray-900">Recent Activity</h3>
-                    <button className="text-sm text-blue-600 hover:text-blue-700 font-medium">
+                    <h3 className="text-lg font-semibold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">Recent Activity</h3>
+                    <button className="text-sm text-emerald-600 hover:text-emerald-700 font-semibold bg-emerald-50/80 px-3 py-1.5 rounded-lg hover:bg-emerald-100/80 transition-colors">
                       View All
                     </button>
                   </div>
@@ -632,20 +645,20 @@ const AdminDashboard = () => {
                       return (
                         <div
                           key={activity.id}
-                          className="flex items-start gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors"
+                          className="flex items-start gap-3 p-3 rounded-xl bg-white/40 backdrop-blur-sm hover:bg-white/60 transition-all duration-200"
                         >
-                          <div className="h-10 w-10 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0">
-                            <Icon className="h-5 w-5 text-blue-600" />
+                          <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-blue-400 to-blue-500 flex items-center justify-center flex-shrink-0 shadow-md shadow-blue-200/50">
+                            <Icon className="h-5 w-5 text-white" />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm text-gray-800 line-clamp-1">
+                            <p className="text-sm text-gray-800 line-clamp-1 font-medium">
                               {activity.description}
                             </p>
                             <p className="text-xs text-gray-500 mt-0.5">
-                              {formatDateDisplay(activity.timestamp)}
+                              {formatDateTimeIST(activity.timestamp)}
                             </p>
                           </div>
-                          <button className="flex-shrink-0 p-1 hover:bg-gray-100 rounded">
+                          <button className="flex-shrink-0 p-1.5 hover:bg-white/60 backdrop-blur-sm rounded-lg transition-colors">
                             <MoreHorizontal className="h-4 w-4 text-gray-400" />
                           </button>
                         </div>
@@ -655,30 +668,30 @@ const AdminDashboard = () => {
                 </div>
               </div>
 
-              {/* Insights Row */}
+              {/* Insights Row - Glassmorphism */}
               {dashboardSummary && (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   {/* Top Sectors */}
-                  <div className="bg-white rounded-lg border border-gray-200 p-6">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-6">Top Sectors</h3>
-                    <div className="space-y-4">
+                  <div className="backdrop-blur-xl bg-white/70 rounded-2xl border border-white/40 shadow-lg shadow-emerald-100/20 p-6 hover:shadow-xl hover:shadow-emerald-100/30 transition-all duration-300">
+                    <h3 className="text-lg font-semibold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent mb-6">Top Sectors</h3>
+                    <div className="space-y-3">
                       {dashboardSummary.insights.topSectors.map((item, index) => (
-                        <div key={index} className="flex items-center gap-3">
-                          <div className="h-10 w-10 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600 font-semibold">
+                        <div key={index} className="flex items-center gap-3 p-3 rounded-xl bg-white/40 backdrop-blur-sm hover:bg-white/60 transition-all duration-200">
+                          <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-blue-400 to-blue-500 flex items-center justify-center text-white font-bold shadow-md shadow-blue-200/50">
                             {index + 1}
                           </div>
                           <div className="flex-1">
-                            <p className="text-sm font-medium text-gray-900">{item.sector}</p>
+                            <p className="text-sm font-medium text-gray-800">{item.sector}</p>
                           </div>
-                          <span className="text-sm font-semibold text-gray-900">{item.count}</span>
+                          <span className="text-sm font-bold text-gray-900 bg-white/60 px-3 py-1 rounded-lg">{item.count}</span>
                         </div>
                       ))}
                     </div>
                   </div>
 
                   {/* Stage Distribution */}
-                  <div className="bg-white rounded-lg border border-gray-200 p-6">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-6">
+                  <div className="backdrop-blur-xl bg-white/70 rounded-2xl border border-white/40 shadow-lg shadow-emerald-100/20 p-6 hover:shadow-xl hover:shadow-emerald-100/30 transition-all duration-300">
+                    <h3 className="text-lg font-semibold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent mb-6">
                       Stage Distribution
                     </h3>
                     <div className="space-y-4">
@@ -692,7 +705,7 @@ const AdminDashboard = () => {
                           );
                           const percentage = ((item.count / total) * 100).toFixed(0);
                           return (
-                            <div key={index}>
+                            <div key={index} className="p-3 rounded-xl bg-white/40 backdrop-blur-sm hover:bg-white/60 transition-all duration-200">
                               <div className="flex items-center justify-between mb-2">
                                 <span className="text-sm font-medium text-gray-700">
                                   {item.stage}
@@ -701,9 +714,9 @@ const AdminDashboard = () => {
                                   {item.count}
                                 </span>
                               </div>
-                              <div className="relative h-2 bg-gray-100 rounded-full overflow-hidden">
+                              <div className="relative h-2.5 bg-gray-100/80 rounded-full overflow-hidden backdrop-blur-sm">
                                 <div
-                                  className="h-full bg-gradient-to-r from-purple-500 to-blue-500 transition-all duration-500"
+                                  className="h-full bg-gradient-to-r from-emerald-400 via-green-400 to-emerald-500 transition-all duration-500 rounded-full shadow-sm"
                                   style={{ width: `${percentage}%` }}
                                 />
                               </div>
@@ -720,8 +733,8 @@ const AdminDashboard = () => {
           {/* Founders View */}
           {activeView === 'founders' && (
             <div className="space-y-6">
-              {/* Search Bar */}
-              <div className="bg-white rounded-lg border border-gray-200 p-4">
+              {/* Search Bar - Glassmorphism */}
+              <div className="backdrop-blur-xl bg-white/70 rounded-2xl border border-white/40 shadow-lg shadow-emerald-100/20 p-4">
                 <div className="flex items-center gap-4">
                   <div className="relative flex-1">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
@@ -730,19 +743,19 @@ const AdminDashboard = () => {
                       placeholder="Search founders..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full pl-10 pr-4 py-2.5 bg-white/60 backdrop-blur-md border border-white/40 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-200/50 focus:border-emerald-300/50 text-sm text-gray-700 placeholder-gray-400 transition-all duration-200 shadow-sm"
                     />
                   </div>
-                  <button className="px-4 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 flex items-center gap-2">
+                  <button className="px-4 py-2.5 bg-white/60 backdrop-blur-md border border-white/40 rounded-xl hover:bg-white/80 hover:shadow-md flex items-center gap-2 transition-all duration-200 text-sm font-medium text-gray-700">
                     <Filter className="h-4 w-4" />
                     Filter
                   </button>
                 </div>
               </div>
 
-              {/* Founder Cards */}
+              {/* Founder Cards - Glassmorphism */}
               {filteredFounders.length === 0 ? (
-                <div className="bg-white rounded-lg border border-gray-200 p-12 text-center">
+                <div className="backdrop-blur-xl bg-white/70 rounded-2xl border border-white/40 shadow-lg shadow-emerald-100/20 p-12 text-center">
                   <CheckCircle2 className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                   <p className="text-gray-600">
                     {searchQuery
@@ -757,31 +770,31 @@ const AdminDashboard = () => {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                   >
-                    <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                    <div className="backdrop-blur-xl bg-white/70 rounded-2xl border border-white/40 shadow-lg shadow-emerald-100/20 overflow-hidden hover:shadow-xl hover:shadow-emerald-100/30 transition-all duration-300">
                       {/* Header */}
-                      <div className="p-6 border-b border-gray-200">
+                      <div className="p-6 border-b border-white/40 bg-gradient-to-r from-white/50 to-white/30">
                         <div className="flex items-start justify-between gap-4">
                           <div className="flex-1">
                             <div className="flex items-center gap-3 mb-2">
                               <h3 className="text-xl font-bold text-gray-900">
                                 {founder.startupName}
                               </h3>
-                              <span className="px-3 py-1 bg-amber-100 text-amber-800 text-xs font-semibold rounded-full">
+                              <span className="px-3 py-1 bg-gradient-to-r from-amber-400 to-amber-500 text-white text-xs font-semibold rounded-full shadow-md">
                                 Pending Review
                               </span>
                             </div>
                             <p className="text-gray-600 mb-3">{founder.headline}</p>
                             <div className="flex flex-wrap gap-2 mb-3">
-                              <span className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded">
+                              <span className="px-2.5 py-1 bg-white/60 backdrop-blur-sm text-gray-700 text-xs rounded-lg border border-white/40 shadow-sm">
                                 {founder.sector}
                               </span>
-                              <span className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded">
+                              <span className="px-2.5 py-1 bg-white/60 backdrop-blur-sm text-gray-700 text-xs rounded-lg border border-white/40 shadow-sm">
                                 {founder.geography}
                               </span>
-                              <span className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded">
+                              <span className="px-2.5 py-1 bg-white/60 backdrop-blur-sm text-gray-700 text-xs rounded-lg border border-white/40 shadow-sm">
                                 {founder.raiseStage}
                               </span>
-                              <span className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded">
+                              <span className="px-2.5 py-1 bg-white/60 backdrop-blur-sm text-gray-700 text-xs rounded-lg border border-white/40 shadow-sm">
                                 {formatCurrency(founder.raiseAmountUSD)}
                               </span>
                             </div>
@@ -801,7 +814,7 @@ const AdminDashboard = () => {
                               updateFounderStatus(founder.id, 'approved');
                               showSuccess(`${founder.startupName} approved`);
                             }}
-                            className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium flex items-center gap-2"
+                            className="px-4 py-2.5 bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-600 hover:to-green-600 text-white rounded-xl font-semibold flex items-center gap-2 shadow-lg shadow-emerald-200/50 hover:shadow-xl hover:shadow-emerald-200/60 transition-all duration-200"
                           >
                             <CheckCircle2 className="h-4 w-4" />
                             Approve
@@ -1894,3 +1907,4 @@ const AdminDashboard = () => {
 };
 
 export default AdminDashboard;
+

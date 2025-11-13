@@ -830,18 +830,6 @@ const AdminDashboard = () => {
                           </h4>
                           <p className="text-gray-600 leading-relaxed">{founder.aiSummary}</p>
                         </div>
-                        <div>
-                          <h4 className="text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wide">
-                            Key Metrics
-                          </h4>
-                          <BenchmarkTable
-                            rows={founder.benchmarks}
-                            founderNotes={founder.benchmarkNotes}
-                            onChangeNote={() => {}}
-                            onSave={() => {}}
-                            isDisabled
-                          />
-                        </div>
                         {founder.pitchDeckUrl && (
                           <a
                             href={founder.pitchDeckUrl}
@@ -1498,22 +1486,6 @@ const AdminDashboard = () => {
                                     <p className="text-gray-600 leading-relaxed">
                                       {founder.aiSummary}
                                     </p>
-                                  </div>
-                                )}
-
-                                {/* Metrics */}
-                                {founder.benchmarks && Array.isArray(founder.benchmarks) && founder.benchmarks.length > 0 && (
-                                  <div>
-                                    <h4 className="text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wide">
-                                      Key Metrics
-                                    </h4>
-                                    <BenchmarkTable
-                                      rows={founder.benchmarks}
-                                      founderNotes={founder.benchmarkNotes || {}}
-                                      onChangeNote={() => {}}
-                                      onSave={() => {}}
-                                      isDisabled
-                                    />
                                   </div>
                                 )}
 

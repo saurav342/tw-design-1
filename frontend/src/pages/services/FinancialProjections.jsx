@@ -305,17 +305,6 @@ const FinancialProjections = () => {
                     <h3 className="text-xl font-semibold text-night">{model.type}</h3>
                     <div className="mt-4 space-y-4">
                       <div>
-                        <p className="text-xs font-semibold uppercase tracking-wider text-night/50">Key Metrics</p>
-                        <ul className="mt-2 space-y-1">
-                          {model.metrics.map((metric) => (
-                            <li key={metric} className="flex items-start gap-2 text-sm text-night/70">
-                              <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500" />
-                              <span>{metric}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                      <div>
                         <p className="text-xs font-semibold uppercase tracking-wider text-night/50">Scenarios</p>
                         <p className="mt-2 text-sm text-night/70">{model.scenarios}</p>
                       </div>

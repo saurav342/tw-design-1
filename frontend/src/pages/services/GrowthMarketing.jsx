@@ -327,10 +327,6 @@ const GrowthMarketing = () => {
                         </li>
                       ))}
                     </ul>
-                    <div className="mt-4 border-t border-night/10 pt-3">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-night/50">Key Metrics</p>
-                      <p className="mt-1 text-sm text-night/70">{playbook.kpi}</p>
-                    </div>
                   </CardContent>
                 </Card>
               </motion.div>

@@ -325,12 +325,12 @@ const AdminDashboard = () => {
 
   const navigationItems = [
     { id: 'dashboard', label: 'Dashboard', icon: Grid3x3 },
-    { id: 'founders', label: 'Founder Journey', icon: Building2, badge: pendingFounders.length },
+    // { id: 'founders', label: 'Founder Journey', icon: Building2, badge: pendingFounders.length },
     { id: 'founders-list', label: 'Founders', icon: User },
     { id: 'investors-list', label: 'Investors', icon: Briefcase },
     { id: 'matchmaking', label: 'Matchmaking', icon: Target },
     { id: 'services', label: 'Services', icon: Sparkles },
-    { id: 'users', label: 'Users', icon: Users },
+    // { id: 'users', label: 'Users', icon: Users },
     { id: 'payments', label: 'Payments', icon: CreditCard },
     { id: 'analytics', label: 'Analytics', icon: BarChart3 },
   ];

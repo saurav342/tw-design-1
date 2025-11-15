@@ -5,8 +5,8 @@ import logoImage from '../assets/image.png';
 
 const navLinks = [
   { label: 'HOME', to: '/' },
-  { label: 'FOR INVESTORS', to: '/investors' },
-  { label: 'FOR FOUNDERS', to: '/founders' },
+  { label: 'INVESTORS', to: '/investors' },
+  { label: 'FOUNDERS', to: '/founders' },
   { label: 'PORTFOLIO', to: '/portfolio' },
   { label: 'RESOURCES', to: '/resources' },
 ];
